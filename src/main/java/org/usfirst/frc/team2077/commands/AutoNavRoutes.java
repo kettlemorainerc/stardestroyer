@@ -42,7 +42,7 @@ private static double m3R(double rotation_){
             new Move2(m3N(-_unit),m3E(_unit)),
             new Move2(m3N(-_unit),m3E(_unit)),
             new Move2(m3N(_unit),m3E(-_unit)),
-            new Move2(m3N(0.0),m3E(0.0),m3R(-29.05)),
+            new Move2(m3R(-29.05)),
             new Move2(m3N(102.956),m3E(0.0)),
             new Move2(m3N(0.0),m3E(-_unit)),
             new Move2(m3N(-_unit),m3E(0.0)),
