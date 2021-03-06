@@ -1,0 +1,16 @@
+North: off by 4.125, 3.75, 4 inches over 120 inches
+
+South off by 4.5, 4.625, 4.19 inches over 120 inches
+
+East off by 55.5, 55, 56.75 inches over 120 inches, moved north at least 10 and rotated slightly ccw
+46.46% off, needs to be 53.54% of original
+
+West off by 55, 55, 54 inches over 120 inches
+45.56% off, needs to be 54.44% of original
+
+average 46.01% off side to side, needs to be 53.99% of original
+68% worked best in actuality
+
+CW off by 30 degrees over 180 degrees
+CW off by 15 degrees over 150 degrees
+Adjusting to 7/8 works pretty well, but it now goes slightly over

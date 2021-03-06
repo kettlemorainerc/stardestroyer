@@ -1,0 +1,34 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - AutonomousCheck",
+      "request": "launch",
+      "mainClass": "org.usfirst.frc.team2077.commands.AutonomousCheck",
+      "projectName": "STARDESTROYER 1-13-21"
+    },
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - Crosshairs",
+      "request": "launch",
+      "mainClass": "org.usfirst.frc.team2077.subsystems.Crosshairs",
+      "projectName": "BuchanaMecanumDemo"
+    },
+    {
+      "type": "wpilib",
+      "name": "WPILib Desktop Debug",
+      "request": "launch",
+      "desktop": true
+    },
+    {
+      "type": "wpilib",
+      "name": "WPILib roboRIO Debug",
+      "request": "launch",
+      "desktop": false
+    }
+  ]
+}
