@@ -28,11 +28,15 @@ public final class Constants {
     public final double STARDESTROYER_TRACK_WIDTH = 22.625; // inches
     public final double STARDESTROYER_WHEEL_RADIUS = 4.0; // inches
     // TODO: move motor RPM limit back up and use acceleration and/or stick scaling to optimize driveability
-    public final double STARDESTROYER_MOTOR_RPM_LIMIT = 2500; // (82 inches/second)
+    public final double STARDESTROYER_MOTOR_RPM_LIMIT = 3000; // (82 inches/second)
     // TODO: use acceleration constants where appropriate throughout other code
     // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
     public final double STARDESTROYER_ACCELERATION_G_LIMIT = .1;
-    public final double STARDESTROYER_DECELERATION_G_LIMIT = .3;
+    public final double STARDESTROYER_DECELERATION_G_LIMIT = .25;
+
+    //for autonomous
+    // public final double STARDESTROYER_ACCELERATION_G_LIMIT = .1;
+    // public final double STARDESTROYER_DECELERATION_G_LIMIT = .3;
 
     public final double INFRARED_MIN_LOADED = 1.4;
     public final double INFRARED_MAX_LOADED = 4;

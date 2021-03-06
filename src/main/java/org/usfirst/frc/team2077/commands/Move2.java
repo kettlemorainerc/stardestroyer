@@ -59,9 +59,12 @@ public class Move2 extends CommandBase {
   private Move2(double north, double east, double rotation, int method, Subsystem... requirements) {
 
     addRequirements(requirements);
-
-    distanceTotal_ = new double[] {north, east * .68, rotation * 7/8};
-    method_ = method;
+    if (north != 0 && east != 0) {
+      distanceTotal_ = new double[] {0, 0};
+    } else {
+      distanceTotal_ = new double[] {north, east * .68, rotation * 7/8};
+    }
+      method_ = method;
     System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" + distanceTotal_[0] + " " + distanceTotal_[1] + " " + distanceTotal_[2] + " (" + method_ + ")");
   }
 
