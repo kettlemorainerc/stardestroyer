@@ -46,6 +46,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 // AJ- Changes
 // import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -202,6 +204,19 @@ public class Robot extends TimedRobot {
     
     System.out.println("CROSSHAIRS:" + crosshairs_);
 
+
+    
+    SmartDashboard.putBoolean("Run Autonomous", false);
+
+    SmartDashboard.putBoolean("Galactic Search", false);
+    SmartDashboard.putBoolean("A", false);
+    SmartDashboard.putBoolean("Red", false);
+
+    SmartDashboard.putBoolean("Barrel Racing", false);
+    SmartDashboard.putBoolean("Slalom", false);
+    SmartDashboard.putBoolean("Bounce", false);
+
+    SmartDashboard.putString("errors", "value");
 
     //----------------------------- DEFAULT TELEOP COMMANDS -----------------------------//
     //drive_ = new PrimaryStickDrive2Axis();
