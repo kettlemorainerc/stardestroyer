@@ -117,7 +117,6 @@ public class Robot extends TimedRobot {
 
         setupDriveTrain();
 
-        //----------------------------- INITIAL ROBOT AND TARGET POSITION -----------------------------//
         robot_.chassis_.setPosition(-180, 0, 0); // TODO: Initialize from Smart Dashboard
         double[] p = robot_.chassis_.getPosition();
         robot_.crosshairs_.set(Math.atan2(-p[1], -p[0]), Math.sqrt(p[0] * p[0] + p[1] * p[1]));
@@ -201,7 +200,6 @@ public class Robot extends TimedRobot {
         //driveStation_.secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 
-        //----------------------------- KEYPAD COMMANDS -----------------------------//
         // driveStation_.testing1_.whenPressed(new ColorOperations());
         // driveStation_.testing1_.whenPressed(new AutonomousOperations());
         // driveStation_.testing2_.whenPressed(new ElevatorOperations());
