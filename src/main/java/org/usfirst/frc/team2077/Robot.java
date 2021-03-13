@@ -81,12 +81,6 @@ public class Robot extends TimedRobot {
     // Default commands
     //    Autonomous selected via drive station dashboard.
     protected Command autonomous_;
-    //    Default teleop robot drive.
-    protected Command drive_;
-    //    Continuous update of target range and direction based on robot motion.
-    protected Command track_;
-    //    Operator input of target position relative to robot.
-    protected Command aim_;
     //    Continuous update of launcher elevation for target range.
     protected Command range_;
     //     Keep Launcher aimed on target from crosshairs
@@ -123,28 +117,20 @@ public class Robot extends TimedRobot {
 
         System.out.println("CROSSHAIRS:" + crosshairs_);
 
-        setupController();
+        crosshairs_ = new Crosshairs();
+        //   These dummy subsystems support separate command ownership of robot motion and rotation.
+        position_ = new SubsystemBase() {};
+        target_ = new SubsystemBase() {};
+
+        // Container for remote control software objects.
+        driveStation_ = new DriveStation(position_, target_, crosshairs_);
     }
 
     public void setupDriveTrain() {
-        DriveModuleIF[] starDestroyerDriveModules = {
-                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_RIGHT),  // northeast (right front)
-                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_RIGHT),  // southeast (right rear)
-                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_LEFT),  // southwest (left rear)
-                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_LEFT)   // northwest (left front)
-        };
-
-        chassis_ = new MecanumChassis(
-                starDestroyerDriveModules,
-                constants_.STARDESTROYER_WHEELBASE,
-                constants_.STARDESTROYER_TRACK_WIDTH,
-                constants_.STARDESTROYER_WHEEL_RADIUS
-        );
-
-        //   These dummy subsystems support separate command ownership of robot motion and rotation.
-        position_ = new SubsystemBase() {};
+        chassis_ = new MecanumChassis(constants_);
         heading_ = new SubsystemBase() {};
-        target_ = new SubsystemBase() {};
+
+
         telemetry_ = new Telemetry();
 
         launcher_ = new Launcher();
@@ -152,58 +138,6 @@ public class Robot extends TimedRobot {
 
         //(new ResetTarPos()).initialize();
         tgrabber_ = new TestGrabber();
-
-        crosshairs_ = new Crosshairs();
-    }
-
-    public void setupController() {
-        // Container for remote control software objects.
-        driveStation_ = new DriveStation();
-
-        drive_ = new PrimaryStickDrive3Axis();
-        aim_ = new AimCrosshairs();
-        track_ = new TrackTarget();
-        // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
-
-
-        CommandScheduler.getInstance()
-                        .setDefaultCommand(position_, drive_);
-        // Uncomment the following to move rotation to secondary stick.
-        //CommandScheduler.getInstance().setDefaultCommand(heading_, new SecondaryStickDrive());
-        CommandScheduler.getInstance()
-                        .setDefaultCommand(target_, track_);
-        CommandScheduler.getInstance()
-                        .setDefaultCommand(crosshairs_, aim_);
-        // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
-
-        driveStation_.primaryTrigger_.whileHeld(new RunGrabber(0.3));
-
-
-        driveStation_.secondary2_.whileHeld(new SteerToCrosshairs());
-        //driveStation_.secondary3_.whenPressed(range_);
-        //driveStation_.secondary3_.whenPressed(new SetAngleTest());
-        driveStation_.secondary4_.whenPressed(new LoadLauncherBack());
-        driveStation_.secondary5_.whileHeld(new LoadLauncher());
-        driveStation_.secondary6_.whenPressed(new LauncherSpinTest(200));
-        driveStation_.secondary7_.whenPressed(new LauncherSpinTest(-200));
-        //driveStation_.secondary8_.whileHeld(new LauncherSpinTest());
-        driveStation_.secondary8_.whenPressed(new LauncherScrewTest(true));//launcher_.getScrewPosition() - 0.1)));
-        driveStation_.secondary9_.whenPressed(new LauncherScrewTest(false));
-        // driveStation_.secondary11_.whileHeld(new LauncherScrewTest(true));
-        driveStation_.secondary11_.whileHeld(new LauncherScrewTest(false));
-
-        // driveStation_.secondaryTrigger_.whileHeld(new LoadLauncher());//HERE
-        driveStation_.secondaryTrigger_.whenPressed(new ToggleLauncher());
-        // driveStation_.secondaryTrigger_.whileHeld(new Launch());
-        // driveStation_.secondaryTrigger_.whileHeld(new EmptyLoader());
-        //driveStation_.secondaryTrigger_.whileActiveContinuous(new SteerToCrosshairs());
-        //driveStation_.secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
-
-
-        // driveStation_.testing1_.whenPressed(new ColorOperations());
-        // driveStation_.testing1_.whenPressed(new AutonomousOperations());
-        // driveStation_.testing2_.whenPressed(new ElevatorOperations());
-        // driveStation_.testing3_.whileHeld(new ZPlaceHolderSensors());
     }
 
     /**

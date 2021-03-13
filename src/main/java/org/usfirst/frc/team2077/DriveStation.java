@@ -6,17 +6,19 @@
 package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.XboxController;
+import org.usfirst.frc.team2077.commands.*;
+import org.usfirst.frc.team2077.subsystems.Crosshairs;
 
 public class DriveStation {
-
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
-
-
     
     public final JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1); 
     public final JoystickButton primary2_ = new JoystickButton(primaryStick_, 2);
@@ -68,6 +70,63 @@ public class DriveStation {
     public final JoystickButton testing22_ = new JoystickButton(testingStick_, 22);
     public final JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
     public final JoystickButton testing24_ = new JoystickButton(testingStick_, 24);
+
+    //    Default teleop robot drive.
+    protected Command drive_;
+    //    Continuous update of target range and direction based on robot motion.
+    protected Command track_;
+    //    Operator input of target position relative to robot.
+    protected Command aim_;
+    
+    public DriveStation(Subsystem position_,
+                        Subsystem target_,
+                        Crosshairs crosshairs_) {
+
+        drive_ = new PrimaryStickDrive3Axis();
+        aim_ = new AimCrosshairs();
+        track_ = new TrackTarget();
+        // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
+
+
+        CommandScheduler.getInstance()
+                .setDefaultCommand(position_, drive_);
+        // Uncomment the following to move rotation to secondary stick.
+        //CommandScheduler.getInstance().setDefaultCommand(heading_, new SecondaryStickDrive());
+        CommandScheduler.getInstance()
+                .setDefaultCommand(target_, track_);
+        CommandScheduler.getInstance()
+                .setDefaultCommand(crosshairs_, aim_);
+        // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
+
+        primaryTrigger_.whileHeld(new RunGrabber(0.3));
+
+
+        secondary2_.whileHeld(new SteerToCrosshairs());
+        //secondary3_.whenPressed(range_);
+        //secondary3_.whenPressed(new SetAngleTest());
+        secondary4_.whenPressed(new LoadLauncherBack());
+        secondary5_.whileHeld(new LoadLauncher());
+        secondary6_.whenPressed(new LauncherSpinTest(200));
+        secondary7_.whenPressed(new LauncherSpinTest(-200));
+        //secondary8_.whileHeld(new LauncherSpinTest());
+        secondary8_.whenPressed(new LauncherScrewTest(true));//launcher_.getScrewPosition() - 0.1)));
+        secondary9_.whenPressed(new LauncherScrewTest(false));
+        // secondary11_.whileHeld(new LauncherScrewTest(true));
+        secondary11_.whileHeld(new LauncherScrewTest(false));
+
+        // secondaryTrigger_.whileHeld(new LoadLauncher());//HERE
+        secondaryTrigger_.whenPressed(new ToggleLauncher());
+        // secondaryTrigger_.whileHeld(new Launch());
+        // secondaryTrigger_.whileHeld(new EmptyLoader());
+        //secondaryTrigger_.whileActiveContinuous(new SteerToCrosshairs());
+        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
+
+
+        // testing1_.whenPressed(new ColorOperations());
+        // testing1_.whenPressed(new AutonomousOperations());
+        // testing2_.whenPressed(new ElevatorOperations());
+        // testing3_.whileHeld(new ZPlaceHolderSensors());
+    }
 
     /**
      * Condition control axis input to improve driveability.

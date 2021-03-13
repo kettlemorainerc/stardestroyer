@@ -5,11 +5,22 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import org.usfirst.frc.team2077.Constants;
+
 import static org.usfirst.frc.team2077.Robot.*;
 
 public class MecanumChassis extends AbstractChassis {
 
     private final MecanumMath mecanumMath_;
+
+    private static DriveModuleIF[] buildDriveModule() {
+        return new DriveModuleIF[] {
+                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_RIGHT),  // northeast (right front)
+                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_RIGHT),  // southeast (right rear)
+                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_LEFT),  // southwest (left rear)
+                new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_LEFT)   // northwest (left front)
+        };
+    }
 
     /**
      * @param driveModule [4]
@@ -17,9 +28,13 @@ public class MecanumChassis extends AbstractChassis {
      * @param trackWidth
      * @param wheelRadius
      */
-    public MecanumChassis(DriveModuleIF[] driveModule, double wheelbase, double trackWidth, double wheelRadius) {
-    
-        super(driveModule, wheelbase, trackWidth, wheelRadius);
+    public MecanumChassis(Constants constants_) {
+        super(
+                buildDriveModule(),
+                constants_.STARDESTROYER_WHEELBASE,
+                constants_.STARDESTROYER_TRACK_WIDTH,
+                constants_.STARDESTROYER_WHEEL_RADIUS
+        );
 
         mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180/Math.PI);
 
