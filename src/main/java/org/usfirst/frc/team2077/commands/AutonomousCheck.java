@@ -24,17 +24,6 @@ public class AutonomousCheck extends SequentialCommandGroup{
 
 
     public void initialize(){
-        SmartDashboard.putBoolean("Run Autonomous", false);
-
-        SmartDashboard.putBoolean("Galactic Search", false);
-        SmartDashboard.putBoolean("A", false);
-        SmartDashboard.putBoolean("Red", false);
-
-        SmartDashboard.putBoolean("Barrel Racing", false);
-        SmartDashboard.putBoolean("Slalom", false);
-        SmartDashboard.putBoolean("Bounce", false);
-
-        SmartDashboard.putString("errors", "value");
     }
 
 
