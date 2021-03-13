@@ -10,21 +10,20 @@ public class GalacticSearch extends SequentialCommandGroup {
 
     private static SequentialCommandGroup getMoveToPickUp(double north, double east, double rotation) {
         int grabDistance = 20;
-        if (rotation != 0) {
-            return new SequentialCommandGroup(
-                new Move2(rotation),  
-                new Move2(north - grabDistance, east - grabDistance),
-                new RunGrabberToggle(.3), //TODO: Look at this value
-                new Move2(grabDistance, grabDistance),
-                new RunGrabberToggle(0)
-            );
+        // if (rotation != 0) {
+        //     return new SequentialCommandGroup(
+        //         new Move2(rotation),  
+        //         new Move2(north - grabDistance, 0),
+        //         new RunGrabberToggle(.3), //TODO: Look at this value
+        //         new Move2(grabDistance, 0),
+        //         new RunGrabberToggle(0)
+        //     );
 
-        }
+        // }
         return new SequentialCommandGroup(
-            
-            new Move2(north - grabDistance, east - grabDistance),
-            new RunGrabberToggle(.3), //TODO: Look at this value
-            new Move2(grabDistance, grabDistance),
+            new Move2(north - grabDistance, 0),
+            new RunGrabberToggle(.6), //TODO: Look at this value
+            new Move2(grabDistance, 0),
             new RunGrabberToggle(0)
         );
     }
@@ -34,12 +33,13 @@ public class GalacticSearch extends SequentialCommandGroup {
     if (a) {
         if (red) {
             addCommands( //Path A red
-                getMoveToPickUp(60, 0, 0),
-                new Move2(0, 30),
-                getMoveToPickUp(60, 0, 0),
-                new Move2(0, -90),
-                getMoveToPickUp(60, 0, 0),
-                new Move2(180, 0)
+                new RunGrabberToggle(.6),
+                new Move2(60, 0),
+                new Move2(0, 24),
+                new Move2(30, 0),
+                new Move2(-5, -70),
+                new Move2(172, 0),
+                new RunGrabberToggle(0)
                 // getMoveToPickUp(90, 0, 0),
                 // getMoveToPickUp(60, 30, 30),
                 // getMoveToPickUp(30, -90, -101.56), //tan^-1((pi/2)/(pi/6)) + 30 == tan^-1(90/30) + 30
@@ -53,7 +53,7 @@ public class GalacticSearch extends SequentialCommandGroup {
                 getMoveToPickUp(30, 0, 0),
                 new Move2(0, 30),
                 getMoveToPickUp(60, 0, 0),
-                new Move2(60, 0)
+                new Move2(30, 0)
                 // getMoveToPickUp(180, 0, 0),
                 // getMoveToPickUp(30, -90, -71.56),
                 // getMoveToPickUp(60, 30, 101.56),
@@ -64,12 +64,15 @@ public class GalacticSearch extends SequentialCommandGroup {
     } else {
         if (red) {
             addCommands( //Path B red
-                getMoveToPickUp(60, 0, 0),
-                new Move2(0, 60),
-                getMoveToPickUp(60, 0, 0),
-                new Move2(0, -60),
-                getMoveToPickUp(60, 0, 0),
-                new Move2(120, 0)
+                new RunGrabberToggle(.5),
+                new Move2(1, 0),
+                new Move2(0, -26.5),
+                new Move2(22, 0),
+                new Move2(0, 65),
+                new Move2(51, 0),
+                new Move2(0, -70),
+                new Move2(120, 0),
+                new RunGrabberToggle(0)
                 // getMoveToPickUp(60, 0, 0),
                 // getMoveToPickUp(60, 60, 45),
                 // getMoveToPickUp(60, -60, -90),

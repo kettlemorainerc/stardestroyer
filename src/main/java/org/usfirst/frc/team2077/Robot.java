@@ -234,27 +234,22 @@ public class Robot extends TimedRobot {
     // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
 
-    driveStation_.primaryTrigger_.whileHeld(new RunGrabber(0.3));
+    driveStation_.primaryTrigger_.whileHeld(new RunGrabber(0.6));
+    // driveStation_.testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
 
 
     driveStation_.secondary2_.whileHeld(new SteerToCrosshairs());
     //driveStation_.secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
-    //driveStation_.secondary3_.whenPressed(new SetAngleTest());
     driveStation_.secondary4_.whenPressed(new LoadLauncherBack());
-    driveStation_.secondary5_.whileHeld(new LoadLauncher());
-    driveStation_.secondary6_.whenPressed(new LauncherSpinTest(200));
-    driveStation_.secondary7_.whenPressed(new LauncherSpinTest(-200));
-    //driveStation_.secondary8_.whileHeld(new LauncherSpinTest());
-    driveStation_.secondary8_.whenPressed(new LauncherScrewTest(true));//launcher_.getScrewPosition() - 0.1)));
-    driveStation_.secondary9_.whenPressed(new LauncherScrewTest(false));
-    // driveStation_.secondary11_.whileHeld(new LauncherScrewTest(true));
-    driveStation_.secondary11_.whileHeld(new LauncherScrewTest(false));
+    driveStation_.secondaryTrigger_.whileHeld(new LoadLauncher());
+      driveStation_.secondary7_.whenPressed(new LauncherSpinTest(-100));
+      driveStation_.secondary6_.whenPressed(new LauncherSpinTest(100));
+      driveStation_.secondary8_.whenPressed(new LauncherSpinTest(-10));
+      driveStation_.secondary9_.whenPressed(new LauncherSpinTest(10));
+      driveStation_.secondary10_.whileHeld(new LauncherScrewTest(false));
+     driveStation_.secondary11_.whileHeld(new LauncherScrewTest(true));
 
-    // driveStation_.secondaryTrigger_.whileHeld(new LoadLauncher());//HERE
-    driveStation_.secondaryTrigger_.whenPressed(new ToggleLauncher());
-    // driveStation_.secondaryTrigger_.whileHeld(new Launch());
-    // driveStation_.secondaryTrigger_.whileHeld(new EmptyLoader());
-    //driveStation_.secondaryTrigger_.whileActiveContinuous(new SteerToCrosshairs());
+    driveStation_.secondary3_.whenPressed(new ToggleLauncher());
     //driveStation_.secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 
