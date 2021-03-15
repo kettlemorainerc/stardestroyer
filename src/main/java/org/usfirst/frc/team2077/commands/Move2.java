@@ -59,8 +59,8 @@ public class Move2 extends CommandBase {
   private Move2(double north, double east, double rotation, int method, Subsystem... requirements) {
 
     addRequirements(requirements);
-
-    distanceTotal_ = new double[] {north, east * .68, rotation * 7/8};
+    // distanceTotal_ = new double[] {north, east * .68, rotation * 7/8}; //fudged values for the multipliers
+    distanceTotal_ = new double[] {north, east, rotation}; //fudged values for the multipliers
     method_ = method;
     System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" + distanceTotal_[0] + " " + distanceTotal_[1] + " " + distanceTotal_[2] + " (" + method_ + ")");
   }
@@ -99,7 +99,8 @@ public class Move2 extends CommandBase {
     System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL R:" + acceleration_[2][0] + " " + acceleration_[2][1]);
   }
 
-  double [] vCurrent;
+  private double[] vCurrent;
+  
   @Override
   public void execute() {
 
@@ -137,18 +138,19 @@ public class Move2 extends CommandBase {
     }
   }
 
-//   @Override
-//   public boolean isFinished() {
-//     for (int i = 0; i < 3; i++) {
-//       finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
-//     }
-//     return Math.abs(distanceTotal_[2])>0 ? finished_[2] : (finished_[0] && finished_[1]);
-//   }
-// }
-@Override
-public boolean isFinished() {
-  for (int i = 0; i < 3; i++) {
-    finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
+  @Override
+  public boolean isFinished() {
+    for (int i = 0; i < 3; i++) {
+      finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
+    }
+    boolean reachedGoal = Math.abs(distanceTotal_[2])>0 ? finished_[2] : (finished_[0] && finished_[1]);
+
+    boolean hasStopped = true;
+    for(double velocity : vCurrent) {
+      hasStopped = hasStopped && velocity <= 0.05;
+    }
+
+    return hasStopped = reachedGoal;
   }
   boolean reachedGoal = Math.abs(distanceTotal_[2])>0 ? finished_[2] : (finished_[0] && finished_[1]);
   boolean stoppedMoving = true;

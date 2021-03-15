@@ -52,23 +52,32 @@ public class PrimaryStickDrive3Axis extends CommandBase {
       accelerationLimit = accelerationLimitMin + (accelerationLimitMax-accelerationLimitMin) * (1 - dialSetting[2]); // reverse dial
       //decelerationLimit = Math.max(accelerationLimit, .25); // don't let this go too low for safety
     }
+    double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
+    //double throttle = 1;
     
     robot_.chassis_.setGLimits(accelerationLimit, decelerationLimit);
 
     // TODO: Who handles rotation updates if another command owns robot_position_?
     // TODO: Check joystick/drive capabilities and merge w/2-axis.
+    // double north = DriveStation.adjustInputSensitivity( robot_.driveStation_.Flight.getY(), .025, 1);
+    // double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .01, 1);
     double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
     double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
     if (CommandScheduler.getInstance().requiring(robot_.heading_) != null) {
       // heading controlled elsewhere, just do position here
       //System.out.println(" STICK(3): " + north + " \t" + east);
-      robot_.chassis_.setVelocity01(north * speedLimit, east * speedLimit);
+      north = Math.abs(north) >= Math.abs(east) ? north : 0;
+      east = Math.abs(east) > Math.abs(east) ? east : 0;
+      robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
     }
     else {
       // heading controlled here, do both position and rotation
-      double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getTwist(), .2, 2.5);
+      double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
+      // double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .025, 1);
       //System.out.println(" STICK(2): " + north + " \t" + east + " \t" + clockwise);
-      robot_.chassis_.setVelocity01(north * speedLimit, east * speedLimit, clockwise * rotationLimit);
+      north = Math.abs(north) >= Math.abs(east) ? north : 0;  
+      east = Math.abs(east) > Math.abs(north) ? east : 0;
+      robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle, clockwise * rotationLimit * throttle);
     }
   }
 

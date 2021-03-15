@@ -172,13 +172,13 @@ public class TestGrabber extends SubsystemBase {
     }
 
     public boolean isBLoaded() { //bottom sensor loaded
-        //return robot_.microSwitch_.getStatusIsLoaded();
-        return robot_.infraredSensor_.getStatusIsLoaded();
+        // return robot_.infraredSensor_.getStatusIsLoaded();
+        return true;
     }
 
     public boolean isTLoaded() { //top sensor loaded
-        //return robot_.microSwitch_.getStatusIsLoaded();
-        return robot_.microSwitch_.getStatusIsLoaded();
+        // return robot_.microSwitch_.getStatusIsLoaded();
+        return true;
     }
 
 
