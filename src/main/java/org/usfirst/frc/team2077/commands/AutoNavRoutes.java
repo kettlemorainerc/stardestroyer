@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.subsystems.Launcher;//NEW
 
 public class AutoNavRoutes extends SequentialCommandGroup {
-    ///---Mapping---///
+///---Mapping---///
     final private static double NORTH_MULTIPLIER = 1.0;
     final private static double EAST_MULTIPLIER = 1.0;
     final private static double ROTATION_MULTIPLIER = 1.0;
@@ -33,7 +33,7 @@ private static double m3R(double rotation_){
 }
 //Callabration values needed.
 
-    private static SequentialCommandGroup barrelRace() {
+    private static SequentialCommandGroup barrelRaceOrig() {
         double _unit = 21.5;
         return (new SequentialCommandGroup(
             // new Move2(m3N(0.0),m3E(0.0)), //North, East, Rotation
@@ -58,7 +58,52 @@ private static double m3R(double rotation_){
         );
     }
 
+    private static SequentialCommandGroup barrelRace() {
+        return (new SequentialCommandGroup(
+            new Move2(m3N(135.0),m3E(0.0)),
+
+            new Move2(m3N(0.0),m3E(53.0)),
+            new Move2(m3N(-50.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(-50.0)),//Gets out of first hoop
+            // new Move2(m3N(0.0),m3E(0.0),m3R(-0.25)),
+            // new Move2(m3N(0.0),m3E(0.0),m3R(-0.125)),//
+
+            // new Move2(m3N(0.0),m3E(0.0),m3R(-5.0)),
+            // new Move2(m3N(0.0),m3E(0.0),m3R(5.0)),
+                // new Move2(-0.15)
+                // new Move2(-1.0),
+                // new Move2(-0.09),
+            // new Move2(m3R(5.0)),
+            new Move2(m3N(147.0),m3E(0.0)),
+
+            new Move2(m3N(0.0),m3E(-63.0)),
+            new Move2(m3N(-55.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(127)),
+
+            // new Move2(m3N(90.0),m3E(135.0)),
+            new Move2(m3N(105.0),m3E(0.0)),//
+            // new Move2(m3N(70.0),m3E(0.0)),//
+            // new Move2(m3N(0.0),m3E(80.0)),
+            // new Move2(m3N(100.0),m3E(58.0)),
+            // new Move2(m3N(10.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(-47.0)),
+            new Move2(1),
+            new Move2(m3N(-290.0),m3E(0.0))
+
+
+            // new Move2(m3N(0.01),m3E(0.01))
+            // new Move2(m3N(0.0),m3E(300.0))
+            // )).schedule();
+            )
+        );
+    }
+
+
     private static SequentialCommandGroup slalomPath() {
+        ///The file in 
+        ///C:\Users\robokm\Desktop\Local2020\2020\_StarDestroyer\STARDESTROYER_1.8_(03-5-21)-Before
+        ///contains the last used optimised code for the slalom path.
+
         //Robot will start with the center 16.5in behind the ende as close to the finish zone as posssalbe
         // return (new SequentialCommandGroup(
         //     new Move2(m3N(33),m3E(0)),
@@ -109,6 +154,8 @@ private static double m3R(double rotation_){
     }
   
     private static SequentialCommandGroup bouncePath() {
+        boolean i = false;
+        if(i){
         return (new SequentialCommandGroup(
             new Move2(m3N(40.0),m3E(0.0)),//center is 20 inches out
             new Move2(m3N(10),m3E(-35)),//Hits first star
@@ -119,13 +166,34 @@ private static double m3R(double rotation_){
             new Move2(m3N(15),m3E(115.0)),
             new Move2(m3N(30.0),m3E(0.0)),
             new Move2(m3N(15),m3E(-115.0)),//Hits the third star
-            new Move2(m3N(10),m3E(35)),//Hits first star
+            new Move2(m3N(10),m3E(15)),//Hits first star
             new Move2(m3N(40.0),m3E(0.0))//center is ~20 inches out
             // new Move2(m3N(0),m3E(0))
             // )).schedule();
             )
         );
+        }else{
+        return (new SequentialCommandGroup(
+            new Move2(m3N(55.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(-55.0)),//Hits first cone
+            new Move2(m3N(0.0),m3E(59.0)),//Out by D3
+            new Move2(m3N(27.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(54.0)),//Below D5
+            new Move2(m3N(55.0),m3E(0.0)),
+            new Move2(m3N(0.0),m3E(-107.0)),//Hits the second spot
+            new Move2(m3N(0.0),m3E(108.0)),
+            new Move2(m3N(80.0),m3E(0.0)),//Second fill left moveup
+            new Move2(m3N(0.0),m3E(-108.0)),//Should hit thrid location
+            new Move2(m3N(0.0),m3E(63.0)),//Move to in frount of the finish zone
+            new Move2(m3N(36.0),m3E(0.0))
+
+
+            // new Move2(m3N(0.001),m3E(0.001))
+            )
+        );
+
         }
+    }
 
 
     public enum AutoNavRoute {

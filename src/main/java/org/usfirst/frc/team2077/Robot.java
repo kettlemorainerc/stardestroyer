@@ -37,6 +37,8 @@ import org.usfirst.frc.team2077.subsystems.Launcher;
 import org.usfirst.frc.team2077.subsystems.LauncherIF;
 import org.usfirst.frc.team2077.subsystems.Telemetry;
 import org.usfirst.frc.team2077.subsystems.TestGrabber;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -202,6 +204,17 @@ public class Robot extends TimedRobot {
     
     System.out.println("CROSSHAIRS:" + crosshairs_);
 
+    SmartDashboard.putBoolean("Run Autonomous", false);
+
+    SmartDashboard.putBoolean("Galactic Search", false);
+    SmartDashboard.putBoolean("A", false);
+    SmartDashboard.putBoolean("Red", false);
+
+    SmartDashboard.putBoolean("Barrel Racing", false);
+    SmartDashboard.putBoolean("Slalom", false);
+    SmartDashboard.putBoolean("Bounce", false);
+
+    SmartDashboard.putString("errors", "value");
 
     //----------------------------- DEFAULT TELEOP COMMANDS -----------------------------//
     //drive_ = new PrimaryStickDrive2Axis();

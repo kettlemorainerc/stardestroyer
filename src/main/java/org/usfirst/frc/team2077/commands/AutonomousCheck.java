@@ -16,25 +16,14 @@ public class AutonomousCheck extends SequentialCommandGroup{
     private boolean galacticSearch;
     private boolean a;
     private boolean red;
-    private boolean barrelRacing;
-    private boolean slalom;
-    private boolean bounce;
+    private boolean barrelRacing = false;
+    private boolean slalom = false;
+    private boolean bounce = false;
 
 
 
 
     public void initialize(){
-        SmartDashboard.putBoolean("Run Autonomous", false);
-
-        SmartDashboard.putBoolean("Galactic Search", false);
-        SmartDashboard.putBoolean("A", false);
-        SmartDashboard.putBoolean("Red", false);
-
-        SmartDashboard.putBoolean("Barrel Racing", false);
-        SmartDashboard.putBoolean("Slalom", false);
-        SmartDashboard.putBoolean("Bounce", false);
-
-        SmartDashboard.putString("errors", "value");
     }
 
 
