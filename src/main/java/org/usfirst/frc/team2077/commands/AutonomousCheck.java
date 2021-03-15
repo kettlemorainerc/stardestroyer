@@ -16,9 +16,9 @@ public class AutonomousCheck extends SequentialCommandGroup{
     private boolean galacticSearch;
     private boolean a;
     private boolean red;
-    private boolean barrelRacing;
-    private boolean slalom;
-    private boolean bounce;
+    private boolean barrelRacing = false;
+    private boolean slalom = false;
+    private boolean bounce = false;
 
 
 

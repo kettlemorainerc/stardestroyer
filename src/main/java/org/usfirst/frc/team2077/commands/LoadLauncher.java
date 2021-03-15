@@ -20,7 +20,7 @@ public class LoadLauncher extends CommandBase {
 
   @Override
   public void execute() {
-    robot_.testLauncher_.runLoader(1.0);
+    robot_.testLauncher_.runLoader(.2);
   }
 
   @Override

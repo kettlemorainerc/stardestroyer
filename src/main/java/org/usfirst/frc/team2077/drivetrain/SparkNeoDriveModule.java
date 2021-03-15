@@ -15,6 +15,8 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         BACK_LEFT(4, false),
         BACK_RIGHT(3, true) //true
         ;
+        private static final double gearRatio = 10.714;
+        private static final double wheelRadius = 4;
         public final int ID;
         public final boolean INVERSE;
         DrivePosition(int id, boolean inverse) {
@@ -29,20 +31,23 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private double setPoint;
     private final double circumference;
     private final double maxRPM = robot_.constants_.STARDESTROYER_MOTOR_RPM_LIMIT;
-    private final double gearRatio = 10.714; // 12.75
+    private final double gearRatio; 
     private final boolean isReverse;
+    private final double radius;
 
     public SparkNeoDriveModule(final DrivePosition pos) {
-        this(pos.ID, pos.INVERSE);
+        this(pos.ID, pos.INVERSE, DrivePosition.gearRatio, DrivePosition.wheelRadius);
     }
     
 
-    public SparkNeoDriveModule(final int deviceID, final boolean isReverse_) {
+    public SparkNeoDriveModule(final int deviceID, final boolean isReverse_, double gearRatio,double radius) {
         super(deviceID, MotorType.kBrushless);
-        circumference = robot_.constants_.STARDESTROYER_WHEEL_RADIUS * 2 * Math.PI;
+        circumference = radius * 2 * Math.PI;
         pidController = this.getPIDController();
         encoder = this.getEncoder();
         isReverse = isReverse_;
+        this.gearRatio = gearRatio;
+        this.radius = radius;
         pidController.setP(5e-5);
         pidController.setI(1e-6);
         pidController.setD(0);
@@ -55,7 +60,7 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     
     @Override
     public double getMaximumSpeed() {
-        return (maxRPM/gearRatio) / (60 / (2 * Math.PI * robot_.constants_.STARDESTROYER_WHEEL_RADIUS));
+        return (maxRPM/gearRatio) / (60 / (2 * Math.PI * radius));
     }
 
     /**
@@ -69,10 +74,24 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         if (setPoint > maxRPM) {
             setPoint = maxRPM;
         }
+        setRPM(setPoint);
+    }
+
+    public void setRPM(double rpm) {
+        setPoint = Math.min(rpm, maxRPM);
         if (isReverse) {
             pidController.setReference(-setPoint, ControlType.kVelocity);
         } else {
             pidController.setReference(setPoint, ControlType.kVelocity);
+        }
+    }
+
+    public double getRPM() {
+        final double velocity = encoder.getVelocity();
+        if (isReverse == true) {
+            return -velocity;
+        } else {
+            return velocity;
         }
     }
 
