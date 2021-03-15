@@ -112,10 +112,6 @@ public class MecanumChassis extends AbstractChassis {
         if (debug_) {
             double[] pS = positionSet_.get();
             double[] pM = positionMeasured_.get();
-            System.out.print("POSITION:{"
-                + Math.round(pS[0]*100.)/100. + "(" + Math.round(pM[0]*100.)/100. + "), "
-                + Math.round(pS[1]*100.)/100. + "(" + Math.round(pM[1]*100.)/100. + "), "
-                + Math.round(pS[2]*10.)/10. + "(" + Math.round(pM[2]*10.)/10. + ")}");
         }
     }
 
@@ -140,7 +136,7 @@ public class MecanumChassis extends AbstractChassis {
             driveModule_[i].setVelocity(ws);
     //        if (debug_ ) System.out.print(" " + Math.round(100.*ws)/100. + "(" + Math.round(100.*driveModule_[i].getVelocity())/100. + ")");
         }
-        if (debug_ ) System.out.println(" " + this);
+        // if (debug_ ) System.out.println(" " + this);
     }
 
     @Override

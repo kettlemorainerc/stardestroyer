@@ -21,8 +21,15 @@ public class LauncherSpinTest extends CommandBase {
   @Override
   public void initialize() {
     double i = Math.abs(increment_);
-    double rpm = Math.round(robot_.testLauncher_.launcherRPM_ / i) * i + increment_;
-    robot_.testLauncher_.setLauncherRPM(Math.max(i, Math.min(robot_.testLauncher_.launcherMaxRPM_, rpm)));
+    // double rpm = Math.round(robot_.testLauncher_.launcherRPM_ / i) * i + increment_;
+    double rpm = Math.max(robot_.testLauncher_.launcherRPM_ + increment_, 0);
+    System.out.println(String.format("[LauncherSpinTest] Increment: %s, launcherRpm: %s",
+                                     increment_,
+                                     robot_.testLauncher_.launcherRPM_));
+    // robot_.testLauncher_.setLauncherRPM(Math.max(i, Math.min(robot_.testLauncher_.launcherMaxRPM_, rpm)));
+    robot_.testLauncher_.setLauncherRPM(rpm);
+    System.out.println(String.format("[LauncherSpinTest] launcherRpm: %s",
+                                     robot_.testLauncher_.launcherRPM_));
   }
 
   @Override
