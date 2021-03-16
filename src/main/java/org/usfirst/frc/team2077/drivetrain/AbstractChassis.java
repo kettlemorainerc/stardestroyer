@@ -203,8 +203,8 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     /**
      * Limit set point change for linear or rotational set points based on velocity or acceleration constraints.
-     * Depends on {@link #calculateTimeSinceLastUpdate} being called at the beginning of {@link #setVelocity}
-     * and {@link #setsetRotation}.
+     * Depends on {@linkplain timeSinceLastUpdate_} being called at the beginning of {@link #setVelocity}
+     * and {@link #setRotation}.
      * @param newV
      * @param oldV
      * @param maxV
@@ -212,7 +212,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
      * @return Acceleration/range constrained set point.
      */
     protected double limit(double newV, double oldV, double maxV, double[] accelerationLimits) {
-
         boolean accelerating = Math.abs(newV) > Math.abs(oldV) && Math.signum(newV) == Math.signum(oldV);
         double deltaLimit = (accelerating ? accelerationLimits[0] : accelerationLimits[1]) * timeSinceLastUpdate_; // always positive
         double deltaRequested = newV - oldV;
