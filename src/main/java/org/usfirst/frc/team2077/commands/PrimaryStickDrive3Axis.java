@@ -12,7 +12,6 @@ import org.usfirst.frc.team2077.DriveStation;
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class PrimaryStickDrive3Axis extends CommandBase {
-
 	public PrimaryStickDrive3Axis() {
 		addRequirements(robot_.position_);
 	}
@@ -63,14 +62,14 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .01, 1);
 		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 		east = Math.abs(east) > Math.abs(north) ? east : 0;
-        // double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
-        // double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
+		// double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
+		// double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
 			//System.out.println(" STICK(3): " + north + " \t" + east);
 			robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
 		} else { // we control heading
-            // double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
+			// double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .025, 1);
 			// System.out.println(" STICK(2): " + north + " \t" + east + " \t" + clockwise);
 			robot_.chassis_.setVelocity01(

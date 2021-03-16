@@ -266,9 +266,6 @@ public class Launcher extends SubsystemBase implements LauncherIF {
             runLoader(1.0);
             
         }
-        //}  else {
-        //     load(); //TODO: Change for new ir-sensor/micro-switch
-        // }
     }
 
     public void stopLaunch() {
