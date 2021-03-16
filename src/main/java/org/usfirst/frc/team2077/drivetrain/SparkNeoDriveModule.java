@@ -10,10 +10,10 @@ import static org.usfirst.frc.team2077.Robot.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     public enum DrivePosition {
-        FRONT_LEFT(1, false),
         FRONT_RIGHT(2, true), //true
+        BACK_RIGHT(3, true), //true,
         BACK_LEFT(4, false),
-        BACK_RIGHT(3, true) //true
+        FRONT_LEFT(1, false)
         ;
         private static final double gearRatio = 10.714;
         private static final double wheelRadius = 4;
@@ -88,13 +88,19 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
 
     public double getRPM() {
         final double velocity = encoder.getVelocity();
-        if (isReverse == true) {
+        if (isReverse) {
             return -velocity;
         } else {
             return velocity;
         }
     }
 
+    public double getSetPoint() {
+        if (isReverse) {
+            return -setPoint;
+        }
+        return setPoint;
+    }
 
     /**
      * Current velocity for this wheel.

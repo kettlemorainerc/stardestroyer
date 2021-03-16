@@ -32,7 +32,7 @@ public final class Constants {
     public final double STARDESTROYER_MOTOR_RPM_LIMIT = 5500; // (82 inches/second)
     // TODO: use acceleration constants where appropriate throughout other code
     // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
-    public final double STARDESTROYER_ACCELERATION_G_LIMIT = .1;
+    public final double STARDESTROYER_ACCELERATION_G_LIMIT = .5;
     public final double STARDESTROYER_DECELERATION_G_LIMIT = .25;
 
     //for autonomous

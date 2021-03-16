@@ -15,10 +15,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.commands.AutonomousCheck;
+import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
 import org.usfirst.frc.team2077.drivetrain.DriveChassisIF;
 import org.usfirst.frc.team2077.drivetrain.MecanumChassis;
+import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
 import org.usfirst.frc.team2077.sensors.*;
 import org.usfirst.frc.team2077.subsystems.*;
+
+import static org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.DrivePosition.*;
 
 public class Robot extends TimedRobot {
 
@@ -45,7 +49,7 @@ public class Robot extends TimedRobot {
 	// Drive train, including:
 	//   Controller/motor/wheel/encoder units for each wheel.
 	//   Logic for applying robot level functionality to individual wheels.
-	public DriveChassisIF chassis_;
+	public AbstractChassis chassis_;
 	// Subsystems
 	//    The position/heading subsystems operate as flags to allow control
 	//    of chassis rotation to move between commands independently of positioning.
@@ -220,11 +224,27 @@ public class Robot extends TimedRobot {
 		// }
 	}
 
+	private static void printWheelInfo(SparkNeoDriveModule.DrivePosition position) {
+		System.out.printf("[%s set RPM: %s][%s reported RPM %s]",
+				position.name(),
+				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getSetPoint(),
+				position.name(),
+				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getRPM());
+	}
+
+
+	private long debug = 0;
 	/**
 	 * Called periodically during teleop.
 	 */
 	@Override
 	public void teleopPeriodic() {
+//		if(++debug % 100 == 0) {
+//			for(SparkNeoDriveModule.DrivePosition position : SparkNeoDriveModule.DrivePosition.values()) {
+//				printWheelInfo(position);
+//			}
+//			System.out.println();
+//		}
 	}
 
 	/**

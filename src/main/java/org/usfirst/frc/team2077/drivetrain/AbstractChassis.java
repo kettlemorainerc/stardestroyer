@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
-    protected final DriveModuleIF[] driveModule_;
+    public final DriveModuleIF[] driveModule_;
     protected final double wheelbase_;
     protected final double trackWidth_;
     protected final double wheelRadius_;
