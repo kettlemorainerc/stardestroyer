@@ -144,20 +144,10 @@ public class Move2 extends CommandBase {
       finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
     }
     boolean reachedGoal = Math.abs(distanceTotal_[2])>0 ? finished_[2] : (finished_[0] && finished_[1]);
-
-    boolean hasStopped = true;
+    boolean stoppedMoving = true;
     for(double velocity : vCurrent) {
-      hasStopped = hasStopped && velocity <= 0.05;
+      stoppedMoving = stoppedMoving && Math.abs(velocity) <= 0.1;
     }
-
-    return hasStopped = reachedGoal;
-  }
-  boolean reachedGoal = Math.abs(distanceTotal_[2])>0 ? finished_[2] : (finished_[0] && finished_[1]);
-  boolean stoppedMoving = true;
-  for(double velocity : vCurrent) {
-    stoppedMoving = stoppedMoving && Math.abs(velocity) <= 0.1;
-  }
-
-  return reachedGoal && stoppedMoving;
+    return reachedGoal && stoppedMoving;
 }
 }

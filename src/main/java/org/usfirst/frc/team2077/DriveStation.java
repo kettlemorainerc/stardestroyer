@@ -15,7 +15,7 @@ public class DriveStation {
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
-    public final XboxController X360 = new XboxController(2);
+    public final Joystick Flight = new Joystick(2);
 
 
 

@@ -59,10 +59,10 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 
     // TODO: Who handles rotation updates if another command owns robot_position_?
     // TODO: Check joystick/drive capabilities and merge w/2-axis.
-    // double north = DriveStation.adjustInputSensitivity( robot_.driveStation_.Flight.getY(), .025, 1);
-    // double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .01, 1);
-    double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
-    double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
+    double north = DriveStation.adjustInputSensitivity( robot_.driveStation_.Flight.getY(), .025, 1);
+    double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .01, 1);
+    // double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
+    // double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
     if (CommandScheduler.getInstance().requiring(robot_.heading_) != null) {
       // heading controlled elsewhere, just do position here
       //System.out.println(" STICK(3): " + north + " \t" + east);
@@ -72,8 +72,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
     }
     else {
       // heading controlled here, do both position and rotation
-      double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
-      // double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .025, 1);
+      // double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
+      double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .025, 1);
       //System.out.println(" STICK(2): " + north + " \t" + east + " \t" + clockwise);
       north = Math.abs(north) >= Math.abs(east) ? north : 0;  
       east = Math.abs(east) > Math.abs(north) ? east : 0;
