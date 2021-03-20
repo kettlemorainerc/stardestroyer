@@ -51,8 +51,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 								(accelerationLimitMax - accelerationLimitMin) * (1 - dialSetting[2]); // reverse dial
 			//decelerationLimit = Math.max(accelerationLimit, .25); // don't let this go too low for safety
 		}
-		double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
-//		double throttle = 1;
+//		double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
+		double throttle = 1;
 
 		robot_.chassis_.setGLimits(accelerationLimit, decelerationLimit);
 
@@ -67,8 +67,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
 			//System.out.println(" STICK(3): " + north + " \t" + east);
-			north = 1;
-			east = 0;
 			robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
 		} else { // we control heading
 			// double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);

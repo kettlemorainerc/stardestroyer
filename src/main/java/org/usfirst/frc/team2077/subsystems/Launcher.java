@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class Launcher extends SubsystemBase implements LauncherIF {
-    private static final double LAUNCHER_WHEEL_RADIUS = 2;
 
     // motor controllers
     private final TalonSRX screw_;
@@ -139,31 +138,9 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         loader_ = new TalonSRX(2);
         loader_.configFactoryDefault();
 
-        shooterL_ = new SparkNeoDriveModule(5, true, 1, LAUNCHER_WHEEL_RADIUS); //0
-        // shooterL_.configFactoryDefault();
-        // shooterL_.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,0,0);
-        // shooterL_.setSensorPhase(true);
-        // shooterL_.configNominalOutputForward(0, 0);
-		// shooterL_.configNominalOutputReverse(0, 0);
-		// shooterL_.configPeakOutputForward(1, 0);
-        // shooterL_.configPeakOutputReverse(-1, 0);
-        // shooterL_.config_kF(0, 0.0, 0);
-		// shooterL_.config_kP(0, kP, 0);
-		// shooterL_.config_kI(0, kI, 0);
-		// shooterL_.config_kD(0, kD, 0);
+        shooterL_ = new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.LEFT_SHOOTER); //0
 
-        shooterR_ = new SparkNeoDriveModule(6, false, 1, LAUNCHER_WHEEL_RADIUS); //1
-        // shooterR_.configFactoryDefault();
-        // shooterR_.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,0,0);
-        // shooterR_.setSensorPhase(true);
-        // shooterR_.configNominalOutputForward(0, 0);
-		// shooterR_.configNominalOutputReverse(0, 0);
-		// shooterR_.configPeakOutputForward(1, 0);
-		// shooterR_.configPeakOutputReverse(-1, 0);
-        // shooterR_.config_kF(0, 0.0, 0);
-		// shooterR_.config_kP(0, kP, 0);
-		// shooterR_.config_kI(0, kI, 0);
-		// shooterR_.config_kD(0, kD, 0);
+        shooterR_ = new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.RIGHT_SHOOTER); //1
 
         launcherRunning_ = false;
         launcherRPM_ = 0;

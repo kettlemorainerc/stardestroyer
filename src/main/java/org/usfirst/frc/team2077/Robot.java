@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.commands.AutonomousCheck;
+import org.usfirst.frc.team2077.commands.WatchPidDashboard;
 import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
 import org.usfirst.frc.team2077.drivetrain.DriveChassisIF;
 import org.usfirst.frc.team2077.drivetrain.MecanumChassis;
@@ -113,6 +114,8 @@ public class Robot extends TimedRobot {
 		System.out.println("CROSSHAIRS:" + crosshairs_);
 
 		setupController();
+
+		new WatchPidDashboard().schedule();
 	}
 
 	public void setupDriveTrain() {
