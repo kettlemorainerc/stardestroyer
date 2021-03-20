@@ -5,24 +5,21 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
-    private static final double WHEEL_GEAR_RATIO = 10.714;
-    private static final double WHEEL_RADIUS = 4;
-    private static final double LAUNCHER_WHEEL_RADIUS = 2;
-    private static final double LAUNCHER_GEAR_RATIO = 1;
-    private static final double ORIGINAL_P = 5e-5;
-    private static final double ORIGINAL_I = 1e-6;
-    private static final double ORIGINAL_D = 0;
-    private static final boolean USE_ORIGINAL_PID = false;
+    private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
+    private static final double LAUNCHER_WHEEL_RADIUS = 2, LAUNCHER_GEAR_RATIO = 1;
+    private static final double ORIGINAL_P = 5e-5, ORIGINAL_I = 1e-6, ORIGINAL_D = 0;
+    private static final boolean USE_SOFTWARE_PID = false, USE_ORIGINAL_PID = false;
 
     public enum DrivePosition {
-        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
-        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
-        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
-        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
+        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 0),
+        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 0),
+        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
 
         LEFT_SHOOTER(5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
         RIGHT_SHOOTER(6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
@@ -31,12 +28,21 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         private final double radius;
         public final int ID;
         public final boolean INVERSE;
+        public final double P, I, D;
         DrivePosition(int id, boolean inverse, double gearRatio, double radius) {
+            this(id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
+        }
+
+        DrivePosition(int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
             ID = id;
             INVERSE = inverse;
             this.gearRatio = gearRatio;
             this.radius = radius;
+            this.P = p;
+            this.I = i;
+            this.D = d;
         }
+
     }
 
     //6 inch wheels on rnd bot
@@ -54,10 +60,16 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         pidController = this.getPIDController();
         encoder = this.getEncoder();
 
-        if(USE_ORIGINAL_PID) {
-            pidController.setP(ORIGINAL_P);
-            pidController.setI(ORIGINAL_I);
-            pidController.setD(ORIGINAL_D);
+        if(USE_SOFTWARE_PID) {
+            if(USE_ORIGINAL_PID) {
+                pidController.setP(ORIGINAL_P);
+                pidController.setI(ORIGINAL_I);
+                pidController.setD(ORIGINAL_D);
+            } else {
+                pidController.setP(position.P);
+                pidController.setI(position.I);
+                pidController.setD(position.D);
+            }
             pidController.setIZone(0);
             pidController.setFF(0);
             pidController.setOutputRange(-1, 1);
