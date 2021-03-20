@@ -10,20 +10,18 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.commands.AutonomousCheck;
-import org.usfirst.frc.team2077.commands.WatchPidDashboard;
 import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
-import org.usfirst.frc.team2077.drivetrain.DriveChassisIF;
+import org.usfirst.frc.team2077.drivetrain.DriveModuleIF;
 import org.usfirst.frc.team2077.drivetrain.MecanumChassis;
 import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
 import org.usfirst.frc.team2077.sensors.*;
 import org.usfirst.frc.team2077.subsystems.*;
-
-import static org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.DrivePosition.*;
 
 public class Robot extends TimedRobot {
 
@@ -114,8 +112,6 @@ public class Robot extends TimedRobot {
 		System.out.println("CROSSHAIRS:" + crosshairs_);
 
 		setupController();
-
-		new WatchPidDashboard().schedule();
 	}
 
 	public void setupDriveTrain() {
@@ -160,6 +156,11 @@ public class Robot extends TimedRobot {
 		// block in order for anything in the Command-based framework to work.
 		CommandScheduler.getInstance()
 						.run();
+
+		for (DriveModuleIF module : chassis_.driveModule_) {
+			SparkNeoDriveModule hi = (SparkNeoDriveModule) module;
+			SmartDashboard.putNumber(hi.getPosition().name() + " RPM", hi.getRPM());
+		}
 	}
 
 	// The robot and the drive station exchange data packets around 50x/second so long

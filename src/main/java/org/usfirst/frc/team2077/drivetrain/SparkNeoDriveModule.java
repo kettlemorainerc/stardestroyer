@@ -16,12 +16,13 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double ORIGINAL_P = 5e-5;
     private static final double ORIGINAL_I = 1e-6;
     private static final double ORIGINAL_D = 0;
+    private static final boolean USE_ORIGINAL_PID = false;
 
     public enum DrivePosition {
-        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 2e-2),
-        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 2e-2),
-        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2),
-        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2),
+        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
+        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
+        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
+        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS),
 
         LEFT_SHOOTER(5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
         RIGHT_SHOOTER(6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
@@ -30,23 +31,11 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         private final double radius;
         public final int ID;
         public final boolean INVERSE;
-        public final double P, I, D;
         DrivePosition(int id, boolean inverse, double gearRatio, double radius) {
-            this(id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
-        }
-
-        DrivePosition(int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
             ID = id;
             INVERSE = inverse;
             this.gearRatio = gearRatio;
             this.radius = radius;
-            this.P = p;
-            this.I = i;
-            this.D = d;
-        }
-
-        public String pidSmartDashboardKey() {
-            return String.format("%s is original PID", name());
         }
     }
 
@@ -64,22 +53,20 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         circumference = pos.radius * 2 * Math.PI;
         pidController = this.getPIDController();
         encoder = this.getEncoder();
-        usePidStyle(false);
-        pidController.setIZone(0);
-        pidController.setFF(0);
-        pidController.setOutputRange(-1, 1);
-    }
 
-    public void usePidStyle(boolean originalPID) {
-        if(originalPID) {
+        if(USE_ORIGINAL_PID) {
             pidController.setP(ORIGINAL_P);
             pidController.setI(ORIGINAL_I);
             pidController.setD(ORIGINAL_D);
-        } else {
-            pidController.setP(position.P);
-            pidController.setI(position.I);
-            pidController.setD(position.D);
+            pidController.setIZone(0);
+            pidController.setFF(0);
+            pidController.setOutputRange(-1, 1);
         }
+
+    }
+
+    public DrivePosition getPosition() {
+        return position;
     }
     
     @Override
