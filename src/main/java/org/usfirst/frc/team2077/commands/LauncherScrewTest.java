@@ -18,7 +18,6 @@ public class LauncherScrewTest extends CommandBase {
   private boolean done = false;
 
   public LauncherScrewTest(boolean up) {
-    // System.out.println("------>>> " + robot_.testLauncher_.getScrewPosition());
     addRequirements(robot_.testLauncher_);
     up_ = up;
   }

@@ -33,7 +33,7 @@ public final class Constants {
     // TODO: use acceleration constants where appropriate throughout other code
     // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
     public final double STARDESTROYER_ACCELERATION_G_LIMIT = 5;
-    public final double STARDESTROYER_DECELERATION_G_LIMIT = 1e10;
+    public final double STARDESTROYER_DECELERATION_G_LIMIT = 1e10; //.35 is the value used for the 03-05-21 version
 
     //for autonomous
     // public final double STARDESTROYER_ACCELERATION_G_LIMIT = .1;
