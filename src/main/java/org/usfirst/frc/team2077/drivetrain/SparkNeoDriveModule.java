@@ -18,10 +18,10 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double ORIGINAL_D = 0;
 
     public enum DrivePosition {
-        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 2e-2), //
-        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 2e-2), //
-        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2), // P 14d-4 I 1e-6 D 2e-2
-        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2), //
+        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 2e-2),
+        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 2e-2),
+        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2),
+        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 2e-2),
 
         LEFT_SHOOTER(5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
         RIGHT_SHOOTER(6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
