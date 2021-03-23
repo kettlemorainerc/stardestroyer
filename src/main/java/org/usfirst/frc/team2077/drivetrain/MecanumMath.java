@@ -1,6 +1,9 @@
 package org.usfirst.frc.team2077.drivetrain;
 
-// I believe the entire purpose of this class is to find [V]. AKA the velocity of the actual bot -- David
+// I believe the entire purpose of this class is to find [V] or [&Omega;]. AKA the velocity of the actual bot or the velocity of each individual wheel -- David
+
+import java.util.*;
+
 /***
  * An implementation of the mecanum drivetrain inverse and forward kinematics described in
  * <a href="http://www.chiefdelphi.com/uploads/default/original/3X/9/3/937da7cbd006480f2b47eb9ee7bd8567b8f22dd9.pdf">
@@ -118,7 +121,7 @@ package org.usfirst.frc.team2077.drivetrain;
  * constructor, and the <b>[R]</b> and <b>[F]</b> matrices are internally managed. Application code may then
  * call the simpler {@link #inverse(double[])} and {@link #forward(double[])} methods with the current robot motion (<b>[V]</b>)
  * or wheel motion (<b>[&Omega;]</b>) vectors. Some of the constructors also take conversion factors to automatically
- * convert input and output values for these methods from and to other units more convenient to the calling code. 
+ * convert input and output values for these methods from and to other units more convenient to the calling code.
  * <div style="font-size: smaller">
  * Note: This implementation departs somewhat from the notational conventions used in the paper above:
  * <ul>
@@ -130,7 +133,22 @@ package org.usfirst.frc.team2077.drivetrain;
  * @author 2077
  */
 public final class MecanumMath {
+	/**
+	 * These are the positions that this class cares about in regards to a motor/wheel/controller/encoder assembly
+	 */
+	public enum AssemblyPosition {
+		NORTH_EAST,
+		SOUTH_EAST,
+		SOUTH_WEST,
+		NORTH_WEST
+	}
 
+	// TODO: name this better?
+	public enum VelocityDirection {
+		NORTH,
+		EAST,
+		ROTATION
+	}
 	/***
 	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b>.
 	 * @param motionVector Robot motion vector <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
@@ -140,12 +158,20 @@ public final class MecanumMath {
 	 */
 	public static double[] inverse(double[] motionVector, double[][] inverseKineticMatrix, double wheelRadius) {
 		double[] velocityVector = new double[4];
-		for(int matrix = 0; matrix < 4; matrix++) {
-			for(int direction = 0; direction < 3; direction++) {
-				velocityVector[matrix] += (motionVector[direction] * inverseKineticMatrix[matrix][direction]) /
-										  wheelRadius;
+		for(AssemblyPosition position : AssemblyPosition.values()) {
+			for(VelocityDirection direction : VelocityDirection.values()) {
+				velocityVector[direction.ordinal()] += (motionVector[direction.ordinal()] *
+				                                       inverseKineticMatrix[position.ordinal()][direction.ordinal()]) /
+				                                       wheelRadius;
 			}
 		}
+		// TODO: verify the above code (and it's performance) and decide whether to use it or the below
+//		for(int matrix = 0; matrix < 4; matrix++) {
+//			for(int direction = 0; direction < 3; direction++) {
+//				velocityVector[matrix] += (motionVector[direction] * inverseKineticMatrix[matrix][direction]) /
+//										  wheelRadius;
+//			}
+//		}
 		return velocityVector;
 	}
 
@@ -159,12 +185,21 @@ public final class MecanumMath {
 	 */
 	public static double[] forward(double[] motionVector, double[][] kinematicMatrix, double wheelRadius) {
 		double[] translationVector = new double[3];
-		for(int direction = 0; direction < 3; direction++) {
-			for(int matrix = 0; matrix < 4; matrix++) {
-				translationVector[direction] += (motionVector[matrix] * kinematicMatrix[direction][matrix]) *
-												wheelRadius;
+
+		for(VelocityDirection direction : VelocityDirection.values()) {
+			for(AssemblyPosition position : AssemblyPosition.values()) {
+				translationVector[direction.ordinal()] += motionVector[position.ordinal()] *
+				                                          kinematicMatrix[direction.ordinal()][position.ordinal()] *
+				                                          wheelRadius;
 			}
 		}
+		// TODO: verify the above code (and it's performance) and decide whether to use it or the below
+//		for(int direction = 0; direction < 3; direction++) {
+//			for(int matrix = 0; matrix < 4; matrix++) {
+//				translationVector[direction] += (motionVector[matrix] * kinematicMatrix[direction][matrix]) *
+//												wheelRadius;
+//			}
+//		}
 		return translationVector;
 	}
 
@@ -235,12 +270,14 @@ public final class MecanumMath {
 	/**
 	 * Construct the forward matrix <b>[F]</b> for a rectangular robot.
 	 *
-	 * @param inverseKinematicMatrix Inverse kinematic matrix <b>[R]</b>.
-	 * @return A 3x4 forward kinematic matrix <b>[F]</b> for use by {@link #forward}.
+	 * Performs <b>(([R]<sup>T</sup>[R])[R]<sup>T</sup>)</b> to calculate <b>[F]</b>
+	 *
+	 * @param inverseKinematicMatrix <b>[R]</b> - Inverse kinematic matrix 4x3.
+	 * @return <b>[F]</b> - 3x4 forward kinematic matrix for use by {@link #forward}.
 	 */
 	public static double[][] createForwardMatrix(double[][] inverseKinematicMatrix) {
 
-		double[][] rT = transpose(inverseKinematicMatrix);
+		double[][] rT = transpose(inverseKinematicMatrix); // 3x4
 		double[][] f = multiply(invert3x3(multiply(rT, inverseKinematicMatrix)), rT);
 		System.out.println("INVERSE" + toString(inverseKinematicMatrix));
 		System.out.println("FORWARD" + (massage(f)));
