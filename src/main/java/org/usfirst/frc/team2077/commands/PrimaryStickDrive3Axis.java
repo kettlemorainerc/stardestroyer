@@ -12,6 +12,9 @@ import org.usfirst.frc.team2077.DriveStation;
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class PrimaryStickDrive3Axis extends CommandBase {
+	public final double ACCELERATION_G_LIMIT = 5;
+	public final double DECELERATION_G_LIMIT = 1e10; //.35 is the value used for the 03-05-21 version
+
 	public PrimaryStickDrive3Axis() {
 		addRequirements(robot_.position_);
 	}
@@ -27,8 +30,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		// Should be at or below the static coefficient of friction (CoF) between the wheels and the floor
 		// Too high allows wheelspin, too low is hazardous due to slow deceleration
 		//double accelerationLimit = 1.0;
-		double accelerationLimit = robot_.constants_.STARDESTROYER_ACCELERATION_G_LIMIT;
-		double decelerationLimit = robot_.constants_.STARDESTROYER_DECELERATION_G_LIMIT;
+		double accelerationLimit = ACCELERATION_G_LIMIT;
 
 		if(robot_.analogSettings_ != null) {
 			double[] dialSetting = { // analog input dials, scaled to 0.0 - 1.0
@@ -54,7 +56,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
 		double throttle = 1;
 
-		robot_.chassis_.setGLimits(accelerationLimit, decelerationLimit);
+		robot_.chassis_.setGLimits(accelerationLimit, DECELERATION_G_LIMIT);
 
 		// TODO: Who handles rotation updates if another command owns robot_position_?
 		// TODO: Check joystick/drive capabilities and merge w/2-axis.

@@ -14,6 +14,8 @@ import static org.usfirst.frc.team2077.Robot.robot_;
 
 
 public class Move extends CommandBase {
+	 public final double ACCELERATION_G_LIMIT = .1;
+	 public final double DECELERATION_G_LIMIT = .3;
 
 	public enum Style {
 		MOVE_AND_ROTATE,
@@ -96,11 +98,9 @@ public class Move extends CommandBase {
 			min[EAST] * sign[EAST],
 			min[CLOCKWISE] * sign[CLOCKWISE]
 		}; // don't scale below minimum
-		acceleration_ = (new Acceleration(
-			robot_.constants_.STARDESTROYER_ACCELERATION_G_LIMIT,
-			robot_.constants_.STARDESTROYER_DECELERATION_G_LIMIT,
-			robot_.chassis_,
-			scale
+		acceleration_ = (new Acceleration(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT,
+		                                  robot_.chassis_,
+		                                  scale
 		).get());
 
 		origin_ = new Position(robot_.chassis_.getPosition());
