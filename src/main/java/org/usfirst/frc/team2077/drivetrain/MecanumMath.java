@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.drivetrain;
 
+// I believe the entire purpose of this class is to find [V]. AKA the velocity of the actual bot -- David
 /***
  * An implementation of the mecanum drivetrain inverse and forward kinematics described in
  * <a href="http://www.chiefdelphi.com/uploads/default/original/3X/9/3/937da7cbd006480f2b47eb9ee7bd8567b8f22dd9.pdf">
