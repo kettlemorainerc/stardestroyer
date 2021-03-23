@@ -28,23 +28,23 @@ public class SteerToCrosshairs extends CommandBase {
 
   @Override
   public void execute() {
-    double azimuth = robot_.crosshairs_.getAzimuth(); // angle from robot to target
-    double velocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
+    double crosshairHeading = robot_.crosshairs_.getHeading(); // angle from robot to target
+    double rotationVelocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
 
-    if (Math.abs(azimuth) < .5) { // TODO: Configure. Also consider range.
+    if (Math.abs(crosshairHeading) < .5) { // considered "on target"  // TODO: Configure. Also consider range.
       robot_.chassis_.setRotation(0);
       return;
     }
 
-    if (Math.signum(velocity) * Math.signum(azimuth) == -1.0) { // rotating away from target
-      robot_.chassis_.setRotation(-velocity/2.); // reverse and slow
-      System.out.println("**************** " + velocity);
+    if (Math.signum(rotationVelocity) * Math.signum(crosshairHeading) == -1.0) { // rotating away from target
+      robot_.chassis_.setRotation(-rotationVelocity/2.); // reverse and slow
+      System.out.println("**************** " + rotationVelocity);
       return;
     }
     
-    double stopRotation = .5 * velocity*velocity / deceleration_; // stopping distance at deceleration limit from physics
-    double pad = Math.max(stopRotation*.1, Math.abs(velocity)*.08); // overestimate stopping distance by 5% or distance traveled in two .02 second control cycles
-    robot_.chassis_.setRotation((Math.abs(azimuth)>(stopRotation+pad) ? fast_ : slow_) * Math.signum(azimuth)); // start slowing a bit early, creep to end
+    double stopRotation = .5 * rotationVelocity*rotationVelocity / deceleration_; // stopping distance at deceleration limit from physics
+    double pad = Math.max(stopRotation*.1, Math.abs(rotationVelocity)*.08); // overestimate stopping distance by 5% or distance traveled in two .02 second control cycles
+    robot_.chassis_.setRotation((Math.abs(crosshairHeading)>(stopRotation+pad) ? fast_ : slow_) * Math.signum(crosshairHeading)); // start slowing a bit early, creep to end
   }
 
   @Override

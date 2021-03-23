@@ -10,83 +10,25 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj.XboxController;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
-import edu.wpi.first.wpilibj2.command.button.InternalButton;
-
 
 public class DriveStation {
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
-    public final Joystick testingStick_ = new Joystick(5);
+//    public final Joystick testingStick_ = new Joystick(5);.
     public final Joystick Flight = new Joystick(2);
 
-    public final JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1); 
-    public final JoystickButton primary2_ = new JoystickButton(primaryStick_, 2);
-    public final JoystickButton primary3_ = new JoystickButton(primaryStick_, 3);
-    public final JoystickButton primary4_ = new JoystickButton(primaryStick_, 4);
-    public final JoystickButton primary5_ = new JoystickButton(primaryStick_, 5);
-    public final JoystickButton primary6_ = new JoystickButton(primaryStick_, 6);
-    public final JoystickButton primary7_ = new JoystickButton(primaryStick_, 7);
-    public final JoystickButton primary8_ = new JoystickButton(primaryStick_, 8);
-    public final JoystickButton primary9_ = new JoystickButton(primaryStick_, 9);
-    public final JoystickButton primary10_ = new JoystickButton(primaryStick_, 10);
-    public final JoystickButton primary11_ = new JoystickButton(primaryStick_, 11);
-    public final JoystickButton primary12_ = new JoystickButton(primaryStick_, 12);
-
-    public final JoystickButton secondaryTrigger_ = new JoystickButton(secondaryStick_, 1); 
-    public final JoystickButton secondary2_ = new JoystickButton(secondaryStick_, 2);
-    public final JoystickButton secondary3_ = new JoystickButton(secondaryStick_, 3);
-    public final JoystickButton secondary4_ = new JoystickButton(secondaryStick_, 4);
-    public final JoystickButton secondary5_ = new JoystickButton(secondaryStick_, 5);
-    public final JoystickButton secondary6_ = new JoystickButton(secondaryStick_, 6);
-    public final JoystickButton secondary7_ = new JoystickButton(secondaryStick_, 7);
-    public final JoystickButton secondary8_ = new JoystickButton(secondaryStick_, 8);
-    public final JoystickButton secondary9_ = new JoystickButton(secondaryStick_, 9);
-    public final JoystickButton secondary10_ = new JoystickButton(secondaryStick_, 10);
-    public final JoystickButton secondary11_ = new JoystickButton(secondaryStick_, 11);
-    public final JoystickButton secondary24_ = new JoystickButton(secondaryStick_, 24);//AJ CHANGES (1.4)
-   
-    public final JoystickButton testing1_ = new JoystickButton(testingStick_, 1);
-    public final JoystickButton testing2_ = new JoystickButton(testingStick_, 2);
-    public final JoystickButton testing3_ = new JoystickButton(testingStick_, 3);
-    public final JoystickButton testing4_ = new JoystickButton(testingStick_, 4);
-    public final JoystickButton testing5_ = new JoystickButton(testingStick_, 5);
-    public final JoystickButton testing6_ = new JoystickButton(testingStick_, 6);
-    public final JoystickButton testing7_ = new JoystickButton(testingStick_, 7);
-    public final JoystickButton testing8_ = new JoystickButton(testingStick_, 8);
-    public final JoystickButton testing9_ = new JoystickButton(testingStick_, 9);
-    public final JoystickButton testing10_ = new JoystickButton(testingStick_, 10);
-    public final JoystickButton testing11_ = new JoystickButton(testingStick_, 11);
-    public final JoystickButton testing12_ = new JoystickButton(testingStick_, 12);
-    public final JoystickButton testing13_ = new JoystickButton(testingStick_, 13);
-    public final JoystickButton testing14_ = new JoystickButton(testingStick_, 14);
-    public final JoystickButton testing15_ = new JoystickButton(testingStick_, 15);
-    public final JoystickButton testing16_ = new JoystickButton(testingStick_, 16);
-    public final JoystickButton testing17_ = new JoystickButton(testingStick_, 17);
-    public final JoystickButton testing18_ = new JoystickButton(testingStick_, 18);
-    public final JoystickButton testing19_ = new JoystickButton(testingStick_, 19);
-    public final JoystickButton testing20_ = new JoystickButton(testingStick_, 20);
-    public final JoystickButton testing21_ = new JoystickButton(testingStick_, 21);
-    public final JoystickButton testing22_ = new JoystickButton(testingStick_, 22);
-    public final JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
-    public final JoystickButton testing24_ = new JoystickButton(testingStick_, 24);
-
-    //    Default teleop robot drive.
-    protected Command drive_;
-    //    Continuous update of target range and direction based on robot motion.
-    protected Command track_;
-    //    Operator input of target position relative to robot.
-    protected Command aim_;
-    
     public DriveStation(Subsystem position_,
                         Subsystem target_,
                         Crosshairs crosshairs_) {
 
-        drive_ = new PrimaryStickDrive3Axis();
-        aim_ = new AimCrosshairs();
-        track_ = new TrackTarget();
+        //    Default teleop robot drive.
+        Command drive_ = new PrimaryStickDrive3Axis();
+        //    Continuous update of target range and direction based on robot motion.
+        Command track_ = new TrackTarget();
+        //    Operator input of target position relative to robot.
+        Command aim_ = new AimCrosshairs();
         // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
 
 
@@ -100,24 +42,44 @@ public class DriveStation {
                         .setDefaultCommand(crosshairs_, aim_);
         // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
-
+        JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1);
         primaryTrigger_.whileHeld(new RunGrabber(0.6));
         // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
 
 
+
+        JoystickButton secondary2_ = new JoystickButton(secondaryStick_, 2);
         secondary2_.whileHeld(new SteerToCrosshairs());
-        //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
+
+
+        JoystickButton secondary4_ = new JoystickButton(secondaryStick_, 4);
         secondary4_.whenPressed(new LoadLauncherBack());
+
+        JoystickButton secondaryTrigger_ = new JoystickButton(secondaryStick_, 1);
+        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
         secondaryTrigger_.whileHeld(new LoadLauncher());
+
+        JoystickButton secondary7_ = new JoystickButton(secondaryStick_, 7);
         secondary7_.whenPressed(new LauncherSpinTest(-100));
+
+        JoystickButton secondary6_ = new JoystickButton(secondaryStick_, 6);
         secondary6_.whenPressed(new LauncherSpinTest(100));
+
+        JoystickButton secondary8_ = new JoystickButton(secondaryStick_, 8);
         secondary8_.whenPressed(new LauncherSpinTest(-10));
+
+        JoystickButton secondary9_ = new JoystickButton(secondaryStick_, 9);
         secondary9_.whenPressed(new LauncherSpinTest(10));
+
+        JoystickButton secondary10_ = new JoystickButton(secondaryStick_, 10);
         secondary10_.whileHeld(new LauncherScrewTest(false));
+
+        JoystickButton secondary11_ = new JoystickButton(secondaryStick_, 11);
         secondary11_.whileHeld(new LauncherScrewTest(true));
 
+        JoystickButton secondary3_ = new JoystickButton(secondaryStick_, 3);
+        //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
         secondary3_.whenPressed(new ToggleLauncher());
-        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 
         //----------------------------- KEYPAD COMMANDS -----------------------------//
@@ -148,10 +110,6 @@ public class DriveStation {
      * Condition control axis input to improve driveability.
      * Each axis has a center dead band in which the output for that axis is always zero.
      * Outside the dead band the output increases exponentially from zero to 1 or -1.
-     * @param input
-     * @param deadBand
-     * @param exponent
-     * @return
      */
     public static double adjustInputSensitivity(double input, double deadBand, double exponent) {
         return Math.pow(Math.max(0, Math.abs(input) - deadBand) / (1 - deadBand), exponent) * Math.signum(input);

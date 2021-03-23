@@ -4,15 +4,102 @@ package org.usfirst.frc.team2077.drivetrain;
  * An implementation of the mecanum drivetrain inverse and forward kinematics described in
  * <a href="http://www.chiefdelphi.com/uploads/default/original/3X/9/3/937da7cbd006480f2b47eb9ee7bd8567b8f22dd9.pdf">
  * <i>Kinematic Analysis of Four-Wheel Mecanum Vehicle</i></a>.
+ * <style>
+ *     #terms table { padding: .25rem; border: 1px solid black; border-collapse: collapse; }
+ *     #terms td { padding: .25rem; border: 1px solid black; text-align: center; }
+ *
+ *     #terms dt { border-bottom: 2px solid black; font-size: 1.2em; }
+ *     #terms dd { margin: 0; padding: .5em 1em .5em 1.5em; border-left: 2px solid black; }
+ *     #terms blockquote { margin: 0; }
+ * </style>
+ * <dl id=terms>
+ *     <dt>[V]</dt>
+ *     <dd><blockquote>Velocity matrix of the vehicle at a given moment, essentially determining how the vehicle is moving/has moved
+ *     <br>
+ *     <b>[V] = {N/S, E/W, Rotational} Velocities</b></blockquote></dd>
+ *     <dt>[&Omega;]</dt>
+ *     <dd><blockquote>Essentially the {NE, SE, SW, NW} wheel velocities. "<b>Inverse Kinematic</b>"</blockquote></dd>
+ * 	   <dt>X<sub>n</sub></dt>
+ * 	   <dd><blockquote>N/S point of the wheel</blockquote></dd>
+ * 	   <dt>Y<sub>n</sub></dt>
+ * 	   <dd><blockquote>E/W point of the wheel</blockquote></dd>
+ * 	   <dt>K</dt>
+ * 	   <dd><blockquote>
+ * 	       <b>abs(X<sub>n</sub>)</b> + <b>abs(Y<sub>n</sub>)</b>
+ * 	   </blockquote></dd>
+ *     <dt>[R]</dt>
+ *     <dd><blockquote>4x3 matrix that allows us to calculate [&Omega;] given [V]
+ *         <br>
+ *         <br>
+ *         <table>
+ *             <tr>
+ *                 <td>1</td>
+ *                 <td>-1</td>
+ *                 <td>-K</td>
+ *             </tr>
+ *             <tr>
+ *                 <td>1</td>
+ *                 <td>1</td>
+ *                 <td>-K</td>
+ *             </tr>
+ *             <tr>
+ *                 <td>1</td>
+ *                 <td>-1</td>
+ *                 <td>K</td>
+ *             </tr>
+ *             <tr>
+ *                 <td>1</td>
+ *                 <td>1</td>
+ *                 <td>K</td>
+ *             </tr>
+ *         </table>
+ *     </blockquote>
+ *     <br><b>[&Omega;] = (1 / wheelRadius)[R][V]</b></blockquote></dd>
+ * 	   <dt>[V<sub>n</sub>]</dt>
+ * 	   <dd><blockquote><b>n</b>th wheel's velocity vector.</blockquote></dd>
+ * 	   <dt>[&Theta;<sub>n</sub>]</dt>
+ * 	   <dd><blockquote>"Anticlockwise angle that the axis of the mecanum roller of wheel <b>n</b>
+ * 	   in contact with the floor makes with the <b>X</b> axis"</blockquote></dd>
+ * 	   <dt>r</dt>
+ * 	   <dd><blockquote>Radius of each wheel</blockquote></dd>
+ * 	   <dt>[F]</dt>
+ * 	   <dd><blockquote>
+ * 	       3x4 matrix allowing to solve for <b>[V]</b> given <b>[&Omega;]</b> and <b>r</b>
+ * 	       <br>
+ * 	       <b>[F][&Omega;]r = [V]</b>
+ *		   <br>
+ *		   <br>
+ *		   <table summary="" id="forward-matrix">
+ *		       <tr>
+ *		           <td>1 / 4</td>
+ *		           <td>1 / 4</td>
+ *		           <td>1 / 4</td>
+ *		           <td>1 / 4</td>
+ *		       </tr>
+ *		       <tr>
+ *		           <td>-1 / 4</td>
+ *		           <td> 1 / 4</td>
+ *		           <td>-1 / 4</td>
+ *		           <td> 1 / 4</td>
+ *		       </tr>
+ *		       <tr>
+ *		           <td>-1 / 4K</td>
+ *		           <td>-1 / 4K</td>
+ *		           <td> 1 / 4K</td>
+ *		           <td> 1 / 4K</td>
+ *		       </tr>
+ *		   </table>
+ * 	   </blockquote></dd>
+ * </dl>
  * <p>
  * The core matrix algebra is implemented in the static methods:
  * <dl>
  *  <dt>{@link #inverse(double[], double[][], double)}</dt>
- *  <dd><p style="margin-left: 40px">Implements the inverse kinematic equation <b>[&#x03A9;] = (1/r)[R][V]</b>,
+ *  <dd><p style="margin-left: 40px">Implements the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b>,
  *  which calculates the the individual wheel motions necessary to produce a specified robot motion.
  *  This calculation is the central function of a basic drive control program to convert user input to motor control.</p></dd>
  *  <dt>{@link #forward(double[], double[][], double)}</dt>
- *  <dd><p style="margin-left: 40px">Implements the forward kinematic equation <b>[V] = [F][&#x03A9;](r)</b>,
+ *  <dd><p style="margin-left: 40px">Implements the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>,
  *  which calculates the robot motion to be expected from a set of individual wheel motions.
  *  This calculation is not generally necessary for basic robot control, but may be useful for more advanced operations.
  *  Unlike the inverse equation, the forward calculation represents an overdetermined system,
@@ -29,7 +116,7 @@ package org.usfirst.frc.team2077.drivetrain;
  * conversion factors. Robot geometry, including dimensions, wheel size, and center of rotation, is set in the
  * constructor, and the <b>[R]</b> and <b>[F]</b> matrices are internally managed. Application code may then
  * call the simpler {@link #inverse(double[])} and {@link #forward(double[])} methods with the current robot motion (<b>[V]</b>)
- * or wheel motion (<b>[&#x03A9;]</b>) vectors. Some of the constructors also take conversion factors to automatically
+ * or wheel motion (<b>[&Omega;]</b>) vectors. Some of the constructors also take conversion factors to automatically
  * convert input and output values for these methods from and to other units more convenient to the calling code. 
  * <div style="font-size: smaller">
  * Note: This implementation departs somewhat from the notational conventions used in the paper above:
@@ -44,11 +131,11 @@ package org.usfirst.frc.team2077.drivetrain;
 public final class MecanumMath {
 
 	/***
-	 * Solve the inverse kinematic equation <b>[&#x03A9;] = (1/r)[R][V]</b>.
+	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b>.
 	 * @param motionVector Robot motion vector <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
 	 * @param inverseKineticMatrix A 4x3 inverse kinematic matrix <b>[R]</b>. See {@link #createInverseMatrix}.
 	 * @param wheelRadius wheel radius, in the length units used to construct <b>[R]</b>.
-	 * @return The wheel angular velocity vector <b>[&#x03A9;]</b>: {NE, SE, SW, NW} in radians.
+	 * @return The wheel angular velocity vector <b>[&Omega;]</b>: {NE, SE, SW, NW} in radians.
 	 */
 	public static double[] inverse(double[] motionVector, double[][] inverseKineticMatrix, double wheelRadius) {
 		double[] velocityVector = new double[4];
@@ -62,9 +149,9 @@ public final class MecanumMath {
 	}
 
 	/***
-	 * Solve the forward kinematic equation <b>[V] = [F][&#x03A9;](r)</b>.
-	 * Where <b>[&#x03A9;]</b> has internal inconsistencies a best-fit value is returned.
-	 * @param motionVector A wheel angular motion vector <b>[&#x03A9;]</b>: [NE, SE, SW, NW] in radians.
+	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
+	 * Where <b>[&Omega;]</b> has internal inconsistencies a best-fit value is returned.
+	 * @param motionVector A wheel angular motion vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in radians.
 	 * @param kinematicMatrix A 3x4 forward kinematic matrix <b>[F]</b>. See {@link #createForwardMatrix}.
 	 * @param wheelRadius Wheel radius, in the length units used to construct <b>[F]</b>.
 	 * @return Th <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
@@ -254,26 +341,26 @@ public final class MecanumMath {
 	}
 
 	/***
-	 * Solve the inverse kinematic equation <b>[&#x03A9;] = (1/r)[R][V]</b>.
+	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b>.
 	 * This method wraps the static {@link #inverse(double[], double[][], double)} method, passing the internal
 	 * <b>[R]</b> matrix and wheel radius initialized in the constructor, and converting input and output
 	 * values from and to user units if conversion factors were specified.
 	 * @param translationMatrix <b>[V]</b>: [north/south translation, east/west translation, rotation], in user units.
-	 * @return The wheel speed vector <b>[&#x03A9;]</b>: [NE, SE, SW, NW] in user units.
+	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
 	public final double[] inverse(double[] translationMatrix) {
 		return inverse(translationMatrix, new double[]{0, 0});
 	}
 
 	/***
-	 * @Deprecated
-	 * Solve the inverse kinematic equation <b>[&#x03A9;] = (1/r)[R][V]</b> for rotation about an arbitrary point.
+	 * @deprecated
+	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b> for rotation about an arbitrary point.
 	 * This method wraps the static {@link #inverse(double[], double[][], double)} method, passing the internal
 	 * <b>[R]</b> matrix and wheel radius initialized in the constructor, and converting input and output
 	 * values from and to user units if conversion factors were specified.
 	 * @param translationMatrix <b>[V]</b>: [north/south translation, east/west translation, rotation], in user units.
 	 * @param rotationCenter {N,E} coordinates of the center of rotation relative to the robot's geometric center.
-	 * @return The wheel speed vector <b>[&#x03A9;]</b>: [NE, SE, SW, NW] in user units.
+	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
 	public final double[] inverse(double[] translationMatrix, double[] rotationCenter) {
 		double[] v = {
@@ -294,11 +381,11 @@ public final class MecanumMath {
 	}
 
 	/***
-	 * Solve the forward kinematic equation <b>[V] = [F][&#x03A9;](r)</b>.
+	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
 	 * This method wraps the static {@link #forward(double[], double[][], double)} method, passing the internal
 	 * <b>[F]</b> matrix and wheel radius initialized in the constructor, and converting input and output
 	 * values from and to user units if conversion factors were specified.
-	 * @param userO A wheel speed vector <b>[&#x03A9;]</b>: [NE, SE, SW, NW] in user units.
+	 * @param userO A wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 * @return [3] robot motion velocities [north/south translation, east/west translation, rotation] in user units.
 	 */
 	public final double[] forward(double[] userO) {
@@ -315,7 +402,7 @@ public final class MecanumMath {
 	/***
 	 * Convert a wheel rotation speed from user units to radians
 	 * by dividing the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param userWheelSpeed An individual wheel speed in user units
 	 * as input to {@link #forward(double[])}.
 	 * @return Wheel rotational velicity in radians
@@ -329,7 +416,7 @@ public final class MecanumMath {
 	 * Convert a robot translation speed from user units to distance
 	 * (where distance is in the length/width/radius units passed to the constructor)
 	 * by dividing the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param userRobotSpeed A N/S or E/W robot translation velocity component in user units
 	 * as input to {@link #inverse(double[])}.
 	 * @return Velocity component in length distance
@@ -342,7 +429,7 @@ public final class MecanumMath {
 	/***
 	 * Convert a robot rotation speed from user units to radians
 	 * by dividing the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param userRotationSpeed A robot rotational velocity in user units
 	 * as input to {@link #inverse(double[])}.
 	 * @return Rotational velocity (radians)
@@ -355,7 +442,7 @@ public final class MecanumMath {
 	/***
 	 * Convert a wheel rotation speed from radians to user units
 	 * by multiplying the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param radiansPerSecond An individual wheel rotational velicity in radians
 	 * as returned by {@link #inverse(double[], double[][], double)}.
 	 * @return Speed in user units as returned by {@link #inverse(double[])}.
@@ -368,7 +455,7 @@ public final class MecanumMath {
 	 * Convert a robot translation speed from distance
 	 * (where distance is in the length/width/radius units passed to the constructor) to user units
 	 * by multiplying the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param unitsPerSecond A N/S or E/W robot translation velocity component in in distance
 	 * as returned by {@link #forward(double[], double[][], double)}.
 	 * @return Speed in user units as returned by {@link #forward(double[])}.
@@ -380,7 +467,7 @@ public final class MecanumMath {
 	/***
 	 * Convert a robot rotation speed from radians to user units
 	 * by multiplying the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double[], double, double, double)}.
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
 	 * @param radiansPerSecond A robot rotational velocity in radians
 	 * as returned by {@link #forward(double[], double[][], double)}.
 	 * @return Speed in user units as returned by {@link #forward(double[])}.

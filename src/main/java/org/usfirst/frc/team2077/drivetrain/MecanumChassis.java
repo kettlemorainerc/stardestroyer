@@ -23,10 +23,7 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	/**
-	 * @param driveModule [4]
-	 * @param wheelbase
-	 * @param trackWidth
-	 * @param wheelRadius
+	 * @param constants_ generic constants that haven't been refactored into better places yet
 	 */
 	public MecanumChassis(Constants constants_) {
 		super(

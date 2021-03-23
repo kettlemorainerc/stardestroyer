@@ -9,8 +9,6 @@ public final class Constants {
 
     public final double UPPER_TARGET_HEIGHT = 98.25; // inches from floor to center of target
     public final double LOWER_TARGET_HEIGHT = 23.; // inches from floor to center of target
-    public final double MINIMUM_TARGET_RANGE = 18.; // minimum possible distance from target
-    public final double MAXIMUM_TARGET_RANGE = 60.*12.-18.; // maximum possible distance from target
 
     public final double AZIMUTH_CROSSHAIR_SENSITIVITY = 0.5; // joystick multiplier
     public final double RANGE_CROSSHAIR_SENSITIVITY = 2.0; // joystick multiplier
