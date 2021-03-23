@@ -13,9 +13,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
     public final DriveModuleIF[] driveModule_;
-    protected final double wheelbase_;
-    protected final double trackWidth_;
-    protected final double wheelRadius_;
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -55,11 +52,8 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     private long debugCounter_ = 0; // internal counter
     public boolean debug_ = false; // Use to throttle debug output.
 
-    public AbstractChassis(DriveModuleIF[] driveModule, double wheelbase, double trackWidth, double wheelRadius) {
+    public AbstractChassis(DriveModuleIF[] driveModule) {
         driveModule_ = driveModule;
-        wheelbase_ = wheelbase;
-        trackWidth_ = trackWidth;
-        wheelRadius_ = wheelRadius;
     }
 
     @Override
