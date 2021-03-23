@@ -6,13 +6,21 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.Clock;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import org.usfirst.frc.team2077.math.Position;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import java.util.*;
+
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
     public final DriveModuleIF[] driveModule_;
+    protected EnumMap<VelocityDirection, Double> setVelocity = new EnumMap<>(VelocityDirection.class);
+    protected EnumMap<VelocityDirection, Double> calculatedVelocity = new EnumMap<>(VelocityDirection.class);
+    protected EnumMap<VelocityDirection, double[]> accelerationLimits = new EnumMap<>(VelocityDirection.class);
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -44,7 +52,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final Position positionSet_ = new Position(); // Continuously updated by integrating velocity setpoints.
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
 
-    protected double[] velocitySet_ = {0, 0, 0};
+//    protected double[] velocitySet_ = {0, 0, 0};
     protected double[] velocityMeasured_ = {0, 0, 0};
 
     // Debug flag gets set to true every Nth call to beginUpdate().
@@ -66,9 +74,12 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         lastUpdateTime_ = now;
 
         updatePosition();
-        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
-        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
-        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
+        calculatedVelocity.put(NORTH, limit(NORTH));
+        calculatedVelocity.put(EAST, limit(EAST));
+        calculatedVelocity.put(CLOCKWISE, limit(CLOCKWISE));
+//        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
+//        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
+//        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
         updateDriveModules();
     }
 
@@ -193,6 +204,12 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
             rotationAccelerationLimit_[0]>0 ? rotationAccelerationLimit_[0] : (northAccelerationLimit_[0]*max[2]/max[0]),
             rotationAccelerationLimit_[1]>0 ? rotationAccelerationLimit_[1] : (northAccelerationLimit_[1]*max[2]/max[0])};
         return new double[][] {northAccelerationLimit_, eastAccelerationLimit_, rotationAccelerationLimit};
+    }
+
+    protected double limit(VelocityDirection direction) {
+        double newV = calculatedVelocity.get(direction),
+                oldV = setVelocity.get(direction);
+        return limit(newV, oldV, maximumSpeed_, accelerationLimits.get(direction));
     }
 
     /**

@@ -7,8 +7,6 @@ package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.AssemblyPosition.*;
-
 public class DummyDriveModule implements DriveModuleIF {
 
     // speed limit
