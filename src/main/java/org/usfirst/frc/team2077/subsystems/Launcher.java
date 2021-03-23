@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
+
 import static org.usfirst.frc.team2077.Robot.*;
 
 import java.util.Arrays;
@@ -17,8 +19,8 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
     // motor controllers
     private final TalonSRX screw_;
-    private final TalonSRX shooterL_;
-    private final TalonSRX shooterR_;
+    private final SparkNeoDriveModule shooterL_;
+    private final SparkNeoDriveModule shooterR_;
     private final TalonSRX loader_;
 
 
@@ -26,9 +28,9 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
     // Readings outside the safe range are assumed to be the result of broken or disconnected hardware.
     // If the screw potentiometer reading is out of range the motor should not be operated.
-    private final double[] safeVoltageRange_ = {.9, 4}; // TODO: Confirm this is a reasonable range or adjust as necessary.
+    private final double[] safeVoltageRange_ = {1.4, 5.1}; // TODO: Confirm this is a reasonable range or adjust as necessary.
 
-    private final double[] operatingVoltageRange_ = {1.2, 2.6};
+    private final double[] operatingVoltageRange_ = {2.2, 4.9};
 
     private final double powerValue_ = 1; // TODO: Confirm this is a reasonable value or adjust as necessary.
 
@@ -44,11 +46,11 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public boolean launcherRunning_ = false;
     public double launcherRPM_ = 0;
    
-    public final double launcherMaxRPM_ = 8000; // TODO: Put in Constants.
+    public final double launcherMaxRPM_ = 4000; // TODO: Put in Constants.
     
     private final double rightLeftBias = 0.0;  // TODO: Put in Constants?  
 
-    private final double unitsToRPM = (600. / 2048.); 
+    private final double unitsToRPM = 1; //(600. / 2048.); //TODO: Fix this
     private final double kP = 0.1; // 0.1
     private final double kI = 0.0001; // 0.0001
     private final double kD = 0.0;
@@ -136,31 +138,9 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         loader_ = new TalonSRX(2);
         loader_.configFactoryDefault();
 
-        shooterL_ = new TalonSRX(0); //0
-        shooterL_.configFactoryDefault();
-        shooterL_.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,0,0);
-        shooterL_.setSensorPhase(true);
-        shooterL_.configNominalOutputForward(0, 0);
-		shooterL_.configNominalOutputReverse(0, 0);
-		shooterL_.configPeakOutputForward(1, 0);
-        shooterL_.configPeakOutputReverse(-1, 0);
-        shooterL_.config_kF(0, 0.0, 0);
-		shooterL_.config_kP(0, kP, 0);
-		shooterL_.config_kI(0, kI, 0);
-		shooterL_.config_kD(0, kD, 0);
+        shooterL_ = new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.LEFT_SHOOTER); //0
 
-        shooterR_ = new TalonSRX(1); //1
-        shooterR_.configFactoryDefault();
-        shooterR_.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,0,0);
-        shooterR_.setSensorPhase(true);
-        shooterR_.configNominalOutputForward(0, 0);
-		shooterR_.configNominalOutputReverse(0, 0);
-		shooterR_.configPeakOutputForward(1, 0);
-		shooterR_.configPeakOutputReverse(-1, 0);
-        shooterR_.config_kF(0, 0.0, 0);
-		shooterR_.config_kP(0, kP, 0);
-		shooterR_.config_kI(0, kI, 0);
-		shooterR_.config_kD(0, kD, 0);
+        shooterR_ = new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.RIGHT_SHOOTER); //1
 
         launcherRunning_ = false;
         launcherRPM_ = 0;
@@ -263,9 +243,6 @@ public class Launcher extends SubsystemBase implements LauncherIF {
             runLoader(1.0);
             
         }
-        //}  else {
-        //     load(); //TODO: Change for new ir-sensor/micro-switch
-        // }
     }
 
     public void stopLaunch() {
@@ -305,24 +282,24 @@ public class Launcher extends SubsystemBase implements LauncherIF {
             leftRPM = (velocity - bias) / unitsToRPM;
             rightRPM = (velocity + bias) / unitsToRPM;
         }
-        shooterL_.set(ControlMode.Velocity, leftRPM);
-        shooterR_.set(ControlMode.Velocity, -rightRPM);
+        shooterL_.setRPM(leftRPM);
+        shooterR_.setRPM(rightRPM);
     }
 
     @Deprecated
     public double getLaunchVelL() {
-        double res = shooterL_.getSelectedSensorVelocity(0) * unitsToRPM;
+        double res = shooterL_.getRPM() * unitsToRPM;
 
         
         return res;
     }
     @Deprecated
     public double getLaunchVelR() {
-        return shooterR_.getSelectedSensorVelocity(0) * unitsToRPM;
+        return shooterR_.getRPM() * unitsToRPM;
     }
 
     public double[] getLauncherSpeed() {
-        return new double[] {shooterL_.getSelectedSensorVelocity(0) * unitsToRPM, shooterR_.getSelectedSensorVelocity(0) * unitsToRPM};
+        return new double[] {shooterL_.getRPM() * unitsToRPM, shooterR_.getRPM() * unitsToRPM};
     }
 
 
@@ -337,8 +314,8 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     }
    
     public void stopAll() {
-        shooterL_.set(ControlMode.PercentOutput,0.0);
-        shooterR_.set(ControlMode.PercentOutput,0.0);
+        shooterL_.setVelocity(0.0);
+        shooterR_.setVelocity(0.0);
         loader_.set(ControlMode.PercentOutput,0.0);
         screw_.set(ControlMode.PercentOutput,0.0);
     }

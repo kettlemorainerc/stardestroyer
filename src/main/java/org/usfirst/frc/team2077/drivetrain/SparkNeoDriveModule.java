@@ -5,22 +5,44 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
+    private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
+    private static final double LAUNCHER_WHEEL_RADIUS = 2, LAUNCHER_GEAR_RATIO = 1;
+    private static final double ORIGINAL_P = 5e-5, ORIGINAL_I = 1e-6, ORIGINAL_D = 0;
+    private static final boolean USE_SOFTWARE_PID = false, USE_ORIGINAL_PID = false;
+
     public enum DrivePosition {
-        FRONT_LEFT(1, false),
-        FRONT_RIGHT(2, true), //true
-        BACK_LEFT(4, false),
-        BACK_RIGHT(3, true) //true
+        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 0),
+        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 0),
+        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+
+        LEFT_SHOOTER(5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
+        RIGHT_SHOOTER(6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
         ;
+        private final double gearRatio;
+        private final double radius;
         public final int ID;
         public final boolean INVERSE;
-        DrivePosition(int id, boolean inverse) {
+        public final double P, I, D;
+        DrivePosition(int id, boolean inverse, double gearRatio, double radius) {
+            this(id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
+        }
+
+        DrivePosition(int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
             ID = id;
             INVERSE = inverse;
+            this.gearRatio = gearRatio;
+            this.radius = radius;
+            this.P = p;
+            this.I = i;
+            this.D = d;
         }
+
     }
 
     //6 inch wheels on rnd bot
@@ -29,33 +51,39 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private double setPoint;
     private final double circumference;
     private final double maxRPM = robot_.constants_.STARDESTROYER_MOTOR_RPM_LIMIT;
-    private final double gearRatio = 10.714; // 12.75
-    private final boolean isReverse;
+    private final DrivePosition position;
 
     public SparkNeoDriveModule(final DrivePosition pos) {
-        this(pos.ID, pos.INVERSE);
-    }
-    
-
-    public SparkNeoDriveModule(final int deviceID, final boolean isReverse_) {
-        super(deviceID, MotorType.kBrushless);
-        circumference = robot_.constants_.STARDESTROYER_WHEEL_RADIUS * 2 * Math.PI;
+        super(pos.ID, MotorType.kBrushless);
+        this.position = pos;
+        circumference = pos.radius * 2 * Math.PI;
         pidController = this.getPIDController();
         encoder = this.getEncoder();
-        isReverse = isReverse_;
-        pidController.setP(5e-5);
-        pidController.setI(1e-6);
-        pidController.setD(0);
-        pidController.setIZone(0);
-        pidController.setFF(0);
-        pidController.setOutputRange(-1, 1);
 
+        if(USE_SOFTWARE_PID) {
+            if(USE_ORIGINAL_PID) {
+                pidController.setP(ORIGINAL_P);
+                pidController.setI(ORIGINAL_I);
+                pidController.setD(ORIGINAL_D);
+            } else {
+                pidController.setP(position.P);
+                pidController.setI(position.I);
+                pidController.setD(position.D);
+            }
+            pidController.setIZone(0);
+            pidController.setFF(0);
+            pidController.setOutputRange(-1, 1);
+        }
 
+    }
+
+    public DrivePosition getPosition() {
+        return position;
     }
     
     @Override
     public double getMaximumSpeed() {
-        return (maxRPM/gearRatio) / (60 / (2 * Math.PI * robot_.constants_.STARDESTROYER_WHEEL_RADIUS));
+        return (maxRPM/position.gearRatio) / (60 / (2 * Math.PI * position.radius));
     }
 
     /**
@@ -65,17 +93,37 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
      */
     public void setVelocity(final double velocity) {
         //convert from inches/second to rpm
-        setPoint = velocity*gearRatio*60/circumference;
+        setPoint = velocity*position.gearRatio*60/circumference;
         if (setPoint > maxRPM) {
             setPoint = maxRPM;
         }
-        if (isReverse) {
+        setRPM(setPoint);
+    }
+
+    public void setRPM(double rpm) {
+        setPoint = Math.min(rpm, maxRPM);
+        if (position.INVERSE) {
             pidController.setReference(-setPoint, ControlType.kVelocity);
         } else {
             pidController.setReference(setPoint, ControlType.kVelocity);
         }
     }
 
+    public double getRPM() {
+        final double velocity = encoder.getVelocity();
+        if (position.INVERSE) {
+            return -velocity;
+        } else {
+            return velocity;
+        }
+    }
+
+    public double getSetPoint() {
+        if (position.INVERSE) {
+            return -setPoint;
+        }
+        return setPoint;
+    }
 
     /**
      * Current velocity for this wheel.
@@ -85,8 +133,8 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
      * @return Velocity In inches/second.
      */
     public double getVelocity() {
-        final double velocity = encoder.getVelocity()/60/gearRatio*circumference; //need to still convert to inches per second
-        if (isReverse == true) {
+        final double velocity = encoder.getVelocity()/60/position.gearRatio*circumference; //need to still convert to inches per second
+        if (position.INVERSE) {
             return -velocity;
         } else {
             return velocity;
@@ -101,7 +149,7 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
      * @return Distance in inches.
      */
     public double getDistance() {
-        return encoder.getPosition()/gearRatio*circumference;
+        return encoder.getPosition()/position.gearRatio*circumference;
     }
 
     /**

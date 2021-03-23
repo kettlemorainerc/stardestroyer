@@ -6,18 +6,22 @@
 package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.XboxController;
+import org.usfirst.frc.team2077.commands.*;
+import org.usfirst.frc.team2077.subsystems.Crosshairs;
+import edu.wpi.first.wpilibj2.command.button.InternalButton;
+
 
 public class DriveStation {
-
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
 
-
-    
     public final JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1); 
     public final JoystickButton primary2_ = new JoystickButton(primaryStick_, 2);
     public final JoystickButton primary3_ = new JoystickButton(primaryStick_, 3);
@@ -68,6 +72,77 @@ public class DriveStation {
     public final JoystickButton testing22_ = new JoystickButton(testingStick_, 22);
     public final JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
     public final JoystickButton testing24_ = new JoystickButton(testingStick_, 24);
+
+    //    Default teleop robot drive.
+    protected Command drive_;
+    //    Continuous update of target range and direction based on robot motion.
+    protected Command track_;
+    //    Operator input of target position relative to robot.
+    protected Command aim_;
+    
+    public DriveStation(Subsystem position_,
+                        Subsystem target_,
+                        Crosshairs crosshairs_) {
+
+        drive_ = new PrimaryStickDrive3Axis();
+        aim_ = new AimCrosshairs();
+        track_ = new TrackTarget();
+        // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
+
+
+        CommandScheduler.getInstance()
+                        .setDefaultCommand(position_, drive_);
+        // Uncomment the following to move rotation to secondary stick.
+        //CommandScheduler.getInstance().setDefaultCommand(heading_, new SecondaryStickDrive());
+        CommandScheduler.getInstance()
+                        .setDefaultCommand(target_, track_);
+        CommandScheduler.getInstance()
+                        .setDefaultCommand(crosshairs_, aim_);
+        // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
+
+
+        primaryTrigger_.whileHeld(new RunGrabber(0.6));
+        // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
+
+
+        secondary2_.whileHeld(new SteerToCrosshairs());
+        //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
+        secondary4_.whenPressed(new LoadLauncherBack());
+        secondaryTrigger_.whileHeld(new LoadLauncher());
+        secondary7_.whenPressed(new LauncherSpinTest(-100));
+        secondary6_.whenPressed(new LauncherSpinTest(100));
+        secondary8_.whenPressed(new LauncherSpinTest(-10));
+        secondary9_.whenPressed(new LauncherSpinTest(10));
+        secondary10_.whileHeld(new LauncherScrewTest(false));
+        secondary11_.whileHeld(new LauncherScrewTest(true));
+
+        secondary3_.whenPressed(new ToggleLauncher());
+        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
+
+
+        //----------------------------- KEYPAD COMMANDS -----------------------------//
+        // testing1_.whenPressed(new ColorOperations());
+        // testing1_.whenPressed(new AutonomousOperations());
+        // testing2_.whenPressed(new ElevatorOperations());
+        // testing3_.whileHeld(new ZPlaceHolderSensors());
+
+
+        // // Test code.
+        // (new JoystickButton(primaryStick_, 3)).whenPressed(new Move(40, 0, -180));
+        // (new JoystickButton(primaryStick_, 4)).whenPressed(new Move(40, 0, 180));
+        // (new JoystickButton(primaryStick_, 5)).whenPressed(new Move(20, 0, -90));
+        // (new JoystickButton(primaryStick_, 6)).whenPressed(new Move(20, 0, 90));
+
+        // (new POVButton(primaryStick_, 0)).whenPressed(new Nudge(0, .1));
+        // (new POVButton(primaryStick_, 90)).whenPressed(new Nudge(90, .15));
+        // (new POVButton(primaryStick_, 180)).whenPressed(new Nudge(180, .1));
+        // (new POVButton(primaryStick_, 270)).whenPressed(new Nudge(270, .15));
+
+        // (new JoystickButton(primaryStick_, 7)).whenPressed(new Move(12, -12));
+        // (new JoystickButton(primaryStick_, 8)).whenPressed(new Move(12, 12));
+        // (new JoystickButton(primaryStick_, 9)).whenPressed(new Move(270));
+        // (new JoystickButton(primaryStick_, 10)).whenPressed(new Move(-270));
+    }
 
     /**
      * Condition control axis input to improve driveability.
