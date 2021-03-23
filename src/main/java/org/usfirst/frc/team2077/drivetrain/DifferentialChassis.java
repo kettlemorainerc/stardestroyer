@@ -18,9 +18,9 @@ public class DifferentialChassis extends AbstractChassis {
      */
     public DifferentialChassis(DriveModuleIF[] driveModule, double wheelbase, double trackWidth, double wheelRadius) {
     
-        super(driveModule, wheelbase, trackWidth, wheelRadius);
+        super(driveModule);
 
-        differentialMath_ = new DifferentialMath(trackWidth_, wheelRadius_);
+        differentialMath_ = new DifferentialMath(20, 3);
 
         // north/south speed conversion from 0-1 range to DriveModule maximum (inches/second)
         maximumSpeed_ = Math.min(driveModule_[0].getMaximumSpeed(), driveModule_[1].getMaximumSpeed());

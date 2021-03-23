@@ -10,6 +10,9 @@ import org.usfirst.frc.team2077.Constants;
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class MecanumChassis extends AbstractChassis {
+	public final double WHEELBASE = 20.375; // inches
+	public final double TRACK_WIDTH = 22.625; // inches
+	public final double WHEEL_RADIUS = 4.0; // inches
 
 	private final MecanumMath mecanumMath_;
 
@@ -26,14 +29,9 @@ public class MecanumChassis extends AbstractChassis {
 	 * @param constants_ generic constants that haven't been refactored into better places yet
 	 */
 	public MecanumChassis(Constants constants_) {
-		super(
-			buildDriveModule(),
-			constants_.STARDESTROYER_WHEELBASE,
-			constants_.STARDESTROYER_TRACK_WIDTH,
-			constants_.STARDESTROYER_WHEEL_RADIUS
-		);
+		super(buildDriveModule());
 
-		mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180 / Math.PI);
+		mecanumMath_ = new MecanumMath(WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, WHEEL_RADIUS, 1, 180 / Math.PI);
 
 		// north/south speed conversion from 0-1 range to DriveModule maximum (inches/second)
 		maximumSpeed_ = Math.min(
