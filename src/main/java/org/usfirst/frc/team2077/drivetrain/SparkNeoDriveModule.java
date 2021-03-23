@@ -5,9 +5,10 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
 import static org.usfirst.frc.team2077.Robot.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.AssemblyPosition.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
@@ -16,24 +17,28 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final boolean USE_SOFTWARE_PID = false, USE_ORIGINAL_PID = false;
 
     public enum DrivePosition {
-        FRONT_RIGHT(2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 0),
-        BACK_RIGHT(3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 0),
-        BACK_LEFT(4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
-        FRONT_LEFT(1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+        FRONT_RIGHT(NORTH_EAST, 2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 0),
+        BACK_RIGHT(SOUTH_EAST, 3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 0),
+        BACK_LEFT(SOUTH_WEST, 4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+        FRONT_LEFT(NORTH_WEST, 1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
 
-        LEFT_SHOOTER(5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
-        RIGHT_SHOOTER(6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
+        LEFT_SHOOTER(null, 5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
+        RIGHT_SHOOTER(null, 6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
         ;
+
         private final double gearRatio;
         private final double radius;
-        public final int ID;
-        public final boolean INVERSE;
-        public final double P, I, D;
-        DrivePosition(int id, boolean inverse, double gearRatio, double radius) {
-            this(id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
+        private final int ID;
+        private final boolean INVERSE;
+        private final double P, I, D;
+        private final AssemblyPosition WHEEL_POSITION;
+
+        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius) {
+            this(position, id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
         }
 
-        DrivePosition(int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
+        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
+            WHEEL_POSITION = position;
             ID = id;
             INVERSE = inverse;
             this.gearRatio = gearRatio;
@@ -86,11 +91,6 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         return (maxRPM/position.gearRatio) / (60 / (2 * Math.PI * position.radius));
     }
 
-    /**
-     * Set velocity for this wheel.
-     * @param velocity In inches/second.
-     * Positive values are robot-forward ("north"), negative backward/south.
-     */
     public void setVelocity(final double velocity) {
         //convert from inches/second to rpm
         setPoint = velocity*position.gearRatio*60/circumference;
@@ -98,6 +98,11 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
             setPoint = maxRPM;
         }
         setRPM(setPoint);
+    }
+
+    @Override
+    public AssemblyPosition getWheelPosition() {
+        return position.WHEEL_POSITION;
     }
 
     public void setRPM(double rpm) {
@@ -125,13 +130,6 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         return setPoint;
     }
 
-    /**
-     * Current velocity for this wheel.
-     * This should be a direct measurement from an encoder if available,
-     * otherwise the set point as passed to {@link #setVelocity} or reported by
-     * the motor controller.
-     * @return Velocity In inches/second.
-     */
     public double getVelocity() {
         final double velocity = encoder.getVelocity()/60/position.gearRatio*circumference; //need to still convert to inches per second
         if (position.INVERSE) {
@@ -141,20 +139,10 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         }
     }
 
-
-    /**
-     * Distance traveled by the wheel since startup or the last reset.
-     * This should be a direct measurement from an encoder if available,
-     * otherwise computed by integrating velocity over time.
-     * @return Distance in inches.
-     */
     public double getDistance() {
         return encoder.getPosition()/position.gearRatio*circumference;
     }
 
-    /**
-     * Reset the distance measurement to zero inches.
-     */
     public void resetDistance() {
         encoder.setPosition(0);
     }
