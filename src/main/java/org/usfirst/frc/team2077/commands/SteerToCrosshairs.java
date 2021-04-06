@@ -5,7 +5,7 @@
 
 package org.usfirst.frc.team2077.commands;
 
-import static org.usfirst.frc.team2077.Robot.robot_;
+import static org.usfirst.frc.team2077.Robot.robot;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 

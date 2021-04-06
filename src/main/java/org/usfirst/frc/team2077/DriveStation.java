@@ -46,7 +46,6 @@ public class DriveStation {
     public final JoystickButton secondary9_ = new JoystickButton(secondaryStick_, 9);
     public final JoystickButton secondary10_ = new JoystickButton(secondaryStick_, 10);
     public final JoystickButton secondary11_ = new JoystickButton(secondaryStick_, 11);
-    public final JoystickButton secondary24_ = new JoystickButton(secondaryStick_, 24);//AJ CHANGES (1.4)
    
     public final JoystickButton testing1_ = new JoystickButton(testingStick_, 1);
     public final JoystickButton testing2_ = new JoystickButton(testingStick_, 2);
@@ -80,12 +79,16 @@ public class DriveStation {
     //    Operator input of target position relative to robot.
     protected Command aim_;
     
+    protected Command aimWASD_;
+
+
     public DriveStation(Subsystem position_,
                         Subsystem target_,
                         Crosshairs crosshairs_) {
 
         drive_ = new PrimaryStickDrive3Axis();
         aim_ = new AimCrosshairs();
+        aimWASD_ = new AimCrosshairs(true);
         track_ = new TrackTarget();
         // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
 
@@ -105,7 +108,10 @@ public class DriveStation {
         // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
 
 
-        secondary2_.whileHeld(new SteerToCrosshairs());
+        secondary2_.whileHeld(new SteerToCrosshairs());     //Orignal
+        testing23_.whileHeld(new SteerToCrosshairs(true));  //WSAD control instead of stick
+        
+
         //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
         secondary4_.whenPressed(new LoadLauncherBack());
         secondaryTrigger_.whileHeld(new LoadLauncher());
