@@ -2,25 +2,27 @@ package org.usfirst.frc.team2077.math;
 
 import org.junit.*;
 
+import static org.junit.Assert.*;
+
 public class MatrixTest {
 
 	@Test
-	public void product_has_inner_dimensions() {
+	public void product_matches_proper_dimensions() {
 		Matrix fourByThree = new Matrix(4, 3);
 		Matrix threeByFour = new Matrix(3, 4);
 
-		Matrix threeByThree = fourByThree.multiply(threeByFour);
-		Matrix fourByFour = threeByFour.multiply(fourByThree);
+		Matrix fourByFour = fourByThree.multiply(threeByFour);
+		Matrix threeByThree = threeByFour.multiply(fourByThree);
 
-		Assert.assertEquals(3, threeByThree.getWidth());
-		Assert.assertEquals(3, threeByThree.getHeight());
+		assertEquals(3, threeByThree.getWidth());
+		assertEquals(3, threeByThree.getHeight());
 
-		Assert.assertEquals(4, fourByFour.getWidth());
-		Assert.assertEquals(4, fourByFour.getHeight());
+		assertEquals(4, fourByFour.getWidth());
+		assertEquals(4, fourByFour.getHeight());
 	}
 
 	@Test
-	public void matrices_are_equal_when_their_contained_arrays_and_transposition_are() {
+	public void matrices_are_equal_when_their_internal_arrays_are() {
 		Matrix a = new Matrix(new double[][] {
 			{1, 2},
 			{3, 4}
@@ -31,22 +33,22 @@ public class MatrixTest {
 			{3, 4}
 		});
 
-		Assert.assertEquals(a, b);
-		b.transpose();
-		Assert.assertNotEquals(a, b);
-		b.transpose();
-		Assert.assertEquals(a, b);
+		assertEquals(a, b);
+		Matrix bTranspose = b.transpose();
+		Assert.assertNotEquals(a, bTranspose);
+		Matrix aTranspose = a.transpose();
+		assertEquals(aTranspose, bTranspose);
 	}
 
 	@Test
-	public void produce_matches_expected_algorithm() {
-		Matrix a = new Matrix(new double[][] { // 2 x 3
+	public void matrix_properly_calculates_product_values() {
+		Matrix a = new Matrix(new double[][] { // 3 x 2
 			{2, 4},
 			{6, 8},
 			{10, 12}
 		});
 
-		Matrix b = new Matrix(new double[][] { // 3 x 2
+		Matrix b = new Matrix(new double[][] { // 2 x 3
 			{1, 3, 5},
 			{7, 9, 11}
 		});
@@ -62,8 +64,54 @@ public class MatrixTest {
 			{(7 * 2) + (9 * 6) + (11 * 10), (7 * 4) + (9 * 8) + (11 * 12)}
 		});
 
-		System.out.println(aByBResult);
-		Assert.assertEquals(aByBResult, a.multiply(b));
-		Assert.assertEquals(bByAResult, b.multiply(a));
+		Matrix aBy2Result = new Matrix(new double[][] {
+			{4, 8},
+			{12, 16},
+			{20, 24}
+		});
+
+		assertEquals(aByBResult, a.multiply(b));
+		assertEquals(bByAResult, b.multiply(a));
+		assertEquals(aBy2Result, a.multiply(2d));
+	}
+
+	@Test
+	public void determinate_is_as_expected() {
+		Matrix twoByTwo = new Matrix(new double[][]{
+			{2, 1},
+			{8, 5}
+		});
+
+		Matrix threeByThree = new Matrix(new double[][]{
+			{3, 2, 5},
+			{5, 1, 7},
+			{9, 5, 2}
+		});
+
+		assertEquals(2, Matrix.determinate(twoByTwo), .0003);
+		assertEquals(87, Matrix.determinate(threeByThree), .0003);
+		double math = 0d, generic = 0d;
+
+		long start = System.nanoTime();
+		for(int i = 0; i < 100; i++) math = determinate(threeByThree);
+		long end = System.nanoTime();
+		System.out.println("Math took: " + (end - start));
+
+		start = System.nanoTime();
+		for(int i = 0; i < 100; i++) generic = Matrix.determinate(threeByThree);
+		end = System.nanoTime();
+
+		System.out.println("Generic took: " + (end - start));
+		assertEquals(generic, math, .0003);
+	}
+
+	private static double determinate(Matrix of) {
+		double[][] m = of.matrix;
+		return m[0][0] * m[1][1] * m[2][2]
+			  + m[0][1] * m[1][2] * m[2][0]
+			  + m[0][2] * m[1][0] * m[2][1]
+			  - m[2][0] * m[1][1] * m[0][2]
+			  - m[2][1] * m[1][2] * m[0][0]
+			  - m[2][2] * m[1][0] * m[0][1];
 	}
 }

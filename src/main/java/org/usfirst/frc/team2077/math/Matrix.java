@@ -2,10 +2,12 @@ package org.usfirst.frc.team2077.math;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.*;
+
+import static java.util.Set.*;
 
 public class Matrix {
 	double[][] matrix;
-	boolean transposed = false;
 
 	public Matrix(int height, int width) {
 		/* 3 x 1 matrix
@@ -15,7 +17,20 @@ public class Matrix {
 		 {0}
 		};
 		 */
-		this(new double[width][height]);
+		this(new double[height][width]);
+	}
+
+	private Matrix(Matrix toTranspose) {
+		double[][] original = toTranspose.matrix;
+		double[][] transposedMatrix = new double[original.length][original[0].length];
+
+		for(int x = 0; x < original.length; x++) {
+			for(int y = 0; y < transposedMatrix.length; y++) {
+				transposedMatrix[y][x] = original[x][y];
+			}
+		}
+
+		matrix = transposedMatrix;
 	}
 
 	public Matrix(Enum<? extends Enum> height, Enum<? extends Enum> width) {
@@ -29,17 +44,18 @@ public class Matrix {
 		this.matrix = matrix;
 	}
 
-	public void transpose() {
-		transposed = !transposed;
+	public Matrix transpose() {
+		return new Matrix(this);
 	}
 
 	/**
 	 * This directly correlates to valid "X" arguments made to
 	 * {@link #get(int, int)}/{@link #set(int, int, double)}/{@link #calculate(int, int, Function)}
+	 *
+	 * @throws IndexOutOfBoundsException if the height of the matrix is 0
 	 * @return the "width" of the matrix
 	 */
 	public int getWidth() {
-		if (transposed) return matrix.length;
 		return matrix[0].length;
 	}
 
@@ -49,35 +65,28 @@ public class Matrix {
 	 * @return the "height" of this matrix
 	 */
 	public int getHeight() {
-		if(transposed) return matrix[0].length;
 		return matrix.length;
 	}
 
 	public double get(int x, int y) {
-		if(transposed) return matrix[y][x];
-		return matrix[x][y];
+		return matrix[y][x];
 	}
 
 	public void set(int x, int y, double value) {
-		if(transposed) matrix[y][x] = value;
-		else matrix[x][y] = value;
+		matrix[y][x] = value;
 	}
 
 	public double get(Enum<? extends Enum> x, Enum<? extends Enum> y) {
-		if(transposed) return matrix[y.ordinal()][x.ordinal()];
-
-		return matrix[x.ordinal()][y.ordinal()];
+		return get(x.ordinal(), y.ordinal());
 	}
 
 	public void set(Enum<? extends Enum> x, Enum<? extends Enum> y, double value) {
-		if(transposed) matrix[y.ordinal()][x.ordinal()] = value;
-		else matrix[x.ordinal()][y.ordinal()] = value;
+		set(x.ordinal(), y.ordinal(), value);
 	}
 
 	public void calculate(int x, int y, Function<Double, Double> calculate) {
 		double value;
-		if(transposed) value = matrix[y][x];
-		else value = matrix[x][y];
+		value = get(x, y);
 
 		set(x, y, calculate.apply(value));
 	}
@@ -90,12 +99,24 @@ public class Matrix {
 	public Matrix multiply(Matrix by) {
 		Matrix result = new Matrix(getHeight(), by.getWidth());
 
-		for (int x = 0; x < getHeight(); x++) {
-			for(int y = 0; y < by.getWidth(); y++) {
-				for(int col = 0; col < by.getHeight(); col++) {
-					double toAdd = get(x, col) * by.get(col, y);
+		for (int x = 0; x < result.getWidth(); x++) {
+			for(int y = 0; y < result.getHeight(); y++) {
+				for(int col = 0; col < getWidth(); col++) {
+					double toAdd = get(col, y) * by.get(x, col);
 					result.calculate(x, y, cur -> cur + toAdd);
 				}
+			}
+		}
+
+		return result;
+	}
+
+	public Matrix multiply(double by) {
+		Matrix result = new Matrix(getHeight(), getWidth());
+
+		for(int x = 0; x < result.getWidth(); x++) {
+			for(int y = 0; y < result.getHeight(); y++) {
+				result.set(x, y, get(x, y) * by);
 			}
 		}
 
@@ -131,28 +152,110 @@ public class Matrix {
 		StringBuilder output = new StringBuilder();
 		String formatToLengthFormat = "%%%1$d.2f"; // %1$d will be the initial conversion for lengths
 
-		for(int x = 0; x < getWidth(); x++) {
+		for(int y = 0; y < getHeight(); y++) {
 			output.append("| ");
-			for(int y = 0; y < getHeight(); y++) {
-				if(y > 0) output.append(", ");
+			for(int x = 0; x < getWidth(); x++) {
+				if(x > 0) output.append(", ");
 				output.append(formatToLengthFormat);
 
 				// the current longest vs the current value to 2 decimal places
 				longest = Math.max(longest, String.format("%.2f", get(x, y)).length());
-				formatArgs[(getHeight() * x) + y] = get(x, y);
+				formatArgs[(getWidth() * y) + x] = get(x, y);
 			}
 			output.append(" |%%n");
 		}
-		char emDash = '\u2014';
-		String padding = "" + emDash + emDash;
-		String line = padding;
+		String emDash = "\u2014";
+		String padding = emDash + emDash;
+		StringBuilder line = new StringBuilder(padding);
 		for(int i = 0; i < getWidth(); i++) {
-			for(int f = 0; f < longest; f++){
-				line += emDash;
-			}
-			line += padding;
+			line.append(emDash.repeat(longest))
+			    .append(padding); // either the ", " or the " |"
 		}
 		String format = String.format(output.toString(), longest);
-		return line + '\n' + String.format(format, formatArgs) + line;
+		return line.toString() + '\n' + String.format(format, formatArgs) + line;
+	}
+
+	private static double determinate(Matrix of, LinkedList<Integer> ignoreX, LinkedList<Integer> ignoreY) {
+		// we're assuming there's a valid reason to use this and that it's a square matrix (meaning this SHOULD be the only necessary check)
+		if(of.getWidth() - ignoreX.size() == 2) {
+			int[] validYs = IntStream.range(0, of.getHeight())
+			                         .filter(i -> !ignoreY.contains(i))
+			                         .toArray(); // prevent doing this EVERY x cycle
+			int[] lr = new int[]{1, 1}; // 2 x 2 determinate = ([0, 0] * [1, 1]) - ([1, 0] * [0, 1]) ||| where [x, y] is a point in the matrix
+			int lrI = 1;
+			for(int x = 0; x < of.getWidth(); x++) {
+				if(ignoreX.contains(x)) continue;
+				for(int y : validYs) {
+					lr[lrI ^ 1] *= of.get(x, y);
+					// this basically just converts between 1 and 0
+					lrI = lrI ^ 1;
+				}
+				lrI = lrI ^ 1;
+			}
+
+			return lr[0] - lr[1];
+		}
+
+		int y = ignoreY.size() == 0 ? 0 : ignoreY.peekLast() + 1;
+		ignoreY.add(y);
+		double[] determinateBase = new double[of.getWidth() - ignoreX.size()];
+		int index = 0;
+		for(int x = 0; x < of.getWidth(); x++ ){
+			if(ignoreX.contains(x)) continue;
+			ignoreX.add(x);
+			determinateBase[index++] = of.get(x, y) * determinate(of, ignoreX, ignoreY);
+			ignoreX.removeLast();
+		}
+
+		double result = 0;
+		for(int i = 0; i < determinateBase.length; i++) {
+			result += Math.pow(-1, i & 1) * determinateBase[i];
+		}
+		return result;
+	}
+
+	public static double determinate(Matrix of) {
+		LinkedList<Integer> ignoreX = new LinkedList<>();
+		LinkedList<Integer> ignoreY = new LinkedList<>();
+
+		if(of.getWidth() == 2) return determinate(of, ignoreX, ignoreY);
+
+		return determinate(of, ignoreX, ignoreY);
+	}
+
+	public static Matrix inverse3x3(Matrix threeByThree) {
+		double[][] m = threeByThree.matrix;
+		double determinate
+			= m[0][0] * m[1][1] * m[2][2]
+			  + m[0][1] * m[1][2] * m[2][0]
+			  + m[0][2] * m[1][0] * m[2][1]
+			  - m[2][0] * m[1][1] * m[0][2]
+			  - m[2][1] * m[1][2] * m[0][0]
+			  - m[2][2] * m[1][0] * m[0][1];
+		double[][] inverse = {
+			{
+				m[1][1] * m[2][2] - m[1][2] * m[2][1],
+				m[0][2] * m[2][1] - m[0][1] * m[2][2],
+				m[0][1] * m[1][2] - m[0][2] * m[1][1]
+			},
+			{
+				m[1][2] * m[2][0] - m[1][0] * m[2][2],
+				m[0][0] * m[2][2] - m[0][2] * m[2][0],
+				m[0][2] * m[1][0] - m[0][0] * m[1][2]
+			},
+			{
+				m[1][0] * m[2][1] - m[1][1] * m[2][0],
+				m[0][1] * m[2][0] - m[0][0] * m[2][1],
+				m[0][0] * m[1][1] - m[0][1] * m[1][0]
+			}
+		};
+		if(determinate != 0) {
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0; j < 3; j++) {
+					inverse[i][j] /= determinate;
+				}
+			}
+		}
+		return new Matrix(inverse);
 	}
 }
