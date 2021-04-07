@@ -175,56 +175,8 @@ public class Matrix {
 		return line.toString() + '\n' + String.format(format, formatArgs) + line;
 	}
 
-	private static double determinate(Matrix of, LinkedList<Integer> ignoreX, LinkedList<Integer> ignoreY) {
-		// we're assuming there's a valid reason to use this and that it's a square matrix (meaning this SHOULD be the only necessary check)
-		if(of.getWidth() - ignoreX.size() == 2) {
-			int[] validYs = IntStream.range(0, of.getHeight())
-			                         .filter(i -> !ignoreY.contains(i))
-			                         .toArray(); // prevent doing this EVERY x cycle
-			int[] lr = new int[]{1, 1}; // 2 x 2 determinate = ([0, 0] * [1, 1]) - ([1, 0] * [0, 1]) ||| where [x, y] is a point in the matrix
-			int lrI = 1;
-			for(int x = 0; x < of.getWidth(); x++) {
-				if(ignoreX.contains(x)) continue;
-				for(int y : validYs) {
-					lr[lrI ^ 1] *= of.get(x, y);
-					// this basically just converts between 1 and 0
-					lrI = lrI ^ 1;
-				}
-				lrI = lrI ^ 1;
-			}
-
-			return lr[0] - lr[1];
-		}
-
-		int y = ignoreY.size() == 0 ? 0 : ignoreY.peekLast() + 1;
-		ignoreY.add(y);
-		double[] determinateBase = new double[of.getWidth() - ignoreX.size()];
-		int index = 0;
-		for(int x = 0; x < of.getWidth(); x++ ){
-			if(ignoreX.contains(x)) continue;
-			ignoreX.add(x);
-			determinateBase[index++] = of.get(x, y) * determinate(of, ignoreX, ignoreY);
-			ignoreX.removeLast();
-		}
-
-		double result = 0;
-		for(int i = 0; i < determinateBase.length; i++) {
-			result += Math.pow(-1, i & 1) * determinateBase[i];
-		}
-		return result;
-	}
-
-	public static double determinate(Matrix of) {
-		LinkedList<Integer> ignoreX = new LinkedList<>();
-		LinkedList<Integer> ignoreY = new LinkedList<>();
-
-		if(of.getWidth() == 2) return determinate(of, ignoreX, ignoreY);
-
-		return determinate(of, ignoreX, ignoreY);
-	}
-
-	public static Matrix inverse3x3(Matrix threeByThree) {
-		double[][] m = threeByThree.matrix;
+	public Matrix inverse3x3() {
+		double[][] m = matrix;
 		double determinate
 			= m[0][0] * m[1][1] * m[2][2]
 			  + m[0][1] * m[1][2] * m[2][0]

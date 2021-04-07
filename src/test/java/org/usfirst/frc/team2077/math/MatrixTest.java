@@ -74,44 +74,4 @@ public class MatrixTest {
 		assertEquals(bByAResult, b.multiply(a));
 		assertEquals(aBy2Result, a.multiply(2d));
 	}
-
-	@Test
-	public void determinate_is_as_expected() {
-		Matrix twoByTwo = new Matrix(new double[][]{
-			{2, 1},
-			{8, 5}
-		});
-
-		Matrix threeByThree = new Matrix(new double[][]{
-			{3, 2, 5},
-			{5, 1, 7},
-			{9, 5, 2}
-		});
-
-		assertEquals(2, Matrix.determinate(twoByTwo), .0003);
-		assertEquals(87, Matrix.determinate(threeByThree), .0003);
-		double math = 0d, generic = 0d;
-
-		long start = System.nanoTime();
-		for(int i = 0; i < 100; i++) math = determinate(threeByThree);
-		long end = System.nanoTime();
-		System.out.println("Math took: " + (end - start));
-
-		start = System.nanoTime();
-		for(int i = 0; i < 100; i++) generic = Matrix.determinate(threeByThree);
-		end = System.nanoTime();
-
-		System.out.println("Generic took: " + (end - start));
-		assertEquals(generic, math, .0003);
-	}
-
-	private static double determinate(Matrix of) {
-		double[][] m = of.matrix;
-		return m[0][0] * m[1][1] * m[2][2]
-			  + m[0][1] * m[1][2] * m[2][0]
-			  + m[0][2] * m[1][0] * m[2][1]
-			  - m[2][0] * m[1][1] * m[0][2]
-			  - m[2][1] * m[1][2] * m[0][0]
-			  - m[2][2] * m[1][0] * m[0][1];
-	}
 }
