@@ -6,6 +6,9 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
+
+import java.util.EnumMap;
 
 /*
 Notes on units:
@@ -135,19 +138,18 @@ public interface DriveChassisIF extends Subsystem {
      * Velocity set point.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocitySet();
+    EnumMap<VelocityDirection, Double> getVelocitySet();
 
     /**
      * Internal velocity set point, after adjustment for acceleration and velocity limits.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocityCalculated();
+    EnumMap<VelocityDirection, Double> getVelocityCalculated();
 
     /**
      * Measured velocity based on motor or wheel encoders if present.
      * May be affected by acceleration limits or calculated from relative settings.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocityMeasured();
-
+    EnumMap<VelocityDirection, Double> getVelocityMeasured();
 }

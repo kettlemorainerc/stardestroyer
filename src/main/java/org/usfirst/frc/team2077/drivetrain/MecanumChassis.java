@@ -5,7 +5,6 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
-import org.usfirst.frc.team2077.Constants;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
 import java.util.*;
@@ -35,10 +34,7 @@ public class MecanumChassis extends AbstractChassis {
 		};
 	}
 
-	/**
-	 * @param constants_ generic constants that haven't been refactored into better places yet
-	 */
-	public MecanumChassis(Constants constants_) {
+	public MecanumChassis() {
 		super(buildDriveModule());
 
 		mecanumMath_ = new MecanumMath(WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, WHEEL_RADIUS, 1, 180 / Math.PI);
@@ -49,12 +45,13 @@ public class MecanumChassis extends AbstractChassis {
 		                      .min()
 		                      .orElseThrow();
 		// rotation speed conversion from 0-1 range to DriveModule maximum (degrees/second)
-		maximumRotation_ = mecanumMath_.forward(new double[]{
-			-maximumSpeed_,
-			-maximumSpeed_,
-			maximumSpeed_,
-			maximumSpeed_
-		})[VelocityDirection.CLOCKWISE.ordinal()];
+		EnumMap<AssemblyPosition, Double> maxRotation = new EnumMap<>(AssemblyPosition.class);
+		maxRotation.put(AssemblyPosition.NORTH_EAST, -maximumSpeed_);
+		maxRotation.put(AssemblyPosition.SOUTH_EAST, -maximumSpeed_);
+		maxRotation.put(AssemblyPosition.NORTH_WEST, -maximumSpeed_);
+		maxRotation.put(AssemblyPosition.SOUTH_WEST, -maximumSpeed_);
+
+		maximumRotation_ = mecanumMath_.forward(maxRotation).get(CLOCKWISE);
 
 		// lowest chassis speeds supportable by the drive modules
 		minimumSpeed_ = minSpeedFromMax(maximumSpeed_);
@@ -113,13 +110,14 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	@Override
-	public double[] getVelocitySet() {
-		return new double[]{northSet_, eastSet_, clockwiseSet_};
+	public EnumMap<VelocityDirection, Double> getVelocitySet() {
+		return setVelocity;
+//		return new double[]{northSet_, eastSet_, clockwiseSet_};
 	}
 
 	@Override
-	public double[] getVelocityCalculated() {
-		return new double[]{north_, east_, clockwise_};
+	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
+		return calculatedVelocity;
 	}
 
 	public EnumMap<VelocityDirection, Double> getCalculatedVelocity() {
@@ -127,8 +125,8 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	@Override
-	public double[] getVelocityMeasured() {
-		return new double[]{velocityMeasured_[0], velocityMeasured_[1], velocityMeasured_[2]};
+	public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
+		return velocityMeasured_;
 	}
 
 	@Override
@@ -137,9 +135,11 @@ public class MecanumChassis extends AbstractChassis {
 		// chassis velocity from internal set point
 //		velocitySet_ = getVelocityCalculated();
 		// chassis velocity from motor/wheel measurements
-		double[] wheelVelocities = new double[AssemblyPosition.values().length];
+		EnumMap<AssemblyPosition, Double> wheelVelocities = new EnumMap<>(AssemblyPosition.class);
+//		double[] wheelVelocities = new double[AssemblyPosition.values().length];
 		for(DriveModuleIF wheel : driveModule_) {
-			wheelVelocities[wheel.getWheelPosition().ordinal()] = wheel.getVelocity();
+			wheelVelocities.put(wheel.getWheelPosition(), wheel.getVelocity());
+//			wheelVelocities[wheel.getWheelPosition().ordinal()] = wheel.getVelocity();
 		}
 		velocityMeasured_ = mecanumMath_.forward(wheelVelocities);
 
@@ -147,9 +147,9 @@ public class MecanumChassis extends AbstractChassis {
 		// TODO: Measure actual vs measured E/W distances and insert an adjustment factor here.
 		// TODO: Put the adjustment factor in constants.
 		setVelocity.compute(EAST, (k, v) -> v * EAST_ADJUSTMENT);
-
 //		velocitySet_[VelocityDirection.EAST.ordinal()] *= EAST_ADJUSTMENT; // just a guess
-		velocityMeasured_[VelocityDirection.EAST.ordinal()] *= EAST_ADJUSTMENT; // just a guess
+
+		velocityMeasured_.compute(EAST, (k, val) -> val * EAST_ADJUSTMENT); // just a guess
 
 		// update position with motion since last update
 		positionSet_.moveRelative(
@@ -161,9 +161,9 @@ public class MecanumChassis extends AbstractChassis {
 //			velocitySet_[VelocityDirection.CLOCKWISE.ordinal()] * timeSinceLastUpdate_
 		);
 		positionMeasured_.moveRelative(
-			velocityMeasured_[NORTH.ordinal()] * timeSinceLastUpdate_,
-			velocityMeasured_[VelocityDirection.EAST.ordinal()] * timeSinceLastUpdate_,
-			velocityMeasured_[VelocityDirection.CLOCKWISE.ordinal()] * timeSinceLastUpdate_
+			velocityMeasured_.get(NORTH) * timeSinceLastUpdate_,
+			velocityMeasured_.get(EAST) * timeSinceLastUpdate_,
+			velocityMeasured_.get(CLOCKWISE) * timeSinceLastUpdate_
 		);
 		if(robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
 			double[] pS = positionSet_.get();
@@ -217,93 +217,8 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public String toString() {
-		return "V:" +
-			   Math.round(north_ * 10.) / 10. +
-			   "/" +
-			   Math.round(east_ * 10.) / 10. +
-			   "/" +
-			   Math.round(clockwise_ * 10.) / 10.
-			   +
-			   " W:" +
-			   driveModule_[0] +
-			   "/" +
-			   driveModule_[1] +
-			   "/" +
-			   driveModule_[2] +
-			   "/" +
-			   driveModule_[3];
-	}
-
-	/**
-	 * Test code. May be run locally in VSCode. // TODO: Local execution broken due to Subsystem dependency.
-	 */
-	public static void main(String[] argv) {
-
-		// DriveChassisIF chassis;
-
-		// DriveModuleIF[] module;
-
-		// double wheelbase;
-		// double trackWidth;
-		// double wheelRadius;
-
-		// chassis = new MecanumChassis(module = new DummyDriveModule[] {
-		//     new DummyDriveModule(100),
-		//     new DummyDriveModule(100),
-		//     new DummyDriveModule(100),
-		//     new DummyDriveModule(100)
-		// },
-		// wheelbase = 20,
-		// trackWidth = 20,
-		// wheelRadius = 3
-		// );
-
-		// System.out.println();
-
-		// chassis.setVelocity01(.5, 0, 0);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(0, .5, 0);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(.5, .5, 0);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(0, 0, .5);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(.5, 0, .5);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(0, .5, .5);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity01(.5, .5, .5);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity(0, 0, -360);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setRotation(360);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity(70, 70, 0);
-		// System.out.println(chassis);
-		// System.out.println();
-
-		// chassis.setVelocity(-50,-50, -90);
-		// System.out.println(chassis);
-		// System.out.println();
-
-
+		return String.format("[Velocity: %s][Wheels: %s]",
+							 calculatedVelocity,
+							 Arrays.toString(driveModule_));
 	}
 }

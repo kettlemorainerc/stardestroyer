@@ -5,7 +5,10 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import java.util.EnumMap;
+
 import static org.usfirst.frc.team2077.Robot.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
 public class DifferentialChassis extends AbstractChassis {
 
@@ -61,17 +64,27 @@ public class DifferentialChassis extends AbstractChassis {
     }
 
     @Override
-    public double[] getVelocitySet() {
-        return new double[] {northSet_, 0, clockwiseSet_};
+    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocitySet() {
+        EnumMap<MecanumMath.VelocityDirection, Double> set = new EnumMap<>(MecanumMath.VelocityDirection.class);
+        set.put(NORTH, northSet_);
+        set.put(MecanumMath.VelocityDirection.EAST, 0d);
+        set.put(MecanumMath.VelocityDirection.CLOCKWISE, clockwiseSet_);
+        return set;
+//        return new double[] {northSet_, 0, clockwiseSet_};
     }
 
     @Override
-    public double[] getVelocityCalculated() {
-        return new double[] {north_, 0, clockwise_};
+    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocityCalculated() {
+        EnumMap<MecanumMath.VelocityDirection, Double> set = new EnumMap<>(MecanumMath.VelocityDirection.class);
+        set.put(NORTH, north_);
+        set.put(MecanumMath.VelocityDirection.EAST, 0d);
+        set.put(MecanumMath.VelocityDirection.CLOCKWISE, clockwise_);
+        return set;
+//        return new double[] {north_, 0, clockwise_};
     }
 
     @Override
-    public double[] getVelocityMeasured() {
+    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocityMeasured() {
         return getVelocityCalculated();
     }
 
@@ -82,14 +95,15 @@ public class DifferentialChassis extends AbstractChassis {
         double dT = timeSinceLastUpdate_;
 
         // chassis velocity from internal set point
-        double[] vS = getVelocityCalculated();
+//        double[] vS = getVelocityCalculated();
+        EnumMap<MecanumMath.VelocityDirection, Double> vS = getVelocityCalculated();
         // chassis velocity from motor/wheel measurements
         double[] w = {driveModule_[0].getVelocity(), driveModule_[1].getVelocity()};
         double[] v = differentialMath_.forward(w);
         double[] vM = {v[0], 0, v[1]};
 
         // update position with motion since last update
-        positionSet_.moveRelative(vS[0]*dT, vS[1]*dT, vS[2]*dT);
+        positionSet_.moveRelative(vS.get(NORTH) * dT, vS.get(EAST) * dT, vS.get(CLOCKWISE) * dT);
         positionMeasured_.moveRelative(vM[0]*dT, vM[1]*dT, vM[2]*dT);
         if (robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
             double[] pS = positionSet_.get();

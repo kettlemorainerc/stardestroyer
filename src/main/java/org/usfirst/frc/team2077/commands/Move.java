@@ -7,8 +7,11 @@ package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.math.Acceleration;
 import org.usfirst.frc.team2077.math.Position;
+
+import java.util.EnumMap;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 
@@ -26,7 +29,7 @@ public class Move extends CommandBase {
 	private static final byte NORTH = 0, EAST = 1, CLOCKWISE = 2;
 	private final double[] distanceTotal_;
 	private final Style method_;
-	private double[] vCurrent;
+	private EnumMap<MecanumMath.VelocityDirection, Double> vCurrent;
 	private double[] fast_;
 	private double[] slow_;
 	private double[] distanceRemaining_;
@@ -158,14 +161,15 @@ public class Move extends CommandBase {
 		double[] vNew = {0, 0, 0};
 		double[] distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(origin_);
 		boolean[] slow = {false, false, false};
-		for(int i = 0; i < 3; i++) {
+		for(MecanumMath.VelocityDirection direction : MecanumMath.VelocityDirection.values()){
+			int i = direction.ordinal();
 			distanceRemaining_[i] = distanceTotal_[i] - distanceTraveled[i];
-			double distanceToStop = vCurrent[i] * vCurrent[i] /
+			double distanceToStop = vCurrent.get(direction) * vCurrent.get(direction) /
 									acceleration_[i][1] /
 									2.;// exact absolute value per physics
 			distanceToStop += Math.max(
 				distanceToStop * .05,
-				Math.abs(vCurrent[i]) * .04
+				Math.abs(vCurrent.get(direction)) * .04
 			); // pad just a bit to avoid overshoot
 			slow[i] = finished_[i] ||
 					  Math.abs(distanceRemaining_[i]) <= distanceToStop; // slow down within padded stopping distance
@@ -201,7 +205,7 @@ public class Move extends CommandBase {
 		}
 		boolean reachedGoal = Math.abs(distanceTotal_[2]) > 0 ? finished_[2] : (finished_[0] && finished_[1]);
 		boolean stoppedMoving = false;
-		for(double velocity : vCurrent) {
+		for(double velocity : vCurrent.values()) {
 			stoppedMoving = stoppedMoving || Math.abs(velocity) <= 0.1;
 		}
 

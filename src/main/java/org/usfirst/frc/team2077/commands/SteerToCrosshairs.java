@@ -6,8 +6,10 @@
 package org.usfirst.frc.team2077.commands;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.CLOCKWISE;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath;
 
 public class SteerToCrosshairs extends CommandBase {
 
@@ -29,7 +31,7 @@ public class SteerToCrosshairs extends CommandBase {
   @Override
   public void execute() {
     double crosshairHeading = robot_.crosshairs_.getHeading(); // angle from robot to target
-    double rotationVelocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
+    double rotationVelocity = robot_.chassis_.getVelocityCalculated().get(CLOCKWISE); // current rotation speed
 
     if (Math.abs(crosshairHeading) < .5) { // considered "on target"  // TODO: Configure. Also consider range.
       robot_.chassis_.setRotation(0);

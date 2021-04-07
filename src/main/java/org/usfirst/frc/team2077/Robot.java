@@ -115,7 +115,7 @@ public class Robot extends TimedRobot {
 	}
 
 	public void setupDriveTrain() {
-		chassis_ = new MecanumChassis(constants_);
+		chassis_ = new MecanumChassis();
 
 		//   These dummy subsystems support separate command ownership of robot motion and rotation.
 		position_ = new SubsystemBase() {

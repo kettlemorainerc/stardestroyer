@@ -53,7 +53,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
 
 //    protected double[] velocitySet_ = {0, 0, 0};
-    protected double[] velocityMeasured_ = {0, 0, 0};
+    protected EnumMap<VelocityDirection, Double> velocityMeasured_;
 
     // Debug flag gets set to true every Nth call to beginUpdate().
     protected int debugFrequency_ = 100; // N
@@ -185,7 +185,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     }
 
     @Override
-    public double[] getVelocityMeasured() {
+    public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
         return getVelocityCalculated();
     }
 
