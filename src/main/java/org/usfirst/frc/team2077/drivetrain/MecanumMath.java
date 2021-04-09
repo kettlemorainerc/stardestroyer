@@ -140,13 +140,14 @@ public final class MecanumMath {
 		NORTH_EAST,
 		SOUTH_EAST,
 		SOUTH_WEST,
-		NORTH_WEST
+		NORTH_WEST,
 	}
 
 	// TODO: name this better?
 	public enum VelocityDirection {
 		NORTH,
-		EAST, CLOCKWISE
+		EAST,
+		CLOCKWISE,
 	}
 
 	/**
