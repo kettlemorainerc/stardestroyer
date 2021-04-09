@@ -56,20 +56,13 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     private final double kD = 0.0;
 
     
-    private static double[] a_ = {0.1, 0.6, 1.3, 1.9, 2.6}; // measured calibration points
-    private static double[] v_ = {3000, 4000, 5000, 6000}; // measured calibration points
+    private static double[] a_ = {2.2, 4}; // measured calibration points
+    private static double[] v_ = {2550, 2690, 3000, 5400}; // measured calibration points
     private static double[][] rangeAV_ = { // ranges in feet with pseudo-index values into a_ and v_
-        {7.5,  5,   4},
-        {8.5,  5,   4},
-        {9,    4,   3.5},
-        {9.5,  3,   3},
-        {12,   2,   3},
-        {15,   1.5, 2},
-        {17.5, 1,   2},
-        {20,   1.5, 2},
-        {28,   2,   3},
-        {32,   2,   4},
-        {38,   5,   4}
+            {55, 1, 3},
+            {115, 0, 0 },
+            {175, 0, 1},
+            {240, 0, 2}
     };
     private static double[] angle_; // enlarged table with n-1 interpolated values
     private static double[] velocity_; // enlarged table with n-1 interpolated values
@@ -95,22 +88,24 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         }
     }
 
-    
+
     private static double[] getAngleVelocity(double range) {
-        if (range < range_[0] || range >= range_[range_.length-1]) {
-            return null;
+//        if (range < range_[0] || range >= range_[range_.length-1]) {
+//          return null;
+//        }
+//        double[] r = {range_[ravIndex[0]], range_[ravIndex[1]]};
+//        double[] a = {angle_[(int)Math.round((rangeAV_[ravIndex[0]][1]-1.)*2.)], angle_[(int)Math.round((rangeAV_[ravIndex[1]][1]-1.)*2.)]};
+//        double[] v = {velocity_[(int)Math.round((rangeAV_[ravIndex[0]][2]-1.)*2.)], velocity_[(int)Math.round((rangeAV_[ravIndex[1]][2]-1.)*2.)]};
+//        double interpolation = (range - r[0]) / (r[1] - r[0]);
+//
+//        double angle = a[0] + interpolation * (a[1] - a[0]);
+//        double velocity = v[0] + interpolation * (v[1] - v[0]);
+        if (range <= 60) {
+            return new double[] {4, 5400};
         }
-        int i = 0;
-        while (range > range_[i]) i++;
-        int[] ravIndex = {i-1, i};
-        double[] r = {range_[ravIndex[0]], range_[ravIndex[1]]};
-        double[] a = {angle_[(int)Math.round((rangeAV_[ravIndex[0]][1]-1.)*2.)], angle_[(int)Math.round((rangeAV_[ravIndex[1]][1]-1.)*2.)]};
-        double[] v = {velocity_[(int)Math.round((rangeAV_[ravIndex[0]][2]-1.)*2.)], velocity_[(int)Math.round((rangeAV_[ravIndex[1]][2]-1.)*2.)]};
-        double interpolation = (range - r[0]) / (r[1] - r[0]);
-        
-        double angle = a[0] + interpolation * (a[1] - a[0]);
-        double velocity = v[0] + interpolation * (v[1] - v[0]);
-        return new double[] {angle, velocity};
+        double slope = (2675 - 2550) / (175 - 115);
+        double iVelocity = slope * range + 2380;
+        return new double[] {2.2, iVelocity};
     }
 
     /**
@@ -152,7 +147,6 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
         // stop if position reading is outside normal range due to disconnected wires, etc
         double currentScrewPosition = getScrewPosition();
-        SmartDashboard.putNumber("hi buddy", currentScrewPosition);
         if ((currentScrewPosition < safeVoltageRange_[0]) || (currentScrewPosition > safeVoltageRange_[1])) {
             screw_.set(ControlMode.PercentOutput, 0);
             return;
@@ -185,9 +179,6 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public boolean setRangeUpper(double range) {
 
         double[] av = getAngleVelocity(range);
-        if (av == null) {
-            return false;
-        }
 
         setScrewPosition(av[0]);
         setLauncherRPM(av[1]);
@@ -211,8 +202,8 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public boolean isReady() {
         // TODO: isRunning() && isLoaded() && both motors within tolerance of target && angle withing tolerance of target voltage
         double wantedMotorSpeed = launcherRPM_;
-        //return Math.abs(wantedMotorSpeed - getLauncherSpeed()[0]) < 50 && Math.abs(wantedMotorSpeed - getLauncherSpeed()[1]) < 50 && screwPosition_ - getScrewPosition() == 0;
-        return Math.abs(screwPosition_ - getScrewPosition()) <= 0.1;
+        return Math.abs(wantedMotorSpeed - getLauncherSpeed()[0]) < 50 && Math.abs(wantedMotorSpeed - getLauncherSpeed()[1]) < 50 && screwPosition_ - getScrewPosition() == 0;
+//        return Math.abs(screwPosition_ - getScrewPosition()) <= 0.1;
     }
 
     @Override
@@ -240,7 +231,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         setRangeUpper(robot_.crosshairs_.getRange());
         setRunning(true);
         if (isReady()) {
-            runLoader(1.0);
+            runLoader(0.6);
             
         }
     }

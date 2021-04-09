@@ -161,6 +161,7 @@ public class Robot extends TimedRobot {
 			SparkNeoDriveModule hi = (SparkNeoDriveModule) module;
 			SmartDashboard.putNumber(hi.getPosition().name() + " RPM", hi.getRPM());
 		}
+		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());
 	}
 
 	// The robot and the drive station exchange data packets around 50x/second so long

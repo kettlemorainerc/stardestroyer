@@ -6,6 +6,7 @@
 package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -102,17 +103,21 @@ public class DriveStation {
 
 
         primaryTrigger_.whileHeld(new RunGrabber(0.6));
-        // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
+        primary4_.whenPressed(new resetCrosshairs());
+        testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
 
+        secondary6_.whileHeld(new RunGrabber(.3));
 
         secondary2_.whileHeld(new SteerToCrosshairs());
+        secondary2_.whileHeld(new RangeToCrosshairs());
         //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
         secondary4_.whenPressed(new LoadLauncherBack());
+        secondary5_.whileHeld(new launch());
         secondaryTrigger_.whileHeld(new LoadLauncher());
-        secondary7_.whenPressed(new LauncherSpinTest(-100));
-        secondary6_.whenPressed(new LauncherSpinTest(100));
-        secondary8_.whenPressed(new LauncherSpinTest(-10));
-        secondary9_.whenPressed(new LauncherSpinTest(10));
+//        secondary7_.whenPressed(new LauncherSpinTest(-100));
+//        secondary6_.whenPressed(new LauncherSpinTest(100));
+//        secondary8_.whenPressed(new LauncherSpinTest(-10));
+//        secondary9_.whenPressed(new LauncherSpinTest(10));
         secondary10_.whileHeld(new LauncherScrewTest(false));
         secondary11_.whileHeld(new LauncherScrewTest(true));
 

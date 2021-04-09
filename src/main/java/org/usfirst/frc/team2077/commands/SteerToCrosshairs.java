@@ -11,14 +11,16 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class SteerToCrosshairs extends CommandBase {
 
-  private double fast_;
-  private double slow_;
-  private double deceleration_;
+  private final double maxRPMFine;
+  private final double maxRPMCoarse;
+  private final double deceleration_;
+  private final double angleToBeginSlowingDown;
   
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
-    fast_ = robot_.chassis_.getMaximumVelocity()[2];
-    slow_ = robot_.chassis_.getMinimumVelocity()[2];
+    maxRPMFine = 800;
+    maxRPMCoarse = 3000;
+    angleToBeginSlowingDown = 60;
     deceleration_ = robot_.chassis_.getAccelerationLimits()[2][1];
   }
 
@@ -41,10 +43,11 @@ public class SteerToCrosshairs extends CommandBase {
       System.out.println("**************** " + velocity);
       return;
     }
-    
-    double stopRotation = .5 * velocity*velocity / deceleration_; // stopping distance at deceleration limit from physics
-    double pad = Math.max(stopRotation*.1, Math.abs(velocity)*.08); // overestimate stopping distance by 5% or distance traveled in two .02 second control cycles
-    robot_.chassis_.setRotation((Math.abs(azimuth)>(stopRotation+pad) ? fast_ : slow_) * Math.signum(azimuth)); // start slowing a bit early, creep to end
+    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / (45 - Math.abs(azimuth));
+    robot_.chassis_.setRotation(speed * Math.signum(azimuth));
+
+    //double speed = fast_ / (45 - Math.abs(azimuth));
+    //robot_.chassis_.setRotation(Math.abs(azimuth) >= 45 ? fast_ * Math.signum(azimuth) : speed * Math.signum(azimuth));
   }
 
   @Override

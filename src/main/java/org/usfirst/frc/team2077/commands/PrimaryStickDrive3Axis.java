@@ -58,8 +58,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 
 		// TODO: Who handles rotation updates if another command owns robot_position_?
 		// TODO: Check joystick/drive capabilities and merge w/2-axis.
-		double north = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getY(), .025, 1);
-		double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .01, 1);
+		double north = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getY(), .2, 1);
+		double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .2, 1);
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 //		 double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
@@ -69,8 +69,9 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			//System.out.println(" STICK(3): " + north + " \t" + east);
 			robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
 		} else { // we control heading
-			// double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
+//			 double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .025, 1);
+//			y(robot_.driveStation_.Flight.getRawAxis(4), .2, 1);
 			// System.out.println(" STICK(2): " + north + " \t" + east + " \t" + clockwise);
 			robot_.chassis_.setVelocity01(
 				north * speedLimit * throttle,
