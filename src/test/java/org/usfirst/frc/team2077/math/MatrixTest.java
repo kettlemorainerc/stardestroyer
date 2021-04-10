@@ -2,6 +2,8 @@ package org.usfirst.frc.team2077.math;
 
 import org.junit.*;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class MatrixTest {
@@ -22,22 +24,56 @@ public class MatrixTest {
 	}
 
 	@Test
-	public void matrices_are_equal_when_their_internal_arrays_are() {
+	public void transpose_flips_x_and_y() {
 		Matrix a = new Matrix(new double[][] {
-			{1, 2},
-			{3, 4}
+			{1, 2, 3},
+			{4, 5, 6}
 		});
 
 		Matrix b = new Matrix(new double[][] {
-			{1, 2},
-			{3, 4}
+			{1, 4},
+			{2, 5},
+			{3, 6}
 		});
 
-		assertEquals(a, b);
-		Matrix bTranspose = b.transpose();
-		Assert.assertNotEquals(a, bTranspose);
+		assertNotEquals(a, b);
+		assertEquals(a, b.transpose());
 		Matrix aTranspose = a.transpose();
-		assertEquals(aTranspose, bTranspose);
+		assertEquals(aTranspose, b);
+	}
+
+	@Test
+	public void matrices_are_equal_when_their_internal_arrays_are() {
+		Matrix a = new Matrix(new double[][] {
+			{1, 2, 3},
+			{4, 5, 6}
+		});
+
+		Matrix b = new Matrix(new double[][] {
+			{1, 4},
+			{2, 5},
+			{3, 6}
+		});
+
+		Matrix c = new Matrix(new double[][] {
+			{1, 2, 3},
+			{4, 5, 6}
+		});
+
+		assertNotEquals(a, b);
+		assertEquals(a, c);
+		assertEquals(b, new Matrix(b.matrix));
+	}
+
+	@Test
+	public void get_matrix_provides_equivalent_matrix() {
+		double[][] example = {
+			{1, 2, 3},
+			{4, 5, 6}
+		};
+		Matrix matrix = new Matrix(example);
+
+		assertTrue(Arrays.deepEquals(example, matrix.getMatrix()));
 	}
 
 	@Test
@@ -70,6 +106,7 @@ public class MatrixTest {
 			{20, 24}
 		});
 
+		System.out.println(aBy2Result);
 		assertEquals(aByBResult, a.multiply(b));
 		assertEquals(bByAResult, b.multiply(a));
 		assertEquals(aBy2Result, a.multiply(2d));

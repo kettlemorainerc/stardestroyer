@@ -1,17 +1,14 @@
 package org.usfirst.frc.team2077.math;
 
-import java.util.*;
+import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.*;
-
-import static java.util.Set.*;
 
 public class Matrix {
 	double[][] matrix;
 
 	public Matrix(int height, int width) {
 		/* 3 x 1 matrix
-		double[1][3] = {
+		double[3][1] = {
 		 {0},
 		 {0},
 		 {0}
@@ -20,9 +17,9 @@ public class Matrix {
 		this(new double[height][width]);
 	}
 
-	private Matrix(Matrix toTranspose) {
+	protected Matrix(Matrix toTranspose) {
 		double[][] original = toTranspose.matrix;
-		double[][] transposedMatrix = new double[original.length][original[0].length];
+		double[][] transposedMatrix = new double[original[0].length][original.length];
 
 		for(int x = 0; x < original.length; x++) {
 			for(int y = 0; y < transposedMatrix.length; y++) {
@@ -76,19 +73,26 @@ public class Matrix {
 		matrix[y][x] = value;
 	}
 
-	public double get(Enum<? extends Enum> x, Enum<? extends Enum> y) {
-		return get(x.ordinal(), y.ordinal());
-	}
-
-	public void set(Enum<? extends Enum> x, Enum<? extends Enum> y, double value) {
-		set(x.ordinal(), y.ordinal(), value);
-	}
-
 	public void calculate(int x, int y, Function<Double, Double> calculate) {
 		double value;
 		value = get(x, y);
 
 		set(x, y, calculate.apply(value));
+	}
+
+	protected <T extends Matrix> T multiply(double[][] by, Function<double[][], T> constructor) {
+		double[][] result = new double[getHeight()][by[0].length];
+
+		for (int x = 0; x < result[0].length; x++) {
+			for(int y = 0; y < result.length; y++) {
+				for(int col = 0; col < matrix[0].length; col++) {
+					double toAdd = get(col, y) * by[col][x];
+					result[y][x] = result[y][x] + toAdd;
+				}
+			}
+		}
+
+		return constructor.apply(result);
 	}
 
 	/**
@@ -97,18 +101,7 @@ public class Matrix {
 	 * @return a this.getHeight X by.getWidth matrix
 	 */
 	public Matrix multiply(Matrix by) {
-		Matrix result = new Matrix(getHeight(), by.getWidth());
-
-		for (int x = 0; x < result.getWidth(); x++) {
-			for(int y = 0; y < result.getHeight(); y++) {
-				for(int col = 0; col < getWidth(); col++) {
-					double toAdd = get(col, y) * by.get(x, col);
-					result.calculate(x, y, cur -> cur + toAdd);
-				}
-			}
-		}
-
-		return result;
+		return multiply(by.matrix, Matrix::new);
 	}
 
 	public Matrix multiply(double by) {
@@ -124,10 +117,10 @@ public class Matrix {
 	}
 
 	public double[][] getMatrix() {
-		double[][] result = new double[getWidth()][getHeight()];
+		double[][] result = new double[getHeight()][getWidth()];
 
 		for(int x = 0; x < getWidth(); x++)
-			for(int y = 0; y < getHeight(); y++) result[x][y] = get(x, y);
+			for(int y = 0; y < getHeight(); y++) result[y][x] = get(x, y);
 
 		return result;
 	}
@@ -150,7 +143,7 @@ public class Matrix {
 		Object[] formatArgs = new Object[getHeight() * getWidth()];
 		int longest = "0.00".length();
 		StringBuilder output = new StringBuilder();
-		String formatToLengthFormat = "%%%1$d.2f"; // %1$d will be the initial conversion for lengths
+		String formatToLengthFormat = "%%%1$ds"; // %1$d will be the initial conversion for lengths which should produce %<longest>s
 
 		for(int y = 0; y < getHeight(); y++) {
 			output.append("| ");
@@ -159,8 +152,9 @@ public class Matrix {
 				output.append(formatToLengthFormat);
 
 				// the current longest vs the current value to 2 decimal places
-				longest = Math.max(longest, String.format("%.2f", get(x, y)).length());
-				formatArgs[(getWidth() * y) + x] = get(x, y);
+				String value = String.format("%.2f", get(x, y));
+				longest = Math.max(longest, value.length());
+				formatArgs[(getWidth() * y) + x] = value;
 			}
 			output.append(" |%%n");
 		}
@@ -175,7 +169,7 @@ public class Matrix {
 		return line.toString() + '\n' + String.format(format, formatArgs) + line;
 	}
 
-	public Matrix inverse3x3() {
+	protected  <T extends Matrix> T inverse3x3(Function<double[][], T> constructor) {
 		double[][] m = matrix;
 		double determinate
 			= m[0][0] * m[1][1] * m[2][2]
@@ -208,6 +202,11 @@ public class Matrix {
 				}
 			}
 		}
-		return new Matrix(inverse);
+
+		return constructor.apply(inverse);
+	}
+
+	public Matrix inverse3x3() {
+		return inverse3x3(Matrix::new);
 	}
 }

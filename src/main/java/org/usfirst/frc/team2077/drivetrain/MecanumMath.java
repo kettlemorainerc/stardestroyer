@@ -2,6 +2,8 @@ package org.usfirst.frc.team2077.drivetrain;
 
 // I believe the entire purpose of this class is to find [V] or [&Omega;]. AKA the velocity of the actual bot or the velocity of each individual wheel -- David
 
+import org.usfirst.frc.team2077.math.EnumMatrix;
+
 import java.util.*;
 
 /***
@@ -110,9 +112,9 @@ import java.util.*;
  *  where most combinations of wheel motions are inconsistent. Inconsistent wheel motions in practice mean
  *  wheel slippage, motor stalling, and generally erratic behavior, the more inconsistent the worse.
  *  This forward calculation produces a least-squares best fit.</p></dd>
- *  <dt>{@link #createInverseMatrix(double, double)}, {@link #createInverseMatrix(double, double, double[])}</dt>
+ *  <dt>{@link #createInverseMatrix(double, double, double[])}</dt>
  *  <dd><p style="margin-left: 40px">Convenience methods for initializing the inverse kinematic matrix <b>[R]</b>.</p></dd>
- *  <dt>{@link #createForwardMatrix(double, double)}</dt>
+ *  <dt>{@link #createForwardMatrix(EnumMatrix)}</dt>
  *  <dd><p style="margin-left: 40px">Convenience method for initializing the forward kinematic matrix <b>[F]</b>.</p></dd>
  * </dl>
  * <p>
@@ -158,7 +160,7 @@ public final class MecanumMath {
 	 * @param rotationCenter {N,E} coordinates of the robot's center of rotation relative to its geometric center.
 	 * @return A 4x3 inverse kinematic matrix <b>[R]</b> for use by {@link #inverse}.
 	 */
-	public static double[][] createInverseMatrix(double length, double width, double[] rotationCenter) {
+	public static EnumMatrix<AssemblyPosition, VelocityDirection> createInverseMatrix(double length, double width, double[] rotationCenter) {
 
 		double[][] xy = {
 			{length / 2 - rotationCenter[0], width / 2 - rotationCenter[1]},
@@ -166,52 +168,12 @@ public final class MecanumMath {
 			{-length / 2 - rotationCenter[0], -width / 2 - rotationCenter[1]},
 			{length / 2 - rotationCenter[0], -width / 2 - rotationCenter[1]}
 		};
-		return new double[][]{
+		return new EnumMatrix<>(new double[][]{
 			{1, -1, -xy[0][0] - xy[0][1]},
 			{1, 1, xy[1][0] - xy[1][1]},
 			{1, -1, -xy[2][0] - xy[2][1]},
 			{1, 1, xy[3][0] - xy[3][1]}
-		};
-	}
-
-	/**
-	 * Construct the inverse matrix <b>[R]</b> for a rectangular robot whose center of rotation is its geometric center.
-	 * This is a convenience function wrapping {@link #createInverseMatrix(double, double, double[])}.
-	 *
-	 * @param length Distance between wheel contact points in the N/S direction, in any length unit.
-	 * @param width  Distance between wheel contact points in the E/W direction, in the same unit.
-	 * @return A 4x3 inverse kinematic matrix <b>[R]</b> for use by {@link #inverse}.
-	 */
-	public static double[][] createInverseMatrix(double length, double width) {
-		//return createInverseMatrix(length, width, new double[] {0,0});
-
-		//should give same as above
-		double K = Math.abs(length / 2) + Math.abs(width / 2);
-		return new double[][]{
-			{1, -1, -K},
-			{1, 1, -K},
-			{1, -1, K},
-			{1, 1, K}
-		};
-
-	}
-
-
-	/**
-	 * Construct the forward matrix <b>[F]</b> for a given inverse matrix <b>[R]</b>.
-	 *
-	 * @param length Distance between wheel contact points in the N/S direction, in any length unit.
-	 * @param width  Distance between wheel contact points in the E/W direction, in the same unit.
-	 * @return A 3x4 forward kinematic matrix <b>[F]</b> for use by {@link #forward}.
-	 */
-	public static double[][] createForwardMatrix(double length, double width) {
-
-		double K = length / 2 + width / 2;
-		return new double[][]{
-			{1 / 4., 1 / 4., 1 / 4., 1 / 4.},
-			{-1 / 4., 1 / 4., -1 / 4., 1 / 4.},
-			{-1 / (4 * K), -1 / (4 * K), 1 / (4 * K), 1 / (4 * K)}
-		};
+		});
 	}
 
 	/**
@@ -222,17 +184,24 @@ public final class MecanumMath {
 	 * @param inverseKinematicMatrix <b>[R]</b> - Inverse kinematic matrix 4x3.
 	 * @return <b>[F]</b> - 3x4 forward kinematic matrix for use by {@link #forward}.
 	 */
-	public static double[][] createForwardMatrix(double[][] inverseKinematicMatrix) {
+	public static EnumMatrix<VelocityDirection, AssemblyPosition> createForwardMatrix(EnumMatrix<AssemblyPosition, VelocityDirection> inverseKinematicMatrix) {
 
-		double[][] rT = transpose(inverseKinematicMatrix); // 3x4
-		double[][] f = multiply(invert3x3(multiply(rT, inverseKinematicMatrix)), rT);
-		System.out.println("INVERSE" + toString(inverseKinematicMatrix));
-		System.out.println("FORWARD" + (massage(f)));
-		return f;
+		EnumMatrix<VelocityDirection, AssemblyPosition> transposedInverse = inverseKinematicMatrix.enumTranspose();
+		EnumMatrix<VelocityDirection, AssemblyPosition> forwardMatrix = transposedInverse.enumMultiply(inverseKinematicMatrix)
+																						 .enumInvert3x3()
+																						 .enumMultiply(transposedInverse);
+
+		return forwardMatrix;
+
+//		double[][] rT = transpose(inverseKinematicMatrix);
+//		double[][] f = multiply(invert3x3(multiply(rT, inverseKinematicMatrix)), rT);
+
+
+//		return f;
 	}
 
-	private final double[][] reverseMatrix_;
-	private final double[][] forwardMatrix_;
+	private final EnumMatrix<AssemblyPosition, VelocityDirection> reverseMatrix_;
+	private final EnumMatrix<VelocityDirection, AssemblyPosition> forwardMatrix_;
 	private final double length_;
 	private final double width_;
 	private final double wheelRadius_;
@@ -355,9 +324,10 @@ public final class MecanumMath {
 	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
 	private EnumMap<AssemblyPosition, Double> inverse(EnumMap<VelocityDirection, Double> translationMatrix, double[] rotationCenter) {
-		double[][] inverseKineticMatrix = rotationCenter[0] == 0 && rotationCenter[1] == 0 ?
-			reverseMatrix_ :
-			createInverseMatrix(length_, width_, rotationCenter);
+		EnumMatrix<AssemblyPosition, VelocityDirection> inverseKineticMatrix =
+			rotationCenter[0] == 0 && rotationCenter[1] == 0 ?
+				reverseMatrix_ :
+				createInverseMatrix(length_, width_, rotationCenter);
 
 		EnumMap<AssemblyPosition, Double> wheelSpeedVector = new EnumMap<>(AssemblyPosition.class);
 		for(AssemblyPosition position : AssemblyPosition.values()) {
@@ -365,9 +335,10 @@ public final class MecanumMath {
 
 			for(VelocityDirection direction : VelocityDirection.values()) {
 				wheelSpeedVector.compute(position, (key, val) -> (
-					val + (fromUserRobotSpeed(translationMatrix.get(direction)) *
-					       inverseKineticMatrix[position.ordinal()][direction.ordinal()]) / wheelRadius_
-					));
+					val + (
+						fromUserRobotSpeed(translationMatrix.get(direction)) * inverseKineticMatrix.get(direction, position)
+				  	) / wheelRadius_
+				));
 			}
 
 			wheelSpeedVector.compute(position, (key, val) -> toUserWheelSpeed(val));
@@ -376,14 +347,14 @@ public final class MecanumMath {
 		return wheelSpeedVector;
 	}
 
-	/***
-	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
-	 * Where <b>[&Omega;]</b> has internal inconsistencies a best-fit value is returned.
-	 * @param motionVector A wheel angular motion vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in radians.
-	 * @param kinematicMatrix A 3x4 forward kinematic matrix <b>[F]</b>. See {@link #createForwardMatrix}.
-	 * @param wheelRadius Wheel radius, in the length units used to construct <b>[F]</b>.
-	 * @return Th <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
-	 */
+//	/***
+//	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
+//	 * Where <b>[&Omega;]</b> has internal inconsistencies a best-fit value is returned.
+//	 * @param motionVector A wheel angular motion vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in radians.
+//	 * @param kinematicMatrix A 3x4 forward kinematic matrix <b>[F]</b>. See {@link #createForwardMatrix}.
+//	 * @param wheelRadius Wheel radius, in the length units used to construct <b>[F]</b>.
+//	 * @return Th <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
+//	 */
 	/***
 	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
 	 * This method wraps the static {@link #forward(EnumMap)} method, passing the internal
@@ -400,7 +371,7 @@ public final class MecanumMath {
 			for(AssemblyPosition position : AssemblyPosition.values()) {
 				translation.compute(direction, (k, val) -> (
 					val + (fromUserWheelSpeed(wheelSpeeds.get(position)) *
-						   forwardMatrix_[direction.ordinal()][position.ordinal()] *
+						   forwardMatrix_.get(position, direction) *
 						   wheelRadius_)
 				));
 			}
