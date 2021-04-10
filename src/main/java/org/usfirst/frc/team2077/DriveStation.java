@@ -16,7 +16,7 @@ import org.usfirst.frc.team2077.subsystems.Crosshairs;
 public class DriveStation {
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
-//    public final Joystick testingStick_ = new Joystick(5);.
+    public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
 
     public DriveStation(Subsystem position_,
