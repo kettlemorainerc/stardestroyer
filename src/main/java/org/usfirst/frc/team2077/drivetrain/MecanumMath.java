@@ -1,7 +1,5 @@
 package org.usfirst.frc.team2077.drivetrain;
 
-// I believe the entire purpose of this class is to find [V] or [&Omega;]. AKA the velocity of the actual bot or the velocity of each individual wheel -- David
-
 import org.usfirst.frc.team2077.math.EnumMatrix;
 
 import java.util.*;
@@ -192,12 +190,6 @@ public final class MecanumMath {
 																						 .enumMultiply(transposedInverse);
 
 		return forwardMatrix;
-
-//		double[][] rT = transpose(inverseKinematicMatrix);
-//		double[][] f = multiply(invert3x3(multiply(rT, inverseKinematicMatrix)), rT);
-
-
-//		return f;
 	}
 
 	private final EnumMatrix<AssemblyPosition, VelocityDirection> reverseMatrix_;
@@ -306,15 +298,6 @@ public final class MecanumMath {
 		return inverse(translationMatrix, new double[]{0, 0});
 	}
 
-
-//	/***
-//	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b>.
-//	 * @param motionVector Robot motion vector <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
-//	 * @param inverseKineticMatrix A 4x3 inverse kinematic matrix <b>[R]</b>. See {@link #createInverseMatrix}.
-//	 * @param wheelRadius wheel radius, in the length units used to construct <b>[R]</b>.
-//	 * @return The wheel angular velocity vector <b>[&Omega;]</b>: {NE, SE, SW, NW} in radians.
-//	 */
-//	 * This method wraps the static {@link #inverse(double[], double[][], double)} method, passing the internal
 	/***
 	 * Solve the inverse kinematic equation <b>[&Omega;] = (1/r)[R][V]</b> for rotation about an arbitrary point.
 	 * <b>[R]</b> matrix and wheel radius initialized in the constructor, and converting input and output
@@ -347,14 +330,6 @@ public final class MecanumMath {
 		return wheelSpeedVector;
 	}
 
-//	/***
-//	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
-//	 * Where <b>[&Omega;]</b> has internal inconsistencies a best-fit value is returned.
-//	 * @param motionVector A wheel angular motion vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in radians.
-//	 * @param kinematicMatrix A 3x4 forward kinematic matrix <b>[F]</b>. See {@link #createForwardMatrix}.
-//	 * @param wheelRadius Wheel radius, in the length units used to construct <b>[F]</b>.
-//	 * @return Th <b>[V]</b>: [north/south translation (distance), east/west translation, rotation (radians)].
-//	 */
 	/***
 	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
 	 * This method wraps the static {@link #forward(EnumMap)} method, passing the internal
@@ -409,19 +384,6 @@ public final class MecanumMath {
 	}
 
 	/***
-	 * Convert a robot rotation speed from user units to radians
-	 * by dividing the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
-	 * @param userRotationSpeed A robot rotational velocity in user units
-	 * as input to {@link #inverse(EnumMap)}.
-	 * @return Rotational velocity (radians)
-	 * as expected by {@link #inverse(EnumMap, double[])}.
-	 */
-	private double fromUserRotationSpeed(double userRotationSpeed) {
-		return userRotationSpeed / rotationSpeedFactor_;
-	}
-
-	/***
 	 * Convert a wheel rotation speed from radians to user units
 	 * by multiplying the input value by the conversion factor passed to the
 	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
@@ -431,219 +393,5 @@ public final class MecanumMath {
 	 */
 	private double toUserWheelSpeed(double radiansPerSecond) {
 		return radiansPerSecond * wheelSpeedFactor_;
-	}
-
-	/***
-	 * Convert a robot translation speed from distance
-	 * (where distance is in the length/width/radius units passed to the constructor) to user units
-	 * by multiplying the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
-	 * @param unitsPerSecond A N/S or E/W robot translation velocity component in in distance
-	 * as returned by {@link #forward(EnumMap)}.
-	 * @return Speed in user units as returned by {@link #forward(EnumMap)}.
-	 */
-	private double toUserRobotSpeed(double unitsPerSecond) {
-		return unitsPerSecond * robotSpeedFactor_;
-	}
-
-	/***
-	 * Convert a robot rotation speed from radians to user units
-	 * by multiplying the input value by the conversion factor passed to the
-	 * constructor {@link #MecanumMath(double, double, double, double, double, double, double[])}.
-	 * @param radiansPerSecond A robot rotational velocity in radians
-	 * as returned by {@link #forward(EnumMap)}.
-	 * @return Speed in user units as returned by {@link #forward(EnumMap)}.
-	 */
-	private double toUserRotationSpeed(double radiansPerSecond) {
-		return radiansPerSecond * rotationSpeedFactor_;
-	}
-
-	/**
-	 * Compute robot-relative <b>[V]</b> ({north/south translation, east/west translation, rotation}) motion
-	 * ncessary to reach location <b>[D]</b> ({north/south position, east/west position, heading})
-	 * from initial location {0, 0, 0}, where translation and rotation speeds are constant or proportional
-	 * throughout.
-	 *
-	 * @param userD <b>[D]</b>: total displacement {north/south translation, east/west translation, heading}, in user units.
-	 * @return [3] robot-relative motion {north/south translation, east/west translation, rotation} in user units.
-	 */
-	public final double[] travel(double[] userD) {
-
-		double[] d = {fromUserRobotSpeed(userD[0]), fromUserRobotSpeed(userD[1]), fromUserRotationSpeed(userD[2])};
-
-		double headingChange = d[2];
-		while(headingChange < -Math.PI) headingChange += 2 * Math.PI;
-		while(headingChange > Math.PI) headingChange -= 2 * Math.PI;
-
-		double displacementDistance = Math.sqrt(d[0] * d[0] + d[1] * d[1]);
-		double displacementAngle = Math.atan2(d[1], d[0]);
-		// portion of displacement angle due to curvature
-		double curveAngle = Math.atan2(Math.sin(headingChange), 1 - Math.cos(headingChange));
-		double travelDistance = headingChange == 0 ?
-			displacementDistance :
-			(displacementDistance * headingChange / (2 * Math.sin(headingChange / 2)));
-		double travelAngle = displacementAngle - curveAngle;
-		double travelN = travelDistance * Math.cos(travelAngle);
-		double travelE = travelDistance * Math.sin(travelAngle);
-
-		return new double[]{toUserRobotSpeed(travelN), toUserRobotSpeed(travelE), toUserRotationSpeed(headingChange)};
-	}
-
-
-	/***
-	 * Compute robot-relative <b>[D]</b>  ({north/south position, east/west position, heading}) displacement
-	 * for a motion <b>[V]</b> ({north/south translation, east/west translation, rotation})
-	 * from initial location {0, 0, 0}, where translation and rotation speeds are constant or proportional
-	 * throughout.
-	 * @param translationVector <b>[V]</b>: {north/south translation, east/west translation, rotation}, in user units.
-	 * @return [3] robot displacement {north/east translation, heading} in user units.
-	 */
-	public final double[] displacement(double[] translationVector) {
-
-		double[] v = {
-			fromUserRobotSpeed(translationVector[0]),
-			fromUserRobotSpeed(translationVector[1]),
-			fromUserRotationSpeed(translationVector[2])
-		};
-
-		double headingChange = v[2];
-		while(headingChange < -Math.PI) headingChange += 2 * Math.PI;
-		while(headingChange > Math.PI) headingChange -= 2 * Math.PI;
-
-		double travelDistance = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-		double travelAngle = Math.atan2(v[1], v[0]);
-		// portion of displacement angle due to curvature
-		double curveAngle = Math.atan2(Math.sin(headingChange), 1 - Math.cos(headingChange));
-		double displacementDistance = headingChange == 0 ?
-			travelDistance :
-			(travelDistance * (2 * Math.sin(headingChange / 2)) / headingChange);
-		double displacementAngle = curveAngle + travelAngle;
-		double displacementN = displacementDistance * Math.cos(displacementAngle);
-		double displacementE = displacementDistance * Math.sin(displacementAngle);
-
-		return new double[]{
-			toUserRobotSpeed(displacementN),
-			toUserRobotSpeed(displacementE),
-			toUserRotationSpeed(headingChange)
-		};
-	}
-
-
-	private static String toString(double[][] m) {
-		StringBuffer sb = new StringBuffer();
-		int rows = m.length;
-		int cols = m[0].length;
-		sb.append("\n{ ");
-		for(int r = 0; r < rows; r++) {
-			sb.append("\n{ ");
-			for(int c = 0; c < cols; c++) {
-				sb.append(roundd(m[r][c]));
-				sb.append("\t");
-			}
-			sb.append("}");
-		}
-		sb.append("\n}");
-		return sb.toString();
-	}
-
-	private static double[][] massage(double[][] m) {
-		int rows = m.length;
-		int cols = m[0].length;
-		double[][] x = new double[rows][cols];
-		for(int r = 0; r < rows; r++) {
-			for(int c = 0; c < cols; c++) {
-				x[r][c] = 1 / m[r][c] / 4;
-			}
-		}
-		return x;
-	}
-
-
-	/**
-	 * Matrix inversion (3x3 only).
-	 *
-	 * @param m 3x3 matrix <b>[M]</b>.
-	 * @return <b>[M]</b><sup>-1</sup>.
-	 */
-	private static double[][] invert3x3(double[][] m) {
-		double determinate
-			= m[0][0] * m[1][1] * m[2][2]
-			  + m[0][1] * m[1][2] * m[2][0]
-			  + m[0][2] * m[1][0] * m[2][1]
-			  - m[2][0] * m[1][1] * m[0][2]
-			  - m[2][1] * m[1][2] * m[0][0]
-			  - m[2][2] * m[1][0] * m[0][1];
-		double[][] inverse = {
-			{
-				m[1][1] * m[2][2] - m[1][2] * m[2][1],
-				m[0][2] * m[2][1] - m[0][1] * m[2][2],
-				m[0][1] * m[1][2] - m[0][2] * m[1][1]
-			},
-			{
-				m[1][2] * m[2][0] - m[1][0] * m[2][2],
-				m[0][0] * m[2][2] - m[0][2] * m[2][0],
-				m[0][2] * m[1][0] - m[0][0] * m[1][2]
-			},
-			{
-				m[1][0] * m[2][1] - m[1][1] * m[2][0],
-				m[0][1] * m[2][0] - m[0][0] * m[2][1],
-				m[0][0] * m[1][1] - m[0][1] * m[1][0]
-			}
-		};
-		if(determinate != 0) {
-			for(int i = 0; i < 3; i++) {
-				for(int j = 0; j < 3; j++) {
-					inverse[i][j] /= determinate;
-				}
-			}
-		}
-		return inverse;
-	}
-
-
-	/**
-	 * Matrix transposition.
-	 *
-	 * @param m Matrix <b>[M]</b>.
-	 * @return <b>[M]</b>'.
-	 */
-	private static double[][] transpose(double[][] m) {
-		int rows = m[0].length;
-		int cols = m.length;
-		double[][] t = new double[rows][cols];
-		for(int r = 0; r < rows; r++) {
-			for(int c = 0; c < cols; c++) {
-				t[r][c] = m[c][r];
-			}
-		}
-		return t;
-	}
-
-
-	/**
-	 * Matrix multiplication.
-	 *
-	 * @param a Matrix <b>[A]</b>.
-	 * @param b Matrix <b>[B]</b>.
-	 * @return <b>[A]</b>x<b>[B]</b>.
-	 */
-	public static double[][] multiply(double[][] a, double[][] b) {
-		int n = b.length;
-		int rows = a.length;
-		int cols = b[0].length;
-		double[][] p = new double[rows][cols];
-		for(int r = 0; r < rows; r++) {
-			for(int c = 0; c < cols; c++) {
-				for(int i = 0; i < n; i++) {
-					p[r][c] += a[r][i] * b[i][c];
-				}
-			}
-		}
-		return p;
-	}
-
-
-	public static double roundd(double d) {
-		return Math.round(1000. * d) / 1000.;
 	}
 }
