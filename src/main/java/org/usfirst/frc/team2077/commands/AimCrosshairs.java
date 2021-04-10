@@ -15,8 +15,8 @@ public class AimCrosshairs extends CommandBase {
 
   private boolean _corse = false;//(toggable) For WSAD control
   private boolean _WASD = false;//(Set uppon construction) - false (default) is stick mode, true is for WSAD mode
-  private static final boolean _slowSpeed = .5;// the % value from 0-1 of the simulated value from it it was a stick for !core mode
-  private static final boolean _fastSpeed = .97;// the % value from 0-1 of the simulated value from it it was a stick for core mode
+  private static final double _slowSpeed = .5;// the % value from 0-1 of the simulated value from it it was a stick for !core mode
+  private static final double _fastSpeed = .97;// the % value from 0-1 of the simulated value from it it was a stick for core mode
 
   //Mode constructor as orignal - uses stick to drive
   public AimCrosshairs() {
@@ -32,8 +32,8 @@ public class AimCrosshairs extends CommandBase {
 
   @Override
   public void execute() {
-    double x;
-    double y;
+    double x = 0;
+    double y = 0;
     double changeSpeed;//This referes to the speed in which the white line on the vision moves
 
     if(!_WASD){
@@ -44,7 +44,7 @@ public class AimCrosshairs extends CommandBase {
         changeSpeed = _fastSpeed;
       else
         changeSpeed = _slowSpeed;
-
+    
 /*    W : 7     UP Y
       A : 2     Down X
       S : 8     DOWN Y
@@ -63,6 +63,7 @@ public class AimCrosshairs extends CommandBase {
       }else if(robot_.driveStation_.testingStick_.getRawButton(8)){
         x = DriveStation.adjustInputSensitivity(changeSpeed, .2, 2.5);
       }
+      
     }
 
     double[] ar = robot_.crosshairs_.get();

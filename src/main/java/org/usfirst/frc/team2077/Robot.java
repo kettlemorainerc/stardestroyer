@@ -104,7 +104,7 @@ public class Robot extends TimedRobot {
 		microSwitch_ = new MicroSwitch(2);
 
 
-		setupDriveTrain();//@@@
+		setupDriveTrain();
 		
 		robot_.chassis_.setPosition(-180, 0, 0); // TODO: Initialize from Smart Dashboard
 		double[] p = robot_.chassis_.getPosition();
