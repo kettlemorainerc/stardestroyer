@@ -65,7 +65,6 @@ public class Robot extends TimedRobot {
 	public Launcher testLauncher_; // low-level control for testing
 	public Telemetry telemetry_;
 	public TestGrabber tgrabber_;
-	public Subsystem testConfig_;//AJ New
 	// Default commands
 	//    Autonomous selected via drive station dashboard.
 	protected Command autonomous_;
@@ -73,7 +72,7 @@ public class Robot extends TimedRobot {
 	protected Command drive_;
 	//    Continuous update of target range and direction based on robot motion.
 	protected Command track_;
-	//    Operator input of target position relative to robot.
+	//    Operator input of target position relative to robot using the stick.
 	protected Command aim_;
 	//    Continuous update of launcher elevation for target range.
 	protected Command range_;
@@ -104,7 +103,7 @@ public class Robot extends TimedRobot {
 
 
 		setupDriveTrain();
-
+		
 		robot_.chassis_.setPosition(-180, 0, 0); // TODO: Initialize from Smart Dashboard
 		double[] p = robot_.chassis_.getPosition();
 		robot_.crosshairs_.set(Math.atan2(-p[1], -p[0]), Math.sqrt(p[0] * p[0] + p[1] * p[1]));

@@ -29,6 +29,10 @@ public class DriveStation {
         Command track_ = new TrackTarget();
         //    Operator input of target position relative to robot.
         Command aim_ = new AimCrosshairs();
+        Command aimWASD_ = new AimCrosshairs(true);
+
+        JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
+        testing23_.whileHeld(new SteerToCrosshairs());
         // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
 
 
@@ -45,7 +49,6 @@ public class DriveStation {
         JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1);
         primaryTrigger_.whileHeld(new RunGrabber(0.6));
         // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
-
 
 
         JoystickButton secondary2_ = new JoystickButton(secondaryStick_, 2);

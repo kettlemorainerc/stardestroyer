@@ -13,14 +13,49 @@ import org.usfirst.frc.team2077.DriveStation;
 
 public class AimCrosshairs extends CommandBase {
 
+  private boolean fast = false;//(toggable) For WSAD control
+  private boolean useKeyboard;//(Set uppon construction) - false (default) is stick mode, true is for WSAD mode
+  private static final double _slowSpeed = .5;// the % value from 0-1 of the simulated value from it it was a stick for !core mode
+  private static final double _fastSpeed = .97;// the % value from 0-1 of the simulated value from it it was a stick for core mode
+
+  //Mode constructor as orignal - uses stick to drive
   public AimCrosshairs() {
+    this(false);
+  }
+
+  //Mode constructor as settable on construct - uses WASD to drive if true, stick if false
+  public AimCrosshairs(boolean useKeyboard) {
+    this.useKeyboard = useKeyboard;
     addRequirements(robot_.crosshairs_);
   }
 
+
   @Override
   public void execute() {
-    double x = DriveStation.adjustInputSensitivity(robot_.driveStation_.secondaryStick_.getX(), .2, 2.5);
-    double y = DriveStation.adjustInputSensitivity(-robot_.driveStation_.secondaryStick_.getY(), .2, 2.5);
+    double x = 0;
+    double y = 0;
+
+    if(!useKeyboard) {
+      x = DriveStation.adjustInputSensitivity(robot_.driveStation_.secondaryStick_.getX(), .2, 2.5);
+      y = DriveStation.adjustInputSensitivity(-robot_.driveStation_.secondaryStick_.getY(), .2, 2.5);
+    } else {
+      double manualChange = fast ? _fastSpeed : _slowSpeed;
+      final int W = 7, A = 2, S = 8, D = 14, THUMB_TRIGGER = 23;
+
+      if(robot_.driveStation_.testingStick_.getRawButton(W)){
+        y = DriveStation.adjustInputSensitivity(-manualChange, .2, 2.5);
+      }else if(robot_.driveStation_.testingStick_.getRawButton(S)){
+        y = DriveStation.adjustInputSensitivity(manualChange, .2, 2.5);
+      }
+
+      if(robot_.driveStation_.testingStick_.getRawButton(A)){
+        x = DriveStation.adjustInputSensitivity(-manualChange, .2, 2.5);
+      }else if(robot_.driveStation_.testingStick_.getRawButton(D)){
+        x = DriveStation.adjustInputSensitivity(manualChange, .2, 2.5);
+      }
+      
+    }
+
     double[] ar = robot_.crosshairs_.get();
     double azimuth = ar[0];
     double range = ar[1];
