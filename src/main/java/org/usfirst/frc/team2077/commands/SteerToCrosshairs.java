@@ -15,13 +15,15 @@ public class SteerToCrosshairs extends CommandBase {
   private final double maxRPMCoarse;
   private final double deceleration_;
   private final double angleToBeginSlowingDown;
+  private final double deadZoneAngle;
   
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
     maxRPMFine = 800;
     maxRPMCoarse = 3000;
-    angleToBeginSlowingDown = 60;
+    angleToBeginSlowingDown = 45;
     deceleration_ = robot_.chassis_.getAccelerationLimits()[2][1];
+    deadZoneAngle = .7; // TODO: Configure. Also consider range.
   }
 
   @Override
@@ -33,7 +35,7 @@ public class SteerToCrosshairs extends CommandBase {
     double azimuth = robot_.crosshairs_.getAzimuth(); // angle from robot to target
     double velocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
 
-    if (Math.abs(azimuth) < .5) { // TODO: Configure. Also consider range.
+    if (Math.abs(azimuth) < deadZoneAngle) {
       robot_.chassis_.setRotation(0);
       return;
     }
@@ -43,18 +45,16 @@ public class SteerToCrosshairs extends CommandBase {
       System.out.println("**************** " + velocity);
       return;
     }
-    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / (45 - Math.abs(azimuth));
+    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / Math.pow((angleToBeginSlowingDown - Math.abs(azimuth)), 2);
     robot_.chassis_.setRotation(speed * Math.signum(azimuth));
 
     //double speed = fast_ / (45 - Math.abs(azimuth));
     //robot_.chassis_.setRotation(Math.abs(azimuth) >= 45 ? fast_ * Math.signum(azimuth) : speed * Math.signum(azimuth));
   }
-
   @Override
   public void end(boolean interrupted) {
     robot_.chassis_.setRotation(0);
   }
-
   @Override
   public boolean isFinished() {
     return false;

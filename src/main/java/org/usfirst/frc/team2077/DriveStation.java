@@ -6,15 +6,13 @@
 package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj.XboxController;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
-import edu.wpi.first.wpilibj2.command.button.InternalButton;
+import org.usfirst.frc.team2077.commands.ZeroScrew;
 
 
 public class DriveStation {
@@ -114,10 +112,10 @@ public class DriveStation {
         secondary4_.whenPressed(new LoadLauncherBack());
         secondary5_.whileHeld(new launch());
         secondaryTrigger_.whileHeld(new LoadLauncher());
-//        secondary7_.whenPressed(new LauncherSpinTest(-100));
-//        secondary6_.whenPressed(new LauncherSpinTest(100));
+        secondary7_.whenPressed(new LauncherSpinTest(-100));
+        secondary6_.whenPressed(new LauncherSpinTest(100));
 //        secondary8_.whenPressed(new LauncherSpinTest(-10));
-//        secondary9_.whenPressed(new LauncherSpinTest(10));
+        secondary9_.whenPressed(new ZeroScrew());
         secondary10_.whileHeld(new LauncherScrewTest(false));
         secondary11_.whileHeld(new LauncherScrewTest(true));
 
@@ -125,7 +123,6 @@ public class DriveStation {
         //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 
-        //----------------------------- KEYPAD COMMANDS -----------------------------//
         // testing1_.whenPressed(new ColorOperations());
         // testing1_.whenPressed(new AutonomousOperations());
         // testing2_.whenPressed(new ElevatorOperations());

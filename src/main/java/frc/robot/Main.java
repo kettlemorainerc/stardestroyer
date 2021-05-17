@@ -24,7 +24,5 @@ public final class Main {
    */
   public static void main(String... args) {
     RobotBase.startRobot(Robot::new);
-    //RobotBase.startRobot(org.usfirst.frc.team2077.Pizzabot::new);
-    //RobotBase.startRobot(org.usfirst.frc.team2077.PizzaDestroyer::new);
   }
 }

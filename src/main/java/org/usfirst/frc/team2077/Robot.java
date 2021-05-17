@@ -42,7 +42,6 @@ public class Robot extends TimedRobot {
 	// Sensors.
 	public AngleSensor angleSensor_;
 	public AnalogSettings analogSettings_;
-	public PotentialSensor potentialSensor_;
 	public InfraredSensor infraredSensor_;
 	public MicroSwitch microSwitch_;
 	// Drive train, including:
@@ -94,13 +93,12 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		networkTableInstance_ = NetworkTableInstance.getDefault();
 		angleSensor_ = new AngleSensor();
-		potentialSensor_ = new PotentialSensor();
 
 		//analogSettings_ = new AnalogSettings(1, 2, 3);
 
 
 		infraredSensor_ = new InfraredSensor(2, constants_.INFRARED_MAX_LOADED, constants_.INFRARED_MIN_LOADED);
-		microSwitch_ = new MicroSwitch(2);
+		microSwitch_ = new MicroSwitch(9);
 
 
 		setupDriveTrain();

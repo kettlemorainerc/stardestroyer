@@ -1,16 +1,14 @@
 package org.usfirst.frc.team2077.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
+import org.usfirst.frc.team2077.math.ShooterMath;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
-import java.util.Arrays;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -28,18 +26,18 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
     // Readings outside the safe range are assumed to be the result of broken or disconnected hardware.
     // If the screw potentiometer reading is out of range the motor should not be operated.
-    private final double[] safeVoltageRange_ = {1.4, 5.1}; // TODO: Confirm this is a reasonable range or adjust as necessary.
-
-    private final double[] operatingVoltageRange_ = {2.2, 4.9};
 
     private final double powerValue_ = 1; // TODO: Confirm this is a reasonable value or adjust as necessary.
 
-    private final double positionTolerance_ = .02; // TODO: Confirm this is a reasonable value or adjust as necessary.
+    private final double positionTolerance_ = 4096 * 3; // TODO: Confirm this is a reasonable value or adjust as necessary.
+    private final double slowingPoint_ = 4096 * 10;
 
     // angle setpoint (voltage returned by robot_.potentialSensor_.getScrewVoltage())
-    private double screwPosition_ = 1; // TODO: this should reflect hardware position at startup.
-    private double screwDirection_ = 0.0; // setpoint changes operate in one direction only to avoid oscillation/instability
-
+    private double screwPosition_ = 0;
+    private final double screwEncoderTicks = 4096;
+    private double screwDirection_ = 0;
+    public boolean zeroing = false;
+    private final double maxScrewHeight = 4.6e6;//7e6; //7934079.0
 
     // launcher wheels
 
@@ -55,71 +53,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     private final double kI = 0.0001; // 0.0001
     private final double kD = 0.0;
 
-    
-    private static double[] a_ = {2.2, 4}; // measured calibration points
-    private static double[] v_ = {2550, 2690, 3000, 5400}; // measured calibration points
-    private static double[][] rangeAV_ = { // ranges in feet with pseudo-index values into a_ and v_
-            {55, 1, 3},
-            {115, 0, 0 },
-            {175, 0, 1},
-            {240, 0, 2}
-    };
-    private static double[] angle_; // enlarged table with n-1 interpolated values
-    private static double[] velocity_; // enlarged table with n-1 interpolated values
-    private static double[] range_; // rangeAV_ range values as a searchable array
-    static {
-        angle_ = new double[a_.length*2-1];
-        for (int i = 0; i < angle_.length; i+=2) {
-            angle_[i] = a_[i/2];
-        }
-        for (int i = 1; i < angle_.length; i+=2) {
-            angle_[i] = (angle_[i-1] + angle_[i+1]) / 2.;
-        }
-        velocity_ = new double[v_.length*2-1];
-        for (int i = 0; i < velocity_.length; i+=2) {
-            velocity_[i] = v_[i/2];
-        }
-        for (int i = 1; i < velocity_.length; i+=2) {
-            velocity_[i] = (velocity_[i-1] + velocity_[i+1]) / 2.;
-        }
-        range_ = new double[rangeAV_.length];
-        for (int i = 0; i < range_.length; i++) {
-            range_[i] = 12. * rangeAV_[i][0]; // in inches
-        }
-    }
-
-
-    private static double[] getAngleVelocity(double range) {
-//        if (range < range_[0] || range >= range_[range_.length-1]) {
-//          return null;
-//        }
-//        double[] r = {range_[ravIndex[0]], range_[ravIndex[1]]};
-//        double[] a = {angle_[(int)Math.round((rangeAV_[ravIndex[0]][1]-1.)*2.)], angle_[(int)Math.round((rangeAV_[ravIndex[1]][1]-1.)*2.)]};
-//        double[] v = {velocity_[(int)Math.round((rangeAV_[ravIndex[0]][2]-1.)*2.)], velocity_[(int)Math.round((rangeAV_[ravIndex[1]][2]-1.)*2.)]};
-//        double interpolation = (range - r[0]) / (r[1] - r[0]);
-//
-//        double angle = a[0] + interpolation * (a[1] - a[0]);
-//        double velocity = v[0] + interpolation * (v[1] - v[0]);
-        if (range <= 60) {
-            return new double[] {4, 5400};
-        }
-        double slope = (2675 - 2550) / (175 - 115);
-        double iVelocity = slope * range + 2380;
-        return new double[] {2.2, iVelocity};
-    }
-
-    /**
-     * Test code for  verifying range/angle/velocity tables. May be run standalone from VSCode.
-     */
-    public static void main(String[] argv) {
-        for (double r : range_) System.out.println("R:" + r/12.);
-        for (double a : angle_) System.out.println("A:" + a);
-        for (double v : velocity_) System.out.println("V:" + v);
-        System.out.println();
-        for (int i = 6; i <= 40; i++) {
-            System.out.println("" + i + " " + toString(getAngleVelocity(i * 12.)));
-        }
-    }
+    public ShooterMath shooterMath = new ShooterMath();
 
     private static String toString(double[] av) {
         return av == null ? "null" : ("" + (Math.round(av[0]*100.)/100.) + "/" + (Math.round(av[1]*10.)/10.));
@@ -143,29 +77,45 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
 
     @Override
-    public void periodic() { // continuous adjustment of screw motor toward setpoint
-
+    public void periodic() {
         // stop if position reading is outside normal range due to disconnected wires, etc
         double currentScrewPosition = getScrewPosition();
-        if ((currentScrewPosition < safeVoltageRange_[0]) || (currentScrewPosition > safeVoltageRange_[1])) {
+        shooterMath.setDistance(robot_.crosshairs_.getRange(), currentScrewPosition);
+        SmartDashboard.putNumber("hi buddy", currentScrewPosition);
+
+
+        double error = screwPosition_ - currentScrewPosition;
+
+        if (robot_.microSwitch_.getStatusIsHit() && screwDirection_ < 0) {
             screw_.set(ControlMode.PercentOutput, 0);
+            zeroScrew();
             return;
         }
+
         // stop if close enough to the set point
-        double error = screwPosition_ - currentScrewPosition;
         if (Math.abs(error) < positionTolerance_) {
             screw_.set(ControlMode.PercentOutput, 0);
+            screwDirection_ = 0;
             return;
         }
 
         // stop if past the set point in the last adjustment direction
         if (Math.signum(error) != screwDirection_) {
             screw_.set(ControlMode.PercentOutput, 0);
+            screwDirection_ = 0;
             return;
         }
-        
+
         // TODO: could vary motor with error magnitude
-        screw_.set(ControlMode.PercentOutput, -1 * powerValue_ * screwDirection_);
+//        screw_.set(ControlMode.PercentOutput, powerValue_ * screwDirection_);
+
+        //slow if close enough to the set point
+        if (Math.abs(error) < slowingPoint_) {
+            screw_.set(ControlMode.PercentOutput, .4 * screwDirection_);
+            return;
+        }
+
+        screw_.set(ControlMode.PercentOutput, screwDirection_);
     }
 
 
@@ -178,10 +128,10 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     @Override
     public boolean setRangeUpper(double range) {
 
-        double[] av = getAngleVelocity(range);
+//        double[] av = getAngleVelocity(range);
 
-        setScrewPosition(av[0]);
-        setLauncherRPM(av[1]);
+//        setScrewPosition(av[0]);
+//        setLauncherRPM(av[1]);
 
         return true;
     }
@@ -311,24 +261,35 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         screw_.set(ControlMode.PercentOutput,0.0);
     }
 
-
     public double getScrewPosition() {
-        return robot_.potentialSensor_.getScrewVoltage();
+        return screw_.getSelectedSensorPosition();
+    }
+
+    public void zeroScrew() {
+        screw_.setSelectedSensorPosition(0);
+        screwPosition_ = 0;
+        screwDirection_ = 0;
+        zeroing = false;
+        return;
     }
 
 
-    public void setScrewPosition(double goalVoltage){ //NEEDS CHECK
+    public void setScrewPosition(double distance, boolean isHeight){ //NEEDS CHECK
+        double currentScrewPosition = getScrewPosition();
 
-        // Goal voltage within paramaters check
-        goalVoltage = Math.max(goalVoltage, operatingVoltageRange_[0]);
-        goalVoltage = Math.min(goalVoltage, operatingVoltageRange_[1]);
-        SmartDashboard.putNumber("testing?", goalVoltage);
-        screwPosition_ = goalVoltage;
-        screwDirection_ = Math.signum(goalVoltage - getScrewPosition()); // 1.0 if to be adjusted up, -1.0 if down
+        if (isHeight) {
+            if (screwPosition_ >= maxScrewHeight && screwDirection_ == 1) return;
+            screwPosition_ = Math.max(-maxScrewHeight, Math.min(distance, maxScrewHeight));
+            screwDirection_ = Math.signum(screwPosition_ - currentScrewPosition);
+            return;
+        }
+        if (screwPosition_ >= maxScrewHeight && screwDirection_ == 1) return;
+        screwPosition_ = Math.max(-maxScrewHeight, Math.min(distance + getScrewPosition(), maxScrewHeight));
+        screwDirection_ = Math.signum(screwPosition_ - currentScrewPosition);
     }
 
     public void setScrewPosition01(double setpoint01) {
-        setScrewPosition(operatingVoltageRange_[0] + (operatingVoltageRange_[1]-operatingVoltageRange_[0]) * setpoint01);
+
     }
 
     public void setLauncherRPM(double rpm) {
@@ -336,5 +297,9 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         if (launcherRunning_) {
             runLauncher(launcherRPM_);
         }
+    }
+
+    public double[] getRangeAV() {
+        return this.shooterMath.getRangeAV();
     }
 }
