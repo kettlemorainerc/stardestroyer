@@ -100,14 +100,14 @@ public class DriveStation {
         // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
 
-        primaryTrigger_.whileHeld(new RunGrabber(0.6));
+        primaryTrigger_.whileHeld(new RunGrabber(1));
         primary4_.whenPressed(new resetCrosshairs());
-        testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
+        testing1_.whileHeld(new RunGrabber(0.5)); //for flysky controller
 
-        secondary6_.whileHeld(new RunGrabber(.3));
+        secondary6_.whileHeld(new RunGrabber(.5));
 
         secondary2_.whileHeld(new SteerToCrosshairs());
-        secondary2_.whileHeld(new RangeToCrosshairs());
+//        secondary2_.whileHeld(new RangeToCrosshairs());
         //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
         secondary4_.whenPressed(new LoadLauncherBack());
         secondary5_.whileHeld(new launch());

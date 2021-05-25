@@ -57,16 +57,15 @@ public class TestGrabber extends SubsystemBase {
                 ++balls;
             }
         }
-
         if (loading) {
             if (balls < 3) { //if it can load more balls
                 if (InBetween) {
                     //Run Motors at same speed until it's passed the T Sensor
-                    input_.set(ControlMode.PercentOutput, -0.5); //TODO: Check speeds
-                    elevator_.set(ControlMode.PercentOutput, -0.5);
+                    input_.set(ControlMode.PercentOutput, -1); //TODO: Check speeds
+                    elevator_.set(ControlMode.PercentOutput, -.8);
                 } else {
                 //Run just the intake fast
-                    input_.set(ControlMode.PercentOutput, -0.5);
+                    input_.set(ControlMode.PercentOutput, -1);
                 }
             
             } else if (balls == 3) { //4th ball coming 
@@ -76,7 +75,7 @@ public class TestGrabber extends SubsystemBase {
                     elevator_.set(ControlMode.PercentOutput, -0.3);
                 } else {
                     //Run just the intake fast
-                    input_.set(ControlMode.PercentOutput, -0.5);
+                    input_.set(ControlMode.PercentOutput, -1);
                 }
             } else if (balls == 4) { //5th ball coming
                 elevator_.set(ControlMode.PercentOutput, 0);
@@ -88,7 +87,7 @@ public class TestGrabber extends SubsystemBase {
             }
         } else if (emptyT) { //Empties top before bottom
             if (isTLoaded()) {
-                elevator_.set(ControlMode.PercentOutput, -0.8);
+                elevator_.set(ControlMode.PercentOutput, -.8);
             } else {
                 emptyT = false;
                 elevator_.set(ControlMode.PercentOutput, 0);
@@ -96,8 +95,8 @@ public class TestGrabber extends SubsystemBase {
         } else if (emptyB) {
             if (isBLoaded() || isTLoaded()) {
                 System.out.println(isBLoaded() + "" + isTLoaded());
-                input_.set(ControlMode.PercentOutput, -0.8);
-                elevator_.set(ControlMode.PercentOutput, -0.8);
+                input_.set(ControlMode.PercentOutput, -1);
+                elevator_.set(ControlMode.PercentOutput, -.8);
             } else {
                 input_.set(ControlMode.PercentOutput, 0);
                 elevator_.set(ControlMode.PercentOutput, 0);

@@ -34,10 +34,11 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
     // angle setpoint (voltage returned by robot_.potentialSensor_.getScrewVoltage())
     private double screwPosition_ = 0;
+    private double lastScrewPosition_ = -1;
     private final double screwEncoderTicks = 4096;
     private double screwDirection_ = 0;
     public boolean zeroing = false;
-    private final double maxScrewHeight = 4.6e6;//7e6; //7934079.0
+    private final double maxScrewHeight = 5e6;//7e6; //7934079.0
 
     // launcher wheels
 
@@ -81,7 +82,8 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         // stop if position reading is outside normal range due to disconnected wires, etc
         double currentScrewPosition = getScrewPosition();
         shooterMath.setDistance(robot_.crosshairs_.getRange(), currentScrewPosition);
-        SmartDashboard.putNumber("hi buddy", currentScrewPosition);
+//        launcherRPM_ = (robot_.driveStation_.secondaryStick_.getZ() - 1.) / 2. * -3250 + 2350;
+        SmartDashboard.putNumber("hi buddy", robot_.crosshairs_.getRange());
 
 
         double error = screwPosition_ - currentScrewPosition;
@@ -127,6 +129,10 @@ public class Launcher extends SubsystemBase implements LauncherIF {
 
     @Override
     public boolean setRangeUpper(double range) {
+        launcherRPM_ = shooterMath.getRangeAV()[1];
+        SmartDashboard.putNumber("CalculatedScrew: ", this.shooterMath.getNeededAngle(false));
+        SmartDashboard.putNumber("CalculatedTicks: ", this.shooterMath.getNeededAngle((true)));
+        this.setScrewPosition(this.shooterMath.getNeededAngle(true), true);
 
 //        double[] av = getAngleVelocity(range);
 
@@ -140,7 +146,6 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public void setRunning(boolean running) {
         launcherRunning_ = running;
         runLauncher(launcherRunning_ ? launcherRPM_ : 0);
-
     }
 
     @Override
@@ -179,11 +184,11 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public void launch() {
         // if (isLoaded()) {
         setRangeUpper(robot_.crosshairs_.getRange());
-        setRunning(true);
-        if (isReady()) {
-            runLoader(0.6);
-            
-        }
+//        setRunning(true);
+//        if (isReady()) {
+//            runLoader(0.6);
+//
+//        }
     }
 
     public void stopLaunch() {
@@ -300,6 +305,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     }
 
     public double[] getRangeAV() {
-        return this.shooterMath.getRangeAV();
+        return new double[] {this.shooterMath.getRangeAV()[0], this.launcherRPM_};
+//        return this.shooterMath.getRangeAV();
     }
 }
