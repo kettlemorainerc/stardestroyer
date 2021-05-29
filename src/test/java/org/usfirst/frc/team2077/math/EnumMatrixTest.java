@@ -10,10 +10,10 @@ import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.NORTH;
 public class EnumMatrixTest {
 	@Test
 	public void transpose_as_expected() {
-		EnumMatrix<AssemblyPosition, Direction> things = new EnumMatrix<>(AssemblyPosition.class, Direction.class);
+		EnumMatrix<Direction, AssemblyPosition> things = new EnumMatrix<>(Direction.class, AssemblyPosition.class);
 		things.set(NORTH, NORTH_WEST, 123);
 
-		EnumMatrix<Direction, AssemblyPosition> other_things = things.enumTranspose();
+		EnumMatrix<AssemblyPosition, Direction> other_things = things.enumTranspose();
 
 		assertEquals(other_things.getHeight(), things.getWidth());
 		assertEquals(other_things.getWidth(), things.getHeight());

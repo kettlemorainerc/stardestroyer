@@ -19,7 +19,7 @@ public class Matrix {
 
 	protected Matrix(Matrix toTranspose) {
 		double[][] original = toTranspose.matrix;
-		double[][] transposedMatrix = new double[original[0].length][original.length];
+		double[][] transposedMatrix = new double[toTranspose.getWidth()][toTranspose.getHeight()];
 
 		for(int x = 0; x < original.length; x++) {
 			for(int y = 0; y < transposedMatrix.length; y++) {
@@ -41,6 +41,10 @@ public class Matrix {
 		this.matrix = matrix;
 	}
 
+	/**
+	 * Returns a transposed version of this matrix.
+	 * @return A matrix similar to new double[{@link #getWidth()}][{@link #getHeight()}]
+	 */
 	public Matrix transpose() {
 		return new Matrix(this);
 	}
@@ -73,6 +77,13 @@ public class Matrix {
 		matrix[y][x] = value;
 	}
 
+	/**
+	 * similar to {@link #set}, however takes a function instead of an updated value. The function argument is the current
+	 * value of {@link #getMatrix()}[{@code y}][{@code x}] and it should return the updated value.
+	 * @param x index
+	 * @param y index
+	 * @param calculate Update function for {@link #getMatrix()}[{@code y}][{@code x}]
+	 */
 	public void calculate(int x, int y, Function<Double, Double> calculate) {
 		double value;
 		value = get(x, y);
@@ -80,6 +91,14 @@ public class Matrix {
 		set(x, y, calculate.apply(value));
 	}
 
+	/**
+	 * This assumes that multiplication with {@code by} is valid. In other words does <strong>NOT</strong>
+	 * enforce that {@code by} is a B by A matrix, assuming this is an A by B matrix.
+	 * @param by matrix to multiply bu
+	 * @param constructor constructor for resulting Matrix
+	 * @param <T> The type of matrix to create
+	 * @return The product of this by {@code by}A matrix of type T
+	 */
 	protected <T extends Matrix> T multiply(double[][] by, Function<double[][], T> constructor) {
 		double[][] result = new double[getHeight()][by[0].length];
 
@@ -98,12 +117,17 @@ public class Matrix {
 	/**
 	 * this assumes the passed matrix is a compatible matrix and performs no checks on dimensions
 	 * @param by the matrix to multiply by
-	 * @return a this.getHeight X by.getWidth matrix
+	 * @return a {@link #getHeight()} X {@code by.getWidth} matrix
 	 */
 	public Matrix multiply(Matrix by) {
 		return multiply(by.matrix, Matrix::new);
 	}
 
+	/**
+	 * Multiplies this matrix by a constant value
+	 * @param by multiplier
+	 * @return a new matrix equivalent to this * {@code by}
+	 */
 	public Matrix multiply(double by) {
 		Matrix result = new Matrix(getHeight(), getWidth());
 
@@ -116,6 +140,10 @@ public class Matrix {
 		return result;
 	}
 
+	/**
+	 * A copy of the internal 2-Dimensional array
+	 * @return a 2 dimensional array of size new double[{@link #getHeight()}][{@link #getWidth()}]
+	 */
 	public double[][] getMatrix() {
 		double[][] result = new double[getHeight()][getWidth()];
 
