@@ -7,6 +7,8 @@ package org.usfirst.frc.team2077;
 
 public final class Constants {
 
+    public final boolean USING_KEYPAD = true;
+
     public final double UPPER_TARGET_HEIGHT = 98.25; // inches from floor to center of target
     public final double LOWER_TARGET_HEIGHT = 23.; // inches from floor to center of target
     public final double MINIMUM_TARGET_RANGE = 18.; // minimum possible distance from target
@@ -31,8 +33,8 @@ public final class Constants {
     // TODO: move motor RPM limit back up and use acceleration and/or stick scaling to optimize driveability
     // TODO: use acceleration constants where appropriate throughout other code
     // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
-    public final double STARDESTROYER_ACCELERATION_G_LIMIT = 5;
-    public final double STARDESTROYER_DECELERATION_G_LIMIT = 1e10; //.35 is the value used for the 03-05-21 version
+    public final double STARDESTROYER_ACCELERATION_G_LIMIT = .4;//0D;
+    public final double STARDESTROYER_DECELERATION_G_LIMIT = STARDESTROYER_ACCELERATION_G_LIMIT;//1e10; //.35 is the value used for the 03-05-21 version
 
     //for autonomous
     // public final double STARDESTROYER_ACCELERATION_G_LIMIT = .1;

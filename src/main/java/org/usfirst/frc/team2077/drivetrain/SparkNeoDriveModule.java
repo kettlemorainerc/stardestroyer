@@ -12,7 +12,7 @@ import static org.usfirst.frc.team2077.Robot.*;
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
     private static final double LAUNCHER_WHEEL_RADIUS = 2, LAUNCHER_GEAR_RATIO = 1;
-    private static final int MAX_SHOOTER_RPM = 5400, MAX_WHEEL_RPM = 3000;
+    private static final int MAX_SHOOTER_RPM = 5400, MAX_WHEEL_RPM = 4500;
     private static final boolean USE_SOFTWARE_PID = true;
 
     public enum DrivePosition {

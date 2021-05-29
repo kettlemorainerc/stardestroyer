@@ -5,10 +5,13 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import jdk.jfr.StackTrace;
 import org.usfirst.frc.team2077.Clock;
 import org.usfirst.frc.team2077.math.Position;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.Arrays;
 
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
@@ -175,7 +178,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public void halt() {
-        double max = 99999;
+        double max = 10000;
         setVelocity(0, 0, 0, new double[][] {{max, max}, {max, max}, {max, max}});
     }
 
@@ -188,7 +191,9 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     public void setGLimits(double accelerationG, double decelerationG) {
         //accelerationG_ = accelerationG;
         //decelerationG_ = decelerationG;
-        northAccelerationLimit_ = eastAccelerationLimit_ = new double[] {accelerationG * G, decelerationG * G};
+        northAccelerationLimit_ = new double[] {accelerationG * G, decelerationG * G};
+        double eastAccelerationRatio = .7;
+        eastAccelerationLimit_ = new double [] {northAccelerationLimit_[0] * eastAccelerationRatio, northAccelerationLimit_[1] * eastAccelerationRatio};
         rotationAccelerationLimit_ = new double[] {0, 0};
     }
 
@@ -212,14 +217,11 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
      * @return Acceleration/range constrained set point.
      */
     protected double limit(double newV, double oldV, double maxV, double[] accelerationLimits) {
-        boolean accelerating = Math.abs(newV) > Math.abs(oldV) && Math.signum(newV) == Math.signum(oldV);
+        boolean accelerating = Math.abs(newV) >= Math.abs(oldV) && Math.signum(newV) == Math.signum(oldV);
         double deltaLimit = (accelerating ? accelerationLimits[0] : accelerationLimits[1]) * timeSinceLastUpdate_; // always positive
         double deltaRequested = newV - oldV;
         double delta = Math.min(deltaLimit, Math.abs(deltaRequested)) * Math.signum(deltaRequested);
         double v = oldV + delta;
-        //if (v != newV) {
-        //    System.out.println("MAX:" + maxV + " INPUT:" + newV + " LIMITED:" + v + " ACCEL:" + accelerationLimits[0] + " DECEL:" + accelerationLimits[1]);
-        //}
         return Math.max(-maxV, Math.min(maxV, v));
         
         //return Math.max(-maxV, Math.min(maxV, newV));

@@ -34,18 +34,10 @@ public class SteerToCrosshairs extends CommandBase {
   public void execute() {
     double azimuth = robot_.crosshairs_.getAzimuth(); // angle from robot to target
     double velocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
+    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / Math.ceil(angleToBeginSlowingDown - Math.abs(azimuth));
 
-    if (Math.abs(azimuth) < deadZoneToCentered) {
-      robot_.chassis_.halt();
-      return;
-    }
-
-    if ((Math.signum(velocity) == Math.signum(azimuth)) || velocity == 0) { // rotating away from target
-      double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine;
-      robot_.chassis_.setRotation(speed * Math.signum(azimuth));
-    }else{
-      robot_.chassis_.setRotation(-velocity/2.); // reverse and slow
-    }
+    if (Math.abs(azimuth) < deadZoneToCentered) robot_.chassis_.halt();
+    else robot_.chassis_.setRotation(speed * Math.signum(azimuth));
   }
   @Override
   public void end(boolean interrupted) {

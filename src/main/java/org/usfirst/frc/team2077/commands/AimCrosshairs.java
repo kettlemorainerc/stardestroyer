@@ -19,15 +19,30 @@ public class AimCrosshairs extends CommandBase {
 
   @Override
   public void execute() {
-    double x = DriveStation.adjustInputSensitivity(robot_.driveStation_.secondaryStick_.getX(), .2, 2.5);
-    double y = DriveStation.adjustInputSensitivity(-robot_.driveStation_.secondaryStick_.getY(), .2, 2.5);
+    double x;
+    double y;
+
+    if (robot_.constants_.USING_KEYPAD) {
+      if (robot_.driveStation_.testing2_.get()) y = 1; //up
+      else if (robot_.driveStation_.testing6_.get())   y = -1; //down
+      else y = 0;
+
+      if (robot_.driveStation_.testing5_.get()) x=-1; //left
+      else if (robot_.driveStation_.testing7_.get()) x=1; //right
+      else x = 0;
+    } else {
+      x = DriveStation.adjustInputSensitivity(robot_.driveStation_.secondaryStick_.getX(), .2, 2.5);
+      y = DriveStation.adjustInputSensitivity(-robot_.driveStation_.secondaryStick_.getY(), .2, 2.5);
+    }
     double[] ar = robot_.crosshairs_.get();
     double azimuth = ar[0];
     double range = ar[1];
+
+
     if (Math.abs(x) > .01) {
       azimuth += x * robot_.constants_.AZIMUTH_CROSSHAIR_SENSITIVITY;
       double fov2 = robot_.crosshairs_.getHorizontalFOV() / 2.;
-      azimuth = Math.max(-fov2, Math.min(fov2, azimuth));
+      azimuth = Math.max(-fov2, Math.min(fov2, azimuth)); //keeps crosshairs above half height
       }
     if (Math.abs(y) > .01) {
       range -= y * robot_.constants_.RANGE_CROSSHAIR_SENSITIVITY;

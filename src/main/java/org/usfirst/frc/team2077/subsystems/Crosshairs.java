@@ -49,28 +49,6 @@ public class Crosshairs extends SubsystemBase {
         return "Azimuth:" + Math.round(azimuth_*10.)/10. + " degrees, Range:" + Math.round(range_*10.)/10. + " inches";
     }
 
-    /**
-     * Test code.
-     * May be run locally in VSCode.
-     */
-    public static void main(String[] argv) {
-
-        System.out.println("" + normalize(361) + " (1);");
-        System.out.println("" + normalize(-361) + " (-1);");
-        System.out.println("" + normalize(359) + " (-1);");
-        System.out.println("" + normalize(-359) + " (1);");
-        System.out.println("" + normalize(181) + " (-179);");
-        System.out.println("" + normalize(-181) + " (179);");
-        System.out.println("" + normalize(179) + " (179);");
-        System.out.println("" + normalize(-179) + " (-179);");
-    }
-
-
-
-
-
-
-
 
     private double horizontalFOV_ = 2. * Math.toDegrees(Math.atan2(robot_.constants_.FISHEYE_CAMERA_PIXEL_WIDTH/2., robot_.constants_.FISHEYE_CAMERA_FOCAL_LENGTH));
 
