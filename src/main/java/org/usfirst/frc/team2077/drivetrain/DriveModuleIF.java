@@ -28,7 +28,7 @@ public interface DriveModuleIF {
      */
     void setVelocity(double velocity);
 
-    AssemblyPosition getWheelPosition();
+    WheelPosition getWheelPosition();
 
     /**
      * Current velocity for this wheel.

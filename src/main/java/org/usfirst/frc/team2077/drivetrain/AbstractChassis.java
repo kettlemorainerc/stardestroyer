@@ -7,7 +7,7 @@ package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.Clock;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
-import org.usfirst.frc.team2077.math.Position;
+import org.usfirst.frc.team2077.math.*;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -17,10 +17,16 @@ import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
-    public final DriveModuleIF[] driveModule_;
-    protected EnumMap<Direction, Double> setVelocity = new EnumMap<>(Direction.class);
-    protected EnumMap<Direction, Double> calculatedVelocity = new EnumMap<>(Direction.class);
-    protected EnumMap<Direction, double[]> accelerationLimits = new EnumMap<>(Direction.class);
+    private static <T> EnumMap<Direction, T> defaultedDirectionMap(T defaultValue) {
+        EnumMap<Direction, T> newMap = new EnumMap<>(Direction.class);
+        for(Direction d : Direction.values()) newMap.put(d,defaultValue);
+        return newMap;
+    }
+
+    public final EnumMap<WheelPosition, DriveModuleIF> driveModule_;
+    protected EnumMap<Direction, Double> setVelocity = defaultedDirectionMap(0d);
+    protected EnumMap<Direction, Double> calculatedVelocity = defaultedDirectionMap(0d);
+    protected AccelerationLimits accelerationLimits;
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -61,7 +67,10 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     public boolean debug_ = false; // Use to throttle debug output.
 
     public AbstractChassis(DriveModuleIF[] driveModule) {
-        driveModule_ = driveModule;
+        driveModule_ = new EnumMap<>(WheelPosition.class);
+        for(DriveModuleIF module : driveModule) {
+            driveModule_.put(module.getWheelPosition(), module);
+        }
     }
 
     @Override
@@ -158,15 +167,15 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public void setVelocity(double north, double east, double clockwise) {
-        setVelocity(north, east, clockwise, getAccelerationLimits());
+        setVelocity(north, east, clockwise, accelerationLimits);
     }
     @Override
     public void setVelocity(double north, double east) {
-        setVelocity(north, east, getAccelerationLimits());
+        setVelocity(north, east, accelerationLimits);
     }
     @Override
     public void setRotation(double clockwise) {
-        setRotation(clockwise, getAccelerationLimits());
+        setRotation(clockwise, accelerationLimits);
     }
 
     @Override
@@ -189,7 +198,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     @Override
     public void halt() {
         double max = 99999;
-        setVelocity(0, 0, 0, new double[][] {{max, max}, {max, max}, {max, max}});
+        setVelocity(0, 0, 0, new AccelerationLimits(new double[][] {{max, max}, {max, max}, {max, max}}, this));
     }
 
     @Override
@@ -219,8 +228,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     }
 
     protected double limit(Direction direction) {
-        double newV = calculatedVelocity.get(direction),
-                oldV = setVelocity.get(direction);
+        double newV = calculatedVelocity.get(direction), oldV = setVelocity.get(direction);
         return limit(newV, oldV, maximumSpeed_, accelerationLimits.get(direction));
     }
 

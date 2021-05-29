@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 public class Matrix {
-	double[][] matrix;
+	protected double[][] matrix;
 
 	public Matrix(int height, int width) {
 		/* 3 x 1 matrix

@@ -6,11 +6,13 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
 
 import java.util.*;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
 public class MecanumChassis extends AbstractChassis {
 	private static final double WHEELBASE = 20.375; // inches
@@ -40,16 +42,17 @@ public class MecanumChassis extends AbstractChassis {
 		mecanumMath_ = new MecanumMath(WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, WHEEL_RADIUS, 1, 180 / Math.PI);
 
 		// north/south speed conversion from 0-1 range to DriveModule maximum (inches/second)
-		maximumSpeed_ = Arrays.stream(driveModule_)
-		                      .mapToDouble(DriveModuleIF::getMaximumSpeed)
-		                      .min()
-		                      .orElseThrow();
+		maximumSpeed_ = driveModule_.values()
+									.stream()
+									.mapToDouble(DriveModuleIF::getMaximumSpeed)
+									.min()
+									.orElseThrow();
 		// rotation speed conversion from 0-1 range to DriveModule maximum (degrees/second)
-		EnumMap<AssemblyPosition, Double> maxRotation = new EnumMap<>(AssemblyPosition.class);
-		maxRotation.put(AssemblyPosition.NORTH_EAST, -maximumSpeed_);
-		maxRotation.put(AssemblyPosition.SOUTH_EAST, -maximumSpeed_);
-		maxRotation.put(AssemblyPosition.NORTH_WEST, -maximumSpeed_);
-		maxRotation.put(AssemblyPosition.SOUTH_WEST, -maximumSpeed_);
+		EnumMap<WheelPosition, Double> maxRotation = new EnumMap<>(WheelPosition.class);
+		maxRotation.put(WheelPosition.NORTH_EAST, -maximumSpeed_);
+		maxRotation.put(WheelPosition.SOUTH_EAST, -maximumSpeed_);
+		maxRotation.put(WheelPosition.NORTH_WEST, -maximumSpeed_);
+		maxRotation.put(WheelPosition.SOUTH_WEST, -maximumSpeed_);
 
 		maximumRotation_ = mecanumMath_.forward(maxRotation).get(CLOCKWISE);
 
@@ -70,43 +73,42 @@ public class MecanumChassis extends AbstractChassis {
 		double[][] a = getAccelerationLimits();
 		System.out.printf("%s ACCELERATION LIMITS: [DIRECTION MAX/MIN][NORTH %.1f/%.1f][EAST %.1f/%.1f][ROTATION %.1f/%.1f]%n",
 		                  getClass().getName(),
-		                  a[NORTH.ordinal()][0],
-		                  a[NORTH.ordinal()][1],
-		                  a[EAST.ordinal()][0],
-		                  a[EAST.ordinal()][1],
-		                  a[CLOCKWISE.ordinal()][0],
-		                  a[CLOCKWISE.ordinal()][1]);
+		                  accelerationLimits.get(NORTH, ACCELERATION),
+		                  accelerationLimits.get(NORTH, DECELERATION),
+		                  accelerationLimits.get(EAST, ACCELERATION),
+		                  accelerationLimits.get(EAST, DECELERATION),
+		                  accelerationLimits.get(CLOCKWISE, ACCELERATION),
+		                  accelerationLimits.get(CLOCKWISE, DECELERATION));
 	}
 
 	@Override
-	public void setVelocity(double north, double east, double clockwise, double[][] accelerationLimits) {
+	public void setVelocity(double north, double east, double clockwise, AccelerationLimits accelerationLimits) {
+		setVelocity(north, east, accelerationLimits);
+		setRotation(clockwise, accelerationLimits);
+	}
+
+	@Override
+	public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
 		setVelocity.put(NORTH, north);
+		northSet_ = north;
+
+		accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
+		northAccelerationLimit_ = accelerationLimits.get(NORTH);
+
 		setVelocity.put(EAST, east);
+		eastSet_ = east;
+
+		accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+		eastAccelerationLimit_ = accelerationLimits.get(EAST);
+	}
+
+	@Override
+	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
 		setVelocity.put(CLOCKWISE, clockwise);
-		this.accelerationLimits.put(NORTH, accelerationLimits[NORTH.ordinal()]);
-		this.accelerationLimits.put(EAST, accelerationLimits[EAST.ordinal()]);
-		this.accelerationLimits.put(CLOCKWISE, accelerationLimits[CLOCKWISE.ordinal()]);
-
-		northSet_ = north;
-		eastSet_ = east;
 		clockwiseSet_ = clockwise;
-		northAccelerationLimit_ = accelerationLimits[0];
-		eastAccelerationLimit_ = accelerationLimits[1];
-		rotationAccelerationLimit_ = accelerationLimits[2];
-	}
 
-	@Override
-	public void setVelocity(double north, double east, double[][] accelerationLimits) {
-		northSet_ = north;
-		eastSet_ = east;
-		northAccelerationLimit_ = accelerationLimits[0];
-		eastAccelerationLimit_ = accelerationLimits[1];
-	}
-
-	@Override
-	public void setRotation(double clockwise, double[][] accelerationLimits) {
-		clockwiseSet_ = clockwise;
-		rotationAccelerationLimit_ = accelerationLimits[2];
+		accelerationLimits.set(CLOCKWISE, accelerationLimits.get(CLOCKWISE));
+		rotationAccelerationLimit_ = accelerationLimits.get(CLOCKWISE);
 	}
 
 	@Override
@@ -135,12 +137,9 @@ public class MecanumChassis extends AbstractChassis {
 		// chassis velocity from internal set point
 //		velocitySet_ = getVelocityCalculated();
 		// chassis velocity from motor/wheel measurements
-		EnumMap<AssemblyPosition, Double> wheelVelocities = new EnumMap<>(AssemblyPosition.class);
+		EnumMap<WheelPosition, Double> wheelVelocities = new EnumMap<>(WheelPosition.class);
 //		double[] wheelVelocities = new double[AssemblyPosition.values().length];
-		for(DriveModuleIF wheel : driveModule_) {
-			wheelVelocities.put(wheel.getWheelPosition(), wheel.getVelocity());
-//			wheelVelocities[wheel.getWheelPosition().ordinal()] = wheel.getVelocity();
-		}
+		driveModule_.forEach((k, wheel) -> wheelVelocities.put(wheel.getWheelPosition(), wheel.getVelocity()));
 		velocityMeasured_ = mecanumMath_.forward(wheelVelocities);
 
 		// TODO: E/W velocities are consistently lower than those calculated from wheel speeds.
@@ -168,14 +167,14 @@ public class MecanumChassis extends AbstractChassis {
 		if(robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
 			double[] pS = positionSet_.get();
 			double[] pM = positionMeasured_.get();
-			pS[Direction.CLOCKWISE.ordinal()] = pM[Direction.CLOCKWISE.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
+			pS[CLOCKWISE.ordinal()] = pM[CLOCKWISE.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
 			positionSet_.set(pS[NORTH.ordinal()],
-			                 pS[Direction.EAST.ordinal()],
-			                 pS[Direction.CLOCKWISE.ordinal()]);
+			                 pS[EAST.ordinal()],
+			                 pS[CLOCKWISE.ordinal()]);
 
 			positionMeasured_.set(pM[NORTH.ordinal()],
-			                      pM[Direction.EAST.ordinal()],
-			                      pM[Direction.CLOCKWISE.ordinal()]);
+			                      pM[EAST.ordinal()],
+			                      pM[CLOCKWISE.ordinal()]);
 		}
 	}
 
@@ -187,7 +186,7 @@ public class MecanumChassis extends AbstractChassis {
 //		double[] w = mecanumMath_.inverse(v);
 
 		// compute motor speeds
-		EnumMap<AssemblyPosition, Double> wheelSpeed = mecanumMath_.inverse(calculatedVelocity);
+		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(calculatedVelocity);
 
 		double max = wheelSpeed.values()
 		                       .stream()
@@ -195,10 +194,7 @@ public class MecanumChassis extends AbstractChassis {
 		                       .max()
 		                       .orElseThrow();
 
-		for(DriveModuleIF module : driveModule_) {
-			double set = wheelSpeed.get(module.getWheelPosition()) / max;
-			module.setVelocity(set);
-		}
+		driveModule_.forEach((position, wheel) -> wheel.setVelocity(wheelSpeed.get(wheel.getWheelPosition()) / max));
 
 		// scale all motors proportionally if any are out of range
 //		double max = 1;
@@ -219,6 +215,6 @@ public class MecanumChassis extends AbstractChassis {
 	public String toString() {
 		return String.format("[Velocity: %s][Wheels: %s]",
 							 calculatedVelocity,
-							 Arrays.toString(driveModule_));
+							 driveModule_);
 	}
 }

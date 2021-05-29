@@ -43,7 +43,7 @@ public class DummyDriveModule implements DriveModuleIF {
     }
 
     @Override
-    public AssemblyPosition getWheelPosition() {
+    public WheelPosition getWheelPosition() {
         return null;
     }
 

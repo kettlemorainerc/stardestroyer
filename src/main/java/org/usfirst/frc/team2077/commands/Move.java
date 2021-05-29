@@ -7,9 +7,8 @@ package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import org.usfirst.frc.team2077.drivetrain.MecanumMath;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
-import org.usfirst.frc.team2077.math.Acceleration;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
 import org.usfirst.frc.team2077.math.Position;
 
 import java.util.EnumMap;
@@ -17,6 +16,7 @@ import java.util.EnumMap;
 import static java.lang.Math.*;
 import static org.usfirst.frc.team2077.Robot.robot_;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
 
 public class Move extends CommandBase {
@@ -40,7 +40,7 @@ public class Move extends CommandBase {
 	private EnumMap<Direction, Double> slow_ = directionMap();
 	private EnumMap<Direction, Double> distanceRemaining_ = directionMap();
 	private EnumMap<Direction, Boolean> finished_ = directionMap();
-	private double[][] acceleration_;
+	private AccelerationLimits acceleration_;
 	private Position origin_;
 
 	public Move(double north, double east, double rotation) {
@@ -108,10 +108,9 @@ public class Move extends CommandBase {
 		slow_.put(EAST, min.get(EAST) * sign[EAST.ordinal()]);
 		slow_.put(CLOCKWISE, min.get(CLOCKWISE) * sign[CLOCKWISE.ordinal()]);
 		// don't scale below minimum
-		acceleration_ = (new Acceleration(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT,
-		                                  robot_.chassis_,
-		                                  scale
-		).get());
+		acceleration_ = new AccelerationLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT,
+											   robot_.chassis_,
+											   scale);
 
 		origin_ = new Position(robot_.chassis_.getPosition());
 		distanceRemaining_ = new EnumMap<Direction, Double>(Direction.class);
@@ -151,17 +150,17 @@ public class Move extends CommandBase {
 						   " " +
 						   slow_.get(CLOCKWISE));
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL N:" +
-						   acceleration_[NORTH.ordinal()][NORTH.ordinal()] +
+						   acceleration_.get(NORTH, ACCELERATION) +
 						   " " +
-						   acceleration_[NORTH.ordinal()][EAST.ordinal()]);
+						   acceleration_.get(NORTH, DECELERATION));
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL E:" +
-						   acceleration_[EAST.ordinal()][NORTH.ordinal()] +
+						   acceleration_.get(EAST, ACCELERATION) +
 						   " " +
-						   acceleration_[EAST.ordinal()][EAST.ordinal()]);
+						   acceleration_.get(EAST, DECELERATION));
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL R:" +
-						   acceleration_[CLOCKWISE.ordinal()][NORTH.ordinal()] +
+						   acceleration_.get(CLOCKWISE, ACCELERATION) +
 						   " " +
-						   acceleration_[CLOCKWISE.ordinal()][EAST.ordinal()]);
+						   acceleration_.get(CLOCKWISE, DECELERATION));
 	}
 
 	@Override
@@ -171,23 +170,20 @@ public class Move extends CommandBase {
 		EnumMap<Direction, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(origin_);
 		boolean[] slow = {false, false, false};
 		for(Direction direction : Direction.values()){
-
-			int i = direction.ordinal();
 			distanceRemaining_.compute(direction, (k,v) -> v - distanceTraveled.get(direction));
 			double distanceToStop = vCurrent.get(direction) * vCurrent.get(direction) /
-									acceleration_[i][1] /
+									acceleration_.get(direction, DECELERATION) /
 									2.;// exact absolute value per physics
 			distanceToStop += Math.max(
 				distanceToStop * .05,
 				Math.abs(vCurrent.get(direction)) * .04
 			); // pad just a bit to avoid overshoot
-			slow[i] = finished_.get(direction) ||
+			slow[direction.ordinal()] = finished_.get(direction) ||
 					  Math.abs(distanceRemaining_.get(direction)) <= distanceToStop; // slow down within padded stopping distance
 		}
 		boolean s = Math.abs(distanceTotal_.get(CLOCKWISE)) > 0 ? slow[CLOCKWISE.ordinal()] : (slow[NORTH.ordinal()] && slow[EAST.ordinal()]);
 		for(Direction direction : Direction.values()) {
-			int i = direction.ordinal();
-			vNew[i] = finished_.get(direction) ? 0d : (s ? slow_ : fast_).get(direction);
+			vNew[direction.ordinal()] = finished_.get(direction) ? 0d : (s ? slow_ : fast_).get(direction);
 		}
 /*
     System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2:"
@@ -212,7 +208,6 @@ public class Move extends CommandBase {
 	@Override
 	public boolean isFinished() {
 		for(Direction direction : Direction.values()) {
-			int i = direction.ordinal();
 			double remaining = distanceRemaining_.get(direction);
 			double total = distanceRemaining_.get(direction);
 			finished_.compute(direction, (k, v) -> v || (signum(remaining) != signum(total)));

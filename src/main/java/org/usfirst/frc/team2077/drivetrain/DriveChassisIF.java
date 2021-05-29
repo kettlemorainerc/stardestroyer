@@ -7,6 +7,7 @@ package org.usfirst.frc.team2077.drivetrain;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
 
 import java.util.EnumMap;
 
@@ -85,7 +86,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param clockwise In degrees per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setVelocity(double north, double east, double clockwise, double[][] accelerationLimits);
+    void setVelocity(double north, double east, double clockwise, AccelerationLimits accelerationLimits);
     /**
      * @param north In inches per second.
      * @param east In inches per second.
@@ -97,7 +98,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param east In inches per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setVelocity(double north, double east, double[][] accelerationLimits);
+    void setVelocity(double north, double east, AccelerationLimits accelerationLimits);
     /**
      * @param north In inches per second.
      * @param east In inches per second.
@@ -107,7 +108,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param clockwise In degrees per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setRotation(double clockwise, double[][] accelerationLimits);
+    void setRotation(double clockwise, AccelerationLimits accelerationLimits);
     /**
      * @param clockwise In degrees per second.
      */

@@ -11,7 +11,7 @@ import static org.usfirst.frc.team2077.Robot.robot_;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
-import org.usfirst.frc.team2077.math.Acceleration;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
 
 import java.util.EnumMap;
 
@@ -34,13 +34,13 @@ public class Nudge extends WaitCommand {
   public void initialize() {
     super.initialize();
     EnumMap<Direction, Double> max = robot_.chassis_.getMaximumVelocity();
-    robot_.chassis_.setVelocity(north_*max.get(NORTH), east_ * max.get(EAST), (new Acceleration(.5, .5, robot_.chassis_)).get());
+    robot_.chassis_.setVelocity(north_*max.get(NORTH), east_ * max.get(EAST), (new AccelerationLimits(.5, .5, robot_.chassis_)));
   }
 
   @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
-    robot_.chassis_.setVelocity(0, 0, (new Acceleration(.5, .5, robot_.chassis_)).get());
+    robot_.chassis_.setVelocity(0, 0, (new AccelerationLimits(.5, .5, robot_.chassis_)));
   }
 
   @Override

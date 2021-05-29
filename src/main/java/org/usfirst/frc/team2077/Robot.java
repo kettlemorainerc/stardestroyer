@@ -157,10 +157,10 @@ public class Robot extends TimedRobot {
 		CommandScheduler.getInstance()
 						.run();
 
-		for (DriveModuleIF module : chassis_.driveModule_) {
-			SparkNeoDriveModule hi = (SparkNeoDriveModule) module;
-			SmartDashboard.putNumber(hi.getPosition().name() + " RPM", hi.getRPM());
-		}
+		chassis_.driveModule_.values().forEach(module -> {
+			SmartDashboard.putNumber(module.getWheelPosition() + " RPM", ((SparkNeoDriveModule) module).getRPM());
+		});
+
 		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());
 	}
 
@@ -230,11 +230,13 @@ public class Robot extends TimedRobot {
 	}
 
 	private static void printWheelInfo(SparkNeoDriveModule.DrivePosition position) {
-		System.out.printf("[%s set RPM: %s][%s reported RPM %s]",
-				position.name(),
-				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getSetPoint(),
-				position.name(),
-				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getRPM());
+		System.out.printf(
+			"[%s set RPM: %s][%s reported RPM %s]",
+			position,
+			((SparkNeoDriveModule) robot_.chassis_.driveModule_.get(position.WHEEL_POSITION)).getSetPoint(),
+			position,
+			((SparkNeoDriveModule) robot_.chassis_.driveModule_.get(position.WHEEL_POSITION)).getRPM()
+		);
 	}
 
 

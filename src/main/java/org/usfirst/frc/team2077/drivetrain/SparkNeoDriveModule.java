@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.AssemblyPosition.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.WheelPosition.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
@@ -31,13 +31,13 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
         private final int ID;
         private final boolean INVERSE;
         private final double P, I, D;
-        private final AssemblyPosition WHEEL_POSITION;
+        public final WheelPosition WHEEL_POSITION;
 
-        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM) {
+        DrivePosition(WheelPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM) {
             this(position, id, inverse, gearRatio, radius, maxRPM, 1.4E-4, 1e-6, 0);
         }
 
-        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM, double p, double i, double d) {
+        DrivePosition(WheelPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM, double p, double i, double d) {
             WHEEL_POSITION = position;
             ID = id;
             INVERSE = inverse;
@@ -97,7 +97,7 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     }
 
     @Override
-    public AssemblyPosition getWheelPosition() {
+    public WheelPosition getWheelPosition() {
         return position.WHEEL_POSITION;
     }
 
