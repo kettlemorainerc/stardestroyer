@@ -15,7 +15,7 @@ public class SteerToCrosshairs extends CommandBase {
   private final double maxRPMCoarse;
   private final double deceleration_;
   private final double angleToBeginSlowingDown;
-  private final double deadZoneAngle;
+  private final double deadZoneToCentered;        //In degrees
   
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
@@ -23,7 +23,7 @@ public class SteerToCrosshairs extends CommandBase {
     maxRPMCoarse = 3000;
     angleToBeginSlowingDown = 45;
     deceleration_ = robot_.chassis_.getAccelerationLimits()[2][1];
-    deadZoneAngle = .7; // TODO: Configure. Also consider range.
+    deadZoneToCentered = .5; //TODO: Requires tuning
   }
 
   @Override
@@ -35,21 +35,17 @@ public class SteerToCrosshairs extends CommandBase {
     double azimuth = robot_.crosshairs_.getAzimuth(); // angle from robot to target
     double velocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
 
-    if (Math.abs(azimuth) < deadZoneAngle) {
-      robot_.chassis_.setRotation(0);
+    if (Math.abs(azimuth) < deadZoneToCentered) {
+      robot_.chassis_.halt();
       return;
     }
 
-    if (Math.signum(velocity) * Math.signum(azimuth) == -1.0) { // rotating away from target
+    if ((Math.signum(velocity) == Math.signum(azimuth)) || velocity == 0) { // rotating away from target
+      double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine;
+      robot_.chassis_.setRotation(speed * Math.signum(azimuth));
+    }else{
       robot_.chassis_.setRotation(-velocity/2.); // reverse and slow
-      System.out.println("**************** " + velocity);
-      return;
     }
-    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / Math.pow((angleToBeginSlowingDown - Math.abs(azimuth)), 2);
-    robot_.chassis_.setRotation(speed * Math.signum(azimuth));
-
-    //double speed = fast_ / (45 - Math.abs(azimuth));
-    //robot_.chassis_.setRotation(Math.abs(azimuth) >= 45 ? fast_ * Math.signum(azimuth) : speed * Math.signum(azimuth));
   }
   @Override
   public void end(boolean interrupted) {
