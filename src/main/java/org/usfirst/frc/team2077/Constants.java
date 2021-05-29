@@ -23,23 +23,10 @@ public final class Constants {
 
 
     // TODO: move motor RPM limit back up and use acceleration and/or stick scaling to optimize driveability
-    public final double STARDESTROYER_MOTOR_RPM_LIMIT = 4000; // (82 inches/second)
     // TODO: use acceleration constants where appropriate throughout other code
     // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
 
 
     public final double INFRARED_MIN_LOADED = 1.4;
     public final double INFRARED_MAX_LOADED = 4;
-
-    public final double PIZZABOT_WHEELBASE = 17.5; // inches 
-    public final double PIZZABOT_TRACK_WIDTH = 18.0; // inches 
-    public final double PIZZABOT_WHEEL_RADIUS = 3.0; // inches
-    public final double PIZZABOT_MOTOR_RPM_LIMIT = 4000; // maximum speed may be limited by RPM or inches/second
-
-    public final double PIZZABOT_CAMERA_HEIGHT = 17.5; // inches
-    public final double PIZZABOT_CAMERA_TILT = 25.5; // degrees above vertical
-    public final double PIZZABOT_CAMERA_POSITION_NORTH = 2.; // inches forward from chassis center to camara lens
-
-    public final double PIZZABOT_LAUNCHER_POSITION_NORTH = 2.; // inches forward from chassis center to camara lens
-    public final double PIZZABOT_LAUNCHER_HEIGHT = 12.0; // inches (approximate)
 }

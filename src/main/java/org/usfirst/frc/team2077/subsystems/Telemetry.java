@@ -32,14 +32,13 @@ public class Telemetry extends SubsystemBase {
         getNTE("Target").setDoubleArray(robot_.crosshairs_.get());
         getNTE("Crosshairs").setDoubleArray(robot_.crosshairs_.getCamera());
 
-        if (robot_.potentialSensor_ != null) {
-            getNTE("screwyPotentiometerVoltage").setDouble(robot_.potentialSensor_.getScrewVoltage());
-        }
+        //TODO: Finish below
+//        if (robot_.potentialSensor_ != null) {
+//            getNTE("screwyPotentiometerVoltage").setDouble(robot_.potentialSensor_.getScrewVoltage());
+//        }
 
         if (robot_.launcher_ instanceof Launcher) {
-            getNTE("LauncherSpeed").setDoubleArray(((Launcher)robot_.launcher_).getLauncherSpeed()); // array version of leftReading/rightReading
-            getNTE("rightReading").setDouble(((Launcher)robot_.launcher_).getLaunchVelR());
-            getNTE("leftReading").setDouble(((Launcher)robot_.launcher_).getLaunchVelL());
+            getNTE("RangeAV").setDoubleArray(((Launcher)robot_.launcher_).getRangeAV());
             getNTE("setPointShoot").setDouble(robot_.testLauncher_.launcherRPM_);
             getNTE("ReadyShoot").setBoolean(robot_.testLauncher_.isReady());
         }

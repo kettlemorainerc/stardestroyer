@@ -29,9 +29,9 @@ public class LauncherScrewTest extends CommandBase {
 
   @Override
   public void execute() {
-    double currentPosition = robot_.testLauncher_.getScrewPosition();
     // SmartDashboard.putNumber("testing?", currentPosition + (up_ ? .1 : -.1));
-    robot_.testLauncher_.setScrewPosition(currentPosition + (up_ ? .1 : -.1));
+
+    robot_.testLauncher_.setScrewPosition((up_ ? 1 : -1) * 20 * 4800, false);
     done = true;
   }
 

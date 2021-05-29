@@ -7,42 +7,43 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
-import static org.usfirst.frc.team2077.Robot.*;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.AssemblyPosition.*;
 
 public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private static final double WHEEL_GEAR_RATIO = 10.714, WHEEL_RADIUS = 4;
     private static final double LAUNCHER_WHEEL_RADIUS = 2, LAUNCHER_GEAR_RATIO = 1;
-    private static final double ORIGINAL_P = 5e-5, ORIGINAL_I = 1e-6, ORIGINAL_D = 0;
-    private static final boolean USE_SOFTWARE_PID = false, USE_ORIGINAL_PID = false;
+    private static final int MAX_SHOOTER_RPM = 5400, MAX_WHEEL_RPM = 3000;
+    private static final boolean USE_SOFTWARE_PID = true;
 
     public enum DrivePosition {
-        FRONT_RIGHT(NORTH_EAST, 2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1e-4, 1e-6, 0),
-        BACK_RIGHT(SOUTH_EAST, 3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.1e-4, 1e-6, 0),
-        BACK_LEFT(SOUTH_WEST, 4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
-        FRONT_LEFT(NORTH_WEST, 1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, 1.4e-4, 1e-6, 0),
+        FRONT_RIGHT(NORTH_EAST, 2, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, MAX_WHEEL_RPM, 1e-4, 1e-6, 0),
+        BACK_RIGHT(SOUTH_EAST, 3, true, WHEEL_GEAR_RATIO, WHEEL_RADIUS, MAX_WHEEL_RPM, 1.1e-4, 1e-6, 0),
+        BACK_LEFT(SOUTH_WEST, 4, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, MAX_WHEEL_RPM, 1.4e-4, 1e-6, 0),
+        FRONT_LEFT(NORTH_WEST, 1, false, WHEEL_GEAR_RATIO, WHEEL_RADIUS, MAX_WHEEL_RPM, 1.4e-4, 1e-6, 0),
 
-        LEFT_SHOOTER(null, 5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS),
-        RIGHT_SHOOTER(null, 6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS)
+        LEFT_SHOOTER(null, 5, true, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS, MAX_WHEEL_RPM),
+        RIGHT_SHOOTER(null, 6, false, LAUNCHER_GEAR_RATIO, LAUNCHER_WHEEL_RADIUS, MAX_WHEEL_RPM)
         ;
 
         private final double gearRatio;
         private final double radius;
+        private final double maxRPM;
         private final int ID;
         private final boolean INVERSE;
         private final double P, I, D;
         private final AssemblyPosition WHEEL_POSITION;
 
-        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius) {
-            this(position, id, inverse, gearRatio, radius, ORIGINAL_P, ORIGINAL_I, ORIGINAL_D);
+        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM) {
+            this(position, id, inverse, gearRatio, radius, maxRPM, 1.4E-4, 1e-6, 0);
         }
 
-        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double p, double i, double d) {
+        DrivePosition(AssemblyPosition position, int id, boolean inverse, double gearRatio, double radius, double maxRPM, double p, double i, double d) {
             WHEEL_POSITION = position;
             ID = id;
             INVERSE = inverse;
             this.gearRatio = gearRatio;
             this.radius = radius;
+            this.maxRPM = maxRPM;
             this.P = p;
             this.I = i;
             this.D = d;
@@ -55,26 +56,21 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     private final CANEncoder encoder;
     private double setPoint;
     private final double circumference;
-    private final double maxRPM = robot_.constants_.STARDESTROYER_MOTOR_RPM_LIMIT;
+    private final double maxRPM;
     private final DrivePosition position;
 
     public SparkNeoDriveModule(final DrivePosition pos) {
         super(pos.ID, MotorType.kBrushless);
         this.position = pos;
+        maxRPM = pos.maxRPM;
         circumference = pos.radius * 2 * Math.PI;
         pidController = this.getPIDController();
         encoder = this.getEncoder();
 
-        if(USE_SOFTWARE_PID) {
-            if(USE_ORIGINAL_PID) {
-                pidController.setP(ORIGINAL_P);
-                pidController.setI(ORIGINAL_I);
-                pidController.setD(ORIGINAL_D);
-            } else {
-                pidController.setP(position.P);
-                pidController.setI(position.I);
-                pidController.setD(position.D);
-            }
+        if(USE_SOFTWARE_PID || position == DrivePosition.LEFT_SHOOTER || position == DrivePosition.RIGHT_SHOOTER) {
+            pidController.setP(position.P);
+            pidController.setI(position.I);
+            pidController.setD(position.D);
             pidController.setIZone(0);
             pidController.setFF(0);
             pidController.setOutputRange(-1, 1);

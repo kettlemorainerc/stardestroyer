@@ -13,15 +13,19 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath;
 
 public class SteerToCrosshairs extends CommandBase {
 
-  private double fast_;
-  private double slow_;
-  private double deceleration_;
+  private final double maxRPMFine;
+  private final double maxRPMCoarse;
+  private final double deceleration_;
+  private final double angleToBeginSlowingDown;
+  private final double deadZoneAngle;
   
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
-    fast_ = robot_.chassis_.getMaximumVelocity()[2];
-    slow_ = robot_.chassis_.getMinimumVelocity()[2];
+    maxRPMFine = 800;
+    maxRPMCoarse = 3000;
+    angleToBeginSlowingDown = 45;
     deceleration_ = robot_.chassis_.getAccelerationLimits()[2][1];
+    deadZoneAngle = .7; // TODO: Configure. Also consider range.
   }
 
   @Override
@@ -33,7 +37,7 @@ public class SteerToCrosshairs extends CommandBase {
     double crosshairHeading = robot_.crosshairs_.getHeading(); // angle from robot to target
     double rotationVelocity = robot_.chassis_.getVelocityCalculated().get(CLOCKWISE); // current rotation speed
 
-    if (Math.abs(crosshairHeading) < .5) { // considered "on target"  // TODO: Configure. Also consider range.
+    if (Math.abs(crosshairHeading) < deadZoneAngle) {
       robot_.chassis_.setRotation(0);
       return;
     }
@@ -43,17 +47,18 @@ public class SteerToCrosshairs extends CommandBase {
       System.out.println("**************** " + rotationVelocity);
       return;
     }
-    
-    double stopRotation = .5 * rotationVelocity*rotationVelocity / deceleration_; // stopping distance at deceleration limit from physics
-    double pad = Math.max(stopRotation*.1, Math.abs(rotationVelocity)*.08); // overestimate stopping distance by 5% or distance traveled in two .02 second control cycles
-    robot_.chassis_.setRotation((Math.abs(crosshairHeading)>(stopRotation+pad) ? fast_ : slow_) * Math.signum(crosshairHeading)); // start slowing a bit early, creep to end
-  }
+    double speed = Math.abs(crosshairHeading) >= angleToBeginSlowingDown ?
+        maxRPMCoarse :
+        maxRPMFine / Math.pow((angleToBeginSlowingDown - Math.abs(crosshairHeading)), 2);
+    robot_.chassis_.setRotation(speed * Math.signum(crosshairHeading));
 
+    //double speed = fast_ / (45 - Math.abs(azimuth));
+    //robot_.chassis_.setRotation(Math.abs(azimuth) >= 45 ? fast_ * Math.signum(azimuth) : speed * Math.signum(azimuth));
+  }
   @Override
   public void end(boolean interrupted) {
     robot_.chassis_.setRotation(0);
   }
-
   @Override
   public boolean isFinished() {
     return false;

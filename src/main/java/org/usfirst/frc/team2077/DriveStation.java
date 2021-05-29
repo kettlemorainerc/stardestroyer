@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
 
+import org.usfirst.frc.team2077.commands.ZeroScrew;
+
+
 public class DriveStation {
     public final Joystick primaryStick_ = new Joystick(0);
     public final Joystick secondaryStick_ = new Joystick(1);
@@ -31,8 +34,8 @@ public class DriveStation {
         Command aim_ = new AimCrosshairs();
         Command aimWASD_ = new AimCrosshairs(true);
 
-        JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
-        testing23_.whileHeld(new SteerToCrosshairs());
+//        JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
+//        testing23_.whileHeld(new SteerToCrosshairs());
         // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
 
 
@@ -47,45 +50,56 @@ public class DriveStation {
         // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
         JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1);
-        primaryTrigger_.whileHeld(new RunGrabber(0.6));
+        primaryTrigger_.whileHeld(new RunGrabber(1));
         // testing1_.whileHeld(new RunGrabber(0.3)); //for flysky controller
 
+        JoystickButton primary4_ = new JoystickButton(primaryStick_, 4);
+        primary4_.whenPressed(new ResetCrosshairs());
 
         JoystickButton secondary2_ = new JoystickButton(secondaryStick_, 2);
         secondary2_.whileHeld(new SteerToCrosshairs());
 
+        JoystickButton secondary3_ = new JoystickButton(secondaryStick_, 3);
+        //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
+        secondary3_.whenPressed(new ToggleLauncher());
 
         JoystickButton secondary4_ = new JoystickButton(secondaryStick_, 4);
         secondary4_.whenPressed(new LoadLauncherBack());
 
-        JoystickButton secondaryTrigger_ = new JoystickButton(secondaryStick_, 1);
-        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
-        secondaryTrigger_.whileHeld(new LoadLauncher());
+        JoystickButton secondary5_ = new JoystickButton(secondaryStick_, 5);
+        secondary5_.whileHeld(new Launch());
+
+        JoystickButton testing1_ = new JoystickButton(testingStick_, 1);
+        testing1_.whileHeld(new RunGrabber(0.5)); //for flysky controller
+
+        JoystickButton secondary6_ = new JoystickButton(secondaryStick_, 6);
+        secondary6_.whenPressed(new LauncherSpinTest(100));
+        secondary6_.whileHeld(new RunGrabber(.5));
 
         JoystickButton secondary7_ = new JoystickButton(secondaryStick_, 7);
         secondary7_.whenPressed(new LauncherSpinTest(-100));
 
-        JoystickButton secondary6_ = new JoystickButton(secondaryStick_, 6);
-        secondary6_.whenPressed(new LauncherSpinTest(100));
 
-        JoystickButton secondary8_ = new JoystickButton(secondaryStick_, 8);
-        secondary8_.whenPressed(new LauncherSpinTest(-10));
+        JoystickButton secondaryTrigger_ = new JoystickButton(secondaryStick_, 1);
+        secondaryTrigger_.whileHeld(new LoadLauncher());
+
+        //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
+//        secondary2_.whileHeld(new RangeToCrosshairs());
+//        secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
+
+//        JoystickButton secondary8_ = new JoystickButton(secondaryStick_, 8);
+//        secondary8_.whenPressed(new LauncherSpinTest(-10));
 
         JoystickButton secondary9_ = new JoystickButton(secondaryStick_, 9);
-        secondary9_.whenPressed(new LauncherSpinTest(10));
-
+        secondary9_.whenPressed(new ZeroScrew());
+//
         JoystickButton secondary10_ = new JoystickButton(secondaryStick_, 10);
         secondary10_.whileHeld(new LauncherScrewTest(false));
 
         JoystickButton secondary11_ = new JoystickButton(secondaryStick_, 11);
         secondary11_.whileHeld(new LauncherScrewTest(true));
 
-        JoystickButton secondary3_ = new JoystickButton(secondaryStick_, 3);
-        //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
-        secondary3_.whenPressed(new ToggleLauncher());
 
-
-        //----------------------------- KEYPAD COMMANDS -----------------------------//
         // testing1_.whenPressed(new ColorOperations());
         // testing1_.whenPressed(new AutonomousOperations());
         // testing2_.whenPressed(new ElevatorOperations());
