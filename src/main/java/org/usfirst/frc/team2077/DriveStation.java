@@ -25,28 +25,14 @@ public class DriveStation {
     public DriveStation(Subsystem position_,
                         Subsystem target_,
                         Crosshairs crosshairs_) {
-
-        //    Default teleop robot drive.
-        Command drive_ = new PrimaryStickDrive3Axis();
-        //    Continuous update of target range and direction based on robot motion.
-        Command track_ = new TrackTarget();
-        //    Operator input of target position relative to robot.
-        Command aim_ = new AimCrosshairs();
-        Command aimWASD_ = new AimCrosshairs(true);
-
-//        JoystickButton testing23_ = new JoystickButton(testingStick_, 23);
-//        testing23_.whileHeld(new SteerToCrosshairs());
-        // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
-
-
         CommandScheduler.getInstance()
-                        .setDefaultCommand(position_, drive_);
+                        .setDefaultCommand(position_, new PrimaryStickDrive3Axis());
         // Uncomment the following to move rotation to secondary stick.
         //CommandScheduler.getInstance().setDefaultCommand(heading_, new SecondaryStickDrive());
         CommandScheduler.getInstance()
-                        .setDefaultCommand(target_, track_);
+                        .setDefaultCommand(target_, new TrackTarget());
         CommandScheduler.getInstance()
-                        .setDefaultCommand(crosshairs_, aim_);
+                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
         // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
         JoystickButton primaryTrigger_ = new JoystickButton(primaryStick_, 1);

@@ -21,12 +21,6 @@ public final class Constants {
     public final int FISHEYE_CAMERA_PIXEL_WIDTH = 1000;
     public final int FISHEYE_CAMERA_FOCAL_LENGTH = 334; // azimuth only (elevation is linear y pixels from center times .13)
 
-
-    // TODO: move motor RPM limit back up and use acceleration and/or stick scaling to optimize driveability
-    // TODO: use acceleration constants where appropriate throughout other code
-    // TODO: different values for operator drive vs programmed motion vs short nudges, etc?
-
-
     public final double INFRARED_MIN_LOADED = 1.4;
     public final double INFRARED_MAX_LOADED = 4;
 }
