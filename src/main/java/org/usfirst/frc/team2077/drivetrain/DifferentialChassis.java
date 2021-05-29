@@ -8,7 +8,7 @@ package org.usfirst.frc.team2077.drivetrain;
 import java.util.EnumMap;
 
 import static org.usfirst.frc.team2077.Robot.*;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public class DifferentialChassis extends AbstractChassis {
 
@@ -64,27 +64,27 @@ public class DifferentialChassis extends AbstractChassis {
     }
 
     @Override
-    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocitySet() {
-        EnumMap<MecanumMath.VelocityDirection, Double> set = new EnumMap<>(MecanumMath.VelocityDirection.class);
+    public EnumMap<MecanumMath.Direction, Double> getVelocitySet() {
+        EnumMap<MecanumMath.Direction, Double> set = new EnumMap<>(MecanumMath.Direction.class);
         set.put(NORTH, northSet_);
-        set.put(MecanumMath.VelocityDirection.EAST, 0d);
-        set.put(MecanumMath.VelocityDirection.CLOCKWISE, clockwiseSet_);
+        set.put(MecanumMath.Direction.EAST, 0d);
+        set.put(MecanumMath.Direction.CLOCKWISE, clockwiseSet_);
         return set;
 //        return new double[] {northSet_, 0, clockwiseSet_};
     }
 
     @Override
-    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocityCalculated() {
-        EnumMap<MecanumMath.VelocityDirection, Double> set = new EnumMap<>(MecanumMath.VelocityDirection.class);
+    public EnumMap<MecanumMath.Direction, Double> getVelocityCalculated() {
+        EnumMap<MecanumMath.Direction, Double> set = new EnumMap<>(MecanumMath.Direction.class);
         set.put(NORTH, north_);
-        set.put(MecanumMath.VelocityDirection.EAST, 0d);
-        set.put(MecanumMath.VelocityDirection.CLOCKWISE, clockwise_);
+        set.put(MecanumMath.Direction.EAST, 0d);
+        set.put(MecanumMath.Direction.CLOCKWISE, clockwise_);
         return set;
 //        return new double[] {north_, 0, clockwise_};
     }
 
     @Override
-    public EnumMap<MecanumMath.VelocityDirection, Double> getVelocityMeasured() {
+    public EnumMap<MecanumMath.Direction, Double> getVelocityMeasured() {
         return getVelocityCalculated();
     }
 
@@ -96,7 +96,7 @@ public class DifferentialChassis extends AbstractChassis {
 
         // chassis velocity from internal set point
 //        double[] vS = getVelocityCalculated();
-        EnumMap<MecanumMath.VelocityDirection, Double> vS = getVelocityCalculated();
+        EnumMap<MecanumMath.Direction, Double> vS = getVelocityCalculated();
         // chassis velocity from motor/wheel measurements
         double[] w = {driveModule_[0].getVelocity(), driveModule_[1].getVelocity()};
         double[] v = differentialMath_.forward(w);

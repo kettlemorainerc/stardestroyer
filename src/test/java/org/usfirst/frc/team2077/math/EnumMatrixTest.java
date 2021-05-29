@@ -5,15 +5,15 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.AssemblyPosition.NORTH_WEST;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.NORTH;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.NORTH;
 
 public class EnumMatrixTest {
 	@Test
 	public void transpose_as_expected() {
-		EnumMatrix<AssemblyPosition, VelocityDirection> things = new EnumMatrix<>(AssemblyPosition.class, VelocityDirection.class);
+		EnumMatrix<AssemblyPosition, Direction> things = new EnumMatrix<>(AssemblyPosition.class, Direction.class);
 		things.set(NORTH, NORTH_WEST, 123);
 
-		EnumMatrix<VelocityDirection, AssemblyPosition> other_things = things.enumTranspose();
+		EnumMatrix<Direction, AssemblyPosition> other_things = things.enumTranspose();
 
 		assertEquals(other_things.getHeight(), things.getWidth());
 		assertEquals(other_things.getWidth(), things.getHeight());

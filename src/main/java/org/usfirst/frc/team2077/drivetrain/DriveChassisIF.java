@@ -6,7 +6,7 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
 
 import java.util.EnumMap;
 
@@ -34,7 +34,7 @@ public interface DriveChassisIF extends Subsystem {
     void rotateRelative(double clockwise);
 
     void setPosition(double north, double east, double heading);
-    double[] getPosition();
+    EnumMap<Direction, Double> getPosition();
 
 
     /**
@@ -43,7 +43,7 @@ public interface DriveChassisIF extends Subsystem {
      * to these values (positive or negative).
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getMaximumVelocity();
+    EnumMap<Direction, Double> getMaximumVelocity();
 
     /**
      * Minimum velocities necessary to ensure motion, as determined by
@@ -52,7 +52,7 @@ public interface DriveChassisIF extends Subsystem {
      * to these values (positive or negative).
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getMinimumVelocity();
+    EnumMap<Direction, Double> getMinimumVelocity();
 
     /**
      * Set maximum allowable linear (N/S or E/W) acceleration and deceleration.
@@ -138,18 +138,18 @@ public interface DriveChassisIF extends Subsystem {
      * Velocity set point.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    EnumMap<VelocityDirection, Double> getVelocitySet();
+    EnumMap<Direction, Double> getVelocitySet();
 
     /**
      * Internal velocity set point, after adjustment for acceleration and velocity limits.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    EnumMap<VelocityDirection, Double> getVelocityCalculated();
+    EnumMap<Direction, Double> getVelocityCalculated();
 
     /**
      * Measured velocity based on motor or wheel encoders if present.
      * May be affected by acceleration limits or calculated from relative settings.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    EnumMap<VelocityDirection, Double> getVelocityMeasured();
+    EnumMap<Direction, Double> getVelocityMeasured();
 }

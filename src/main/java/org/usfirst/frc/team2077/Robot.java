@@ -16,12 +16,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.commands.AutonomousCheck;
-import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
-import org.usfirst.frc.team2077.drivetrain.DriveModuleIF;
-import org.usfirst.frc.team2077.drivetrain.MecanumChassis;
-import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
+import org.usfirst.frc.team2077.drivetrain.*;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
 import org.usfirst.frc.team2077.sensors.*;
 import org.usfirst.frc.team2077.subsystems.*;
+
+import java.util.EnumMap;
+
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public class Robot extends TimedRobot {
 
@@ -103,8 +105,9 @@ public class Robot extends TimedRobot {
 		setupDriveTrain();
 		
 		robot_.chassis_.setPosition(-180, 0, 0); // TODO: Initialize from Smart Dashboard
-		double[] p = robot_.chassis_.getPosition();
-		robot_.crosshairs_.set(Math.atan2(-p[1], -p[0]), Math.sqrt(p[0] * p[0] + p[1] * p[1]));
+		EnumMap<Direction, Double> p = robot_.chassis_.getPosition();
+		robot_.crosshairs_.set(Math.atan2(-p.get(EAST), -p.get(NORTH)),
+							   Math.sqrt(p.get(NORTH) * p.get(NORTH) + p.get(EAST) * p.get(EAST)));
 
 		System.out.println("CROSSHAIRS:" + crosshairs_);
 

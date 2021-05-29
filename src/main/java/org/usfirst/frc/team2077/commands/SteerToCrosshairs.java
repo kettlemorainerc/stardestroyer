@@ -6,10 +6,9 @@
 package org.usfirst.frc.team2077.commands;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.CLOCKWISE;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.CLOCKWISE;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import org.usfirst.frc.team2077.drivetrain.MecanumMath;
 
 public class SteerToCrosshairs extends CommandBase {
 
@@ -18,7 +17,7 @@ public class SteerToCrosshairs extends CommandBase {
   private final double deceleration_;
   private final double angleToBeginSlowingDown;
   private final double deadZoneAngle;
-  
+
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
     maxRPMFine = 800;

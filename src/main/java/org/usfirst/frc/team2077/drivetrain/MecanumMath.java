@@ -144,7 +144,7 @@ public final class MecanumMath {
 	}
 
 	// TODO: name this better?
-	public enum VelocityDirection {
+	public enum Direction {
 		NORTH,
 		EAST,
 		CLOCKWISE,
@@ -158,7 +158,7 @@ public final class MecanumMath {
 	 * @param rotationCenter {N,E} coordinates of the robot's center of rotation relative to its geometric center.
 	 * @return A 4x3 inverse kinematic matrix <b>[R]</b> for use by {@link #inverse}.
 	 */
-	public static EnumMatrix<AssemblyPosition, VelocityDirection> createInverseMatrix(double length, double width, double[] rotationCenter) {
+	public static EnumMatrix<AssemblyPosition, Direction> createInverseMatrix(double length, double width, double[] rotationCenter) {
 
 		double[][] xy = {
 			{length / 2 - rotationCenter[0], width / 2 - rotationCenter[1]},
@@ -182,18 +182,18 @@ public final class MecanumMath {
 	 * @param inverseKinematicMatrix <b>[R]</b> - Inverse kinematic matrix 4x3.
 	 * @return <b>[F]</b> - 3x4 forward kinematic matrix for use by {@link #forward}.
 	 */
-	public static EnumMatrix<VelocityDirection, AssemblyPosition> createForwardMatrix(EnumMatrix<AssemblyPosition, VelocityDirection> inverseKinematicMatrix) {
+	public static EnumMatrix<Direction, AssemblyPosition> createForwardMatrix(EnumMatrix<AssemblyPosition, Direction> inverseKinematicMatrix) {
 
-		EnumMatrix<VelocityDirection, AssemblyPosition> transposedInverse = inverseKinematicMatrix.enumTranspose();
-		EnumMatrix<VelocityDirection, AssemblyPosition> forwardMatrix = transposedInverse.enumMultiply(inverseKinematicMatrix)
-																						 .enumInvert3x3()
-																						 .enumMultiply(transposedInverse);
+		EnumMatrix<Direction, AssemblyPosition> transposedInverse = inverseKinematicMatrix.enumTranspose();
+		EnumMatrix<Direction, AssemblyPosition> forwardMatrix = transposedInverse.enumMultiply(inverseKinematicMatrix)
+																				 .enumInvert3x3()
+																				 .enumMultiply(transposedInverse);
 
 		return forwardMatrix;
 	}
 
-	private final EnumMatrix<AssemblyPosition, VelocityDirection> reverseMatrix_;
-	private final EnumMatrix<VelocityDirection, AssemblyPosition> forwardMatrix_;
+	private final EnumMatrix<AssemblyPosition, Direction> reverseMatrix_;
+	private final EnumMatrix<Direction, AssemblyPosition> forwardMatrix_;
 	private final double length_;
 	private final double width_;
 	private final double wheelRadius_;
@@ -294,7 +294,7 @@ public final class MecanumMath {
 	 * @param translationMatrix <b>[V]</b>: [north/south translation, east/west translation, rotation], in user units.
 	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
-	public final EnumMap<AssemblyPosition, Double> inverse(EnumMap<VelocityDirection, Double> translationMatrix) {
+	public final EnumMap<AssemblyPosition, Double> inverse(EnumMap<Direction, Double> translationMatrix) {
 		return inverse(translationMatrix, new double[]{0, 0});
 	}
 
@@ -306,8 +306,8 @@ public final class MecanumMath {
 	 * @param rotationCenter {N,E} coordinates of the center of rotation relative to the robot's geometric center.
 	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
-	private EnumMap<AssemblyPosition, Double> inverse(EnumMap<VelocityDirection, Double> translationMatrix, double[] rotationCenter) {
-		EnumMatrix<AssemblyPosition, VelocityDirection> inverseKineticMatrix =
+	private EnumMap<AssemblyPosition, Double> inverse(EnumMap<Direction, Double> translationMatrix, double[] rotationCenter) {
+		EnumMatrix<AssemblyPosition, Direction> inverseKineticMatrix =
 			rotationCenter[0] == 0 && rotationCenter[1] == 0 ?
 				reverseMatrix_ :
 				createInverseMatrix(length_, width_, rotationCenter);
@@ -316,7 +316,7 @@ public final class MecanumMath {
 		for(AssemblyPosition position : AssemblyPosition.values()) {
 			wheelSpeedVector.put(position, 0d);
 
-			for(VelocityDirection direction : VelocityDirection.values()) {
+			for(Direction direction : Direction.values()) {
 				wheelSpeedVector.compute(position, (key, val) -> (
 					val + (
 						fromUserRobotSpeed(translationMatrix.get(direction)) * inverseKineticMatrix.get(direction, position)
@@ -338,10 +338,10 @@ public final class MecanumMath {
 	 * @param wheelSpeeds A wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 * @return [3] robot motion velocities [north/south translation, east/west translation, rotation] in user units.
 	 */
-	public final EnumMap<VelocityDirection, Double> forward(EnumMap<AssemblyPosition, Double> wheelSpeeds) {
-		EnumMap<VelocityDirection, Double> translation = new EnumMap<>(VelocityDirection.class);
+	public final EnumMap<Direction, Double> forward(EnumMap<AssemblyPosition, Double> wheelSpeeds) {
+		EnumMap<Direction, Double> translation = new EnumMap<>(Direction.class);
 
-		for(VelocityDirection direction: VelocityDirection.values()) {
+		for(Direction direction: Direction.values()) {
 			translation.put(direction, 0d);
 			for(AssemblyPosition position : AssemblyPosition.values()) {
 				translation.compute(direction, (k, val) -> (

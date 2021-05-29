@@ -10,7 +10,7 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import java.util.*;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public class MecanumChassis extends AbstractChassis {
 	private static final double WHEELBASE = 20.375; // inches
@@ -110,22 +110,22 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	@Override
-	public EnumMap<VelocityDirection, Double> getVelocitySet() {
+	public EnumMap<Direction, Double> getVelocitySet() {
 		return setVelocity;
 //		return new double[]{northSet_, eastSet_, clockwiseSet_};
 	}
 
 	@Override
-	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
+	public EnumMap<Direction, Double> getVelocityCalculated() {
 		return calculatedVelocity;
 	}
 
-	public EnumMap<VelocityDirection, Double> getCalculatedVelocity() {
+	public EnumMap<Direction, Double> getCalculatedVelocity() {
 		return calculatedVelocity;
 	}
 
 	@Override
-	public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
+	public EnumMap<Direction, Double> getVelocityMeasured() {
 		return velocityMeasured_;
 	}
 
@@ -168,14 +168,14 @@ public class MecanumChassis extends AbstractChassis {
 		if(robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
 			double[] pS = positionSet_.get();
 			double[] pM = positionMeasured_.get();
-			pS[VelocityDirection.CLOCKWISE.ordinal()] = pM[VelocityDirection.CLOCKWISE.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
+			pS[Direction.CLOCKWISE.ordinal()] = pM[Direction.CLOCKWISE.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
 			positionSet_.set(pS[NORTH.ordinal()],
-			                 pS[VelocityDirection.EAST.ordinal()],
-			                 pS[VelocityDirection.CLOCKWISE.ordinal()]);
+			                 pS[Direction.EAST.ordinal()],
+			                 pS[Direction.CLOCKWISE.ordinal()]);
 
 			positionMeasured_.set(pM[NORTH.ordinal()],
-			                      pM[VelocityDirection.EAST.ordinal()],
-			                      pM[VelocityDirection.CLOCKWISE.ordinal()]);
+			                      pM[Direction.EAST.ordinal()],
+			                      pM[Direction.CLOCKWISE.ordinal()]);
 		}
 	}
 

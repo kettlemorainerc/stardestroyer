@@ -6,6 +6,11 @@
 package org.usfirst.frc.team2077.math;
 
 import org.usfirst.frc.team2077.drivetrain.DriveChassisIF;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
+
+import java.util.EnumMap;
+
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public class Acceleration {
 
@@ -22,8 +27,8 @@ public class Acceleration {
     public Acceleration(double accelerationG, double decelerationG, DriveChassisIF chassis, double[] scale) {
         north_ = new double[] {G * accelerationG * scale[0], G * decelerationG * scale[0]};
         east_ = new double[] {G * accelerationG * scale[1], G * decelerationG * scale[1]};
-        double[] max = chassis.getMaximumVelocity();
-        double inchesToDegrees = max[2] / max[0];
+        EnumMap<Direction, Double> max = chassis.getMaximumVelocity();
+        double inchesToDegrees = max.get(CLOCKWISE) / max.get(NORTH);
         rotation_ = new double[] {inchesToDegrees * G * accelerationG * scale[2], inchesToDegrees * G * decelerationG * scale[2]};
     }
 

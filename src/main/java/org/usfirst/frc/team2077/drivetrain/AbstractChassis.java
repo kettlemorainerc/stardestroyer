@@ -13,14 +13,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.*;
 
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
 
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
     public final DriveModuleIF[] driveModule_;
-    protected EnumMap<VelocityDirection, Double> setVelocity = new EnumMap<>(VelocityDirection.class);
-    protected EnumMap<VelocityDirection, Double> calculatedVelocity = new EnumMap<>(VelocityDirection.class);
-    protected EnumMap<VelocityDirection, double[]> accelerationLimits = new EnumMap<>(VelocityDirection.class);
+    protected EnumMap<Direction, Double> setVelocity = new EnumMap<>(Direction.class);
+    protected EnumMap<Direction, Double> calculatedVelocity = new EnumMap<>(Direction.class);
+    protected EnumMap<Direction, double[]> accelerationLimits = new EnumMap<>(Direction.class);
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -53,7 +53,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
 
 //    protected double[] velocitySet_ = {0, 0, 0};
-    protected EnumMap<VelocityDirection, Double> velocityMeasured_;
+    protected EnumMap<Direction, Double> velocityMeasured_;
 
     // Debug flag gets set to true every Nth call to beginUpdate().
     protected int debugFrequency_ = 100; // N
@@ -97,13 +97,21 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected abstract void updateDriveModules();
 
     @Override
-    public double[] getMaximumVelocity() {
-        return new double[] {maximumSpeed_, maximumSpeed_, maximumRotation_};
+    public EnumMap<Direction, Double> getMaximumVelocity() {
+        EnumMap<Direction, Double> maxVel = new EnumMap<>(Direction.class);
+        maxVel.put(NORTH, maximumSpeed_);
+        maxVel.put(EAST, maximumSpeed_);
+        maxVel.put(CLOCKWISE, maximumRotation_);
+        return maxVel;
     }
 
     @Override
-    public double[] getMinimumVelocity() {
-        return new double[] {minimumSpeed_, minimumSpeed_, minimumRotation_};
+    public EnumMap<Direction, Double> getMinimumVelocity() {
+        EnumMap<Direction, Double> maxVel = new EnumMap<>(Direction.class);
+        maxVel.put(NORTH, minimumSpeed_);
+        maxVel.put(EAST, minimumSpeed_);
+        maxVel.put(CLOCKWISE, minimumRotation_);
+        return maxVel;
     }
 
     @Override
@@ -143,8 +151,8 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     }
 
     @Override
-    public double[] getPosition() {
-        return positionSet_.get();
+    public Position getPosition() {
+        return positionSet_.copy();
         //return positionMeasured_.get();
     }
 
@@ -163,19 +171,19 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public final void setVelocity01(double north, double east, double clockwise) {
-        double[] max = getMaximumVelocity();
-        setVelocity(north * max[0], east * max[1], clockwise * max[2]);
+        EnumMap<Direction, Double> max = getMaximumVelocity();
+        setVelocity(north * max.get(NORTH), east * max.get(EAST), clockwise * max.get(CLOCKWISE));
     }
 
     @Override
     public final void setVelocity01(double north, double east) {
-        double[] max = getMaximumVelocity();
-        setVelocity(north * max[0], east * max[1]);
+        EnumMap<Direction, Double> max = getMaximumVelocity();
+        setVelocity(north * max.get(NORTH), east * max.get(EAST));
     }
 
     @Override
     public final void setRotation01(double clockwise) {
-        setRotation(clockwise * getMaximumVelocity()[2]);
+        setRotation(clockwise * getMaximumVelocity().get(CLOCKWISE));
     }
 
     @Override
@@ -185,7 +193,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     }
 
     @Override
-    public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
+    public EnumMap<Direction, Double> getVelocityMeasured() {
         return getVelocityCalculated();
     }
 
@@ -199,14 +207,18 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public double[][] getAccelerationLimits() {
-        double[] max = getMaximumVelocity();
+        EnumMap<Direction, Double> max = getMaximumVelocity();
         double[] rotationAccelerationLimit = {
-            rotationAccelerationLimit_[0]>0 ? rotationAccelerationLimit_[0] : (northAccelerationLimit_[0]*max[2]/max[0]),
-            rotationAccelerationLimit_[1]>0 ? rotationAccelerationLimit_[1] : (northAccelerationLimit_[1]*max[2]/max[0])};
+            rotationAccelerationLimit_[0]>0 ?
+                rotationAccelerationLimit_[0] :
+                (northAccelerationLimit_[0]*max.get(CLOCKWISE)/max.get(NORTH)),
+            rotationAccelerationLimit_[1]>0 ?
+                rotationAccelerationLimit_[1] :
+                (northAccelerationLimit_[1]*max.get(CLOCKWISE)/max.get(NORTH))};
         return new double[][] {northAccelerationLimit_, eastAccelerationLimit_, rotationAccelerationLimit};
     }
 
-    protected double limit(VelocityDirection direction) {
+    protected double limit(Direction direction) {
         double newV = calculatedVelocity.get(direction),
                 oldV = setVelocity.get(direction);
         return limit(newV, oldV, maximumSpeed_, accelerationLimits.get(direction));
