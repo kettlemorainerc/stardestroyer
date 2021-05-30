@@ -11,7 +11,7 @@ import org.usfirst.frc.team2077.math.AccelerationLimits;
 import java.util.*;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
 public class MecanumChassis extends AbstractChassis {
@@ -54,7 +54,7 @@ public class MecanumChassis extends AbstractChassis {
 		maxRotation.put(WheelPosition.NORTH_WEST, -maximumSpeed_);
 		maxRotation.put(WheelPosition.SOUTH_WEST, -maximumSpeed_);
 
-		maximumRotation_ = mecanumMath_.forward(maxRotation).get(CLOCKWISE);
+		maximumRotation_ = mecanumMath_.forward(maxRotation).get(ROTATION);
 
 		// lowest chassis speeds supportable by the drive modules
 		minimumSpeed_ = minSpeedFromMax(maximumSpeed_);
@@ -77,8 +77,8 @@ public class MecanumChassis extends AbstractChassis {
 		                  accelerationLimits.get(NORTH, DECELERATION),
 		                  accelerationLimits.get(EAST, ACCELERATION),
 		                  accelerationLimits.get(EAST, DECELERATION),
-		                  accelerationLimits.get(CLOCKWISE, ACCELERATION),
-		                  accelerationLimits.get(CLOCKWISE, DECELERATION));
+		                  accelerationLimits.get(ROTATION, ACCELERATION),
+		                  accelerationLimits.get(ROTATION, DECELERATION));
 	}
 
 	@Override
@@ -104,30 +104,30 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
-		setVelocity.put(CLOCKWISE, clockwise);
+		setVelocity.put(ROTATION, clockwise);
 		clockwiseSet_ = clockwise;
 
-		accelerationLimits.set(CLOCKWISE, accelerationLimits.get(CLOCKWISE));
-		rotationAccelerationLimit_ = accelerationLimits.get(CLOCKWISE);
+		accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
+		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
 	}
 
 	@Override
-	public EnumMap<Direction, Double> getVelocitySet() {
+	public EnumMap<VelocityDirection, Double> getVelocitySet() {
 		return setVelocity;
 //		return new double[]{northSet_, eastSet_, clockwiseSet_};
 	}
 
 	@Override
-	public EnumMap<Direction, Double> getVelocityCalculated() {
+	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
 		return calculatedVelocity;
 	}
 
-	public EnumMap<Direction, Double> getCalculatedVelocity() {
+	public EnumMap<VelocityDirection, Double> getCalculatedVelocity() {
 		return calculatedVelocity;
 	}
 
 	@Override
-	public EnumMap<Direction, Double> getVelocityMeasured() {
+	public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
 		return velocityMeasured_;
 	}
 
@@ -156,25 +156,25 @@ public class MecanumChassis extends AbstractChassis {
 //			velocitySet_[NORTH.ordinal()] * timeSinceLastUpdate_,
 			setVelocity.get(EAST) * timeSinceLastUpdate_,
 //			velocitySet_[VelocityDirection.EAST.ordinal()] * timeSinceLastUpdate_,
-			setVelocity.get(CLOCKWISE) * timeSinceLastUpdate_
+			setVelocity.get(ROTATION) * timeSinceLastUpdate_
 //			velocitySet_[VelocityDirection.CLOCKWISE.ordinal()] * timeSinceLastUpdate_
 		);
 		positionMeasured_.moveRelative(
 			velocityMeasured_.get(NORTH) * timeSinceLastUpdate_,
 			velocityMeasured_.get(EAST) * timeSinceLastUpdate_,
-			velocityMeasured_.get(CLOCKWISE) * timeSinceLastUpdate_
+			velocityMeasured_.get(ROTATION) * timeSinceLastUpdate_
 		);
 		if(robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
 			double[] pS = positionSet_.get();
 			double[] pM = positionMeasured_.get();
-			pS[CLOCKWISE.ordinal()] = pM[CLOCKWISE.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
+			pS[ROTATION.ordinal()] = pM[ROTATION.ordinal()] = robot_.angleSensor_.getAngle(); // TODO: conditional on gyro availability
 			positionSet_.set(pS[NORTH.ordinal()],
 			                 pS[EAST.ordinal()],
-			                 pS[CLOCKWISE.ordinal()]);
+			                 pS[ROTATION.ordinal()]);
 
 			positionMeasured_.set(pM[NORTH.ordinal()],
 			                      pM[EAST.ordinal()],
-			                      pM[CLOCKWISE.ordinal()]);
+			                      pM[ROTATION.ordinal()]);
 		}
 	}
 

@@ -5,7 +5,7 @@ import org.usfirst.frc.team2077.math.EnumMatrix;
 import java.util.EnumMap;
 
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.WheelPosition.*;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
 /***
  * An implementation of the mecanum drivetrain inverse and forward kinematics described in
@@ -136,9 +136,6 @@ import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
  * @author 2077
  */
 public final class MecanumMath {
-	/**
-	 * These are the positions that this class cares about in regards to a motor/wheel/controller/encoder assembly
-	 */
 	public enum WheelPosition {
 		NORTH_EAST,
 		SOUTH_EAST,
@@ -146,11 +143,9 @@ public final class MecanumMath {
 		NORTH_WEST,
 	}
 
-	// TODO: name this better?
-	public enum Direction {
+	public enum VelocityDirection {
 		NORTH,
-		EAST,
-		CLOCKWISE,
+		EAST, ROTATION,
 	}
 
 	public static class Point {
@@ -166,8 +161,8 @@ public final class MecanumMath {
 			this.east = east;
 		}
 		
-		public EnumMatrix<Direction, WheelPosition> inverseMatrixForBotSize(double length, double width) {
-			EnumMatrix<WheelPosition, Direction> wheelCoords = new EnumMatrix<>(WheelPosition.class, Direction.class);
+		public EnumMatrix<VelocityDirection, WheelPosition> inverseMatrixForBotSize(double length, double width) {
+			EnumMatrix<WheelPosition, VelocityDirection> wheelCoords = new EnumMatrix<>(WheelPosition.class, VelocityDirection.class);
 			wheelCoords.set(NORTH_EAST, NORTH, length / 2 - north);
 			wheelCoords.set(NORTH_EAST, EAST, width / 2 - east);
 			wheelCoords.set(NORTH_WEST, NORTH, length / 2 - north);
@@ -178,36 +173,36 @@ public final class MecanumMath {
 			wheelCoords.set(SOUTH_WEST, NORTH, -length / 2 - north);
 			wheelCoords.set(SOUTH_WEST, EAST, -width / 2 - east);
 
-			EnumMatrix<Direction, WheelPosition> inverseMatrix = new EnumMatrix<>(
-				Direction.class,
+			EnumMatrix<VelocityDirection, WheelPosition> inverseMatrix = new EnumMatrix<>(
+				VelocityDirection.class,
 				WheelPosition.class
-				);
+			);
 			inverseMatrix.set(NORTH, NORTH_EAST, 1d);
 			inverseMatrix.set(EAST, NORTH_EAST, -1d);
 			inverseMatrix.set(
-				CLOCKWISE,
+				ROTATION,
 				NORTH_EAST,
 				-wheelCoords.get(NORTH_EAST, NORTH) - wheelCoords.get(NORTH_EAST, EAST)
 			);
 			inverseMatrix.set(NORTH, NORTH_WEST, 1d);
 			inverseMatrix.set(EAST, NORTH_WEST, 1d);
 			inverseMatrix.set(
-				CLOCKWISE,
+				ROTATION,
 				NORTH_WEST,
-				-wheelCoords.get(NORTH_WEST, NORTH) - wheelCoords.get(NORTH_WEST, EAST)
+				wheelCoords.get(NORTH_WEST, NORTH) - wheelCoords.get(NORTH_WEST, EAST)
 			);
 
 			inverseMatrix.set(NORTH, SOUTH_EAST, 1d);
 			inverseMatrix.set(EAST, SOUTH_EAST, 1d);
 			inverseMatrix.set(
-				CLOCKWISE,
+				ROTATION,
 				SOUTH_EAST,
 				wheelCoords.get(SOUTH_EAST, NORTH) - wheelCoords.get(SOUTH_EAST, EAST)
 			);
 			inverseMatrix.set(NORTH, SOUTH_WEST, 1d);
 			inverseMatrix.set(EAST, SOUTH_WEST, -1d);
 			inverseMatrix.set(
-				CLOCKWISE,
+				ROTATION,
 				SOUTH_WEST,
 				-wheelCoords.get(SOUTH_WEST, NORTH) - wheelCoords.get(SOUTH_WEST, EAST)
 			);
@@ -224,15 +219,15 @@ public final class MecanumMath {
 	 * @param inverseKinematicMatrix <b>[R]</b> - Inverse kinematic matrix 4x3.
 	 * @return <b>[F]</b> - 3x4 forward kinematic matrix for use by {@link #forward}.
 	 */
-	public static EnumMatrix<WheelPosition, Direction> createForwardMatrix(EnumMatrix<Direction, WheelPosition> inverseKinematicMatrix) {
-		EnumMatrix<WheelPosition, Direction> transposedInverse = inverseKinematicMatrix.enumTranspose();
+	public static EnumMatrix<WheelPosition, VelocityDirection> createForwardMatrix(EnumMatrix<VelocityDirection, WheelPosition> inverseKinematicMatrix) {
+		EnumMatrix<WheelPosition, VelocityDirection> transposedInverse = inverseKinematicMatrix.enumTranspose();
 		return transposedInverse.enumMultiply(inverseKinematicMatrix)
 								.enumInvert3x3()
 								.enumMultiply(transposedInverse);
 	}
 
-	private final EnumMatrix<Direction, WheelPosition> reverseMatrix_;
-	private final EnumMatrix<WheelPosition, Direction> forwardMatrix_;
+	private final EnumMatrix<VelocityDirection, WheelPosition> reverseMatrix_;
+	private final EnumMatrix<WheelPosition, VelocityDirection> forwardMatrix_;
 	private final double length_;
 	private final double width_;
 	private final double wheelRadius_;
@@ -332,7 +327,7 @@ public final class MecanumMath {
 	 * @param translationMatrix <b>[V]</b>: [north/south translation, east/west translation, rotation], in user units.
 	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
-	public final EnumMap<WheelPosition, Double> inverse(EnumMap<Direction, Double> translationMatrix) {
+	public final EnumMap<WheelPosition, Double> inverse(EnumMap<VelocityDirection, Double> translationMatrix) {
 		return inverse(translationMatrix, new Point(0, 0));
 	}
 
@@ -344,8 +339,8 @@ public final class MecanumMath {
 	 * @param rotationCenter {N,E} coordinates of the center of rotation relative to the robot's geometric center.
 	 * @return The wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 */
-	private EnumMap<WheelPosition, Double> inverse(EnumMap<Direction, Double> translationMatrix, Point rotationCenter) {
-		EnumMatrix<Direction, WheelPosition> inverseKineticMatrix =
+	private EnumMap<WheelPosition, Double> inverse(EnumMap<VelocityDirection, Double> translationMatrix, Point rotationCenter) {
+		EnumMatrix<VelocityDirection, WheelPosition> inverseKineticMatrix =
 			rotationCenter.north == 0 && rotationCenter.east == 0 ?
 				reverseMatrix_ :
 				rotationCenter.inverseMatrixForBotSize(length_, width_);
@@ -354,15 +349,21 @@ public final class MecanumMath {
 		for(WheelPosition position : WheelPosition.values()) {
 			wheelSpeedVector.put(position, 0d);
 
-			for(Direction direction : Direction.values()) {
-				wheelSpeedVector.compute(position, (key, val) -> (
-					val + (
-						fromUserRobotSpeed(translationMatrix.get(direction)) * inverseKineticMatrix.get(direction, position)
-				  	) / wheelRadius_
-				));
+			for(VelocityDirection direction : VelocityDirection.values()) {
+				wheelSpeedVector.compute(
+					position,
+					(key, val) -> {
+						double adjustedValue = direction == ROTATION ?
+						                       fromUserRotationSpeed(translationMatrix.get(direction)) :
+						                       fromUserRobotSpeed(translationMatrix.get(direction));
+						return val + (adjustedValue * inverseKineticMatrix.get(direction, position)) / wheelRadius_;
+					}
+				);
 			}
+		}
 
-			wheelSpeedVector.compute(position, (key, val) -> toUserWheelSpeed(val));
+		for(WheelPosition position : WheelPosition.values()){
+			wheelSpeedVector.compute(position, (k, v) -> toUserWheelSpeed(v));
 		}
 
 		return wheelSpeedVector;
@@ -370,25 +371,31 @@ public final class MecanumMath {
 
 	/***
 	 * Solve the forward kinematic equation <b>[V] = [F][&Omega;](r)</b>.
-	 * This method wraps the static {@link #forward(EnumMap)} method, passing the internal
-	 * <b>[F]</b> matrix and wheel radius initialized in the constructor, and converting input and output
-	 * values from and to user units if conversion factors were specified.
 	 * @param wheelSpeeds A wheel speed vector <b>[&Omega;]</b>: [NE, SE, SW, NW] in user units.
 	 * @return [3] robot motion velocities [north/south translation, east/west translation, rotation] in user units.
 	 */
-	public final EnumMap<Direction, Double> forward(EnumMap<WheelPosition, Double> wheelSpeeds) {
-		EnumMap<Direction, Double> translation = new EnumMap<>(Direction.class);
+	public final EnumMap<VelocityDirection, Double> forward(EnumMap<WheelPosition, Double> wheelSpeeds) {
+		EnumMap<VelocityDirection, Double> translation = new EnumMap<>(VelocityDirection.class);
 
-		for(Direction direction: Direction.values()) {
+		for(VelocityDirection direction: VelocityDirection.values()) {
 			translation.put(direction, 0d);
 			for(WheelPosition position : WheelPosition.values()) {
-				translation.compute(direction, (k, val) -> (
-					val + (fromUserWheelSpeed(wheelSpeeds.get(position)) *
-						   forwardMatrix_.get(position, direction) *
-						   wheelRadius_)
-				));
+				translation.compute(
+					direction,
+					(k, val) -> (
+						val + (fromUserWheelSpeed(wheelSpeeds.get(position)) *
+						       forwardMatrix_.get(position, direction) *
+						       wheelRadius_)
+					)
+				);
 			}
-			translation.compute(direction, (k, val) -> toUserWheelSpeed(val));
+		}
+
+		for(VelocityDirection direction : VelocityDirection.values()) {
+			translation.compute(
+				direction,
+				(k, v) -> direction == ROTATION ? toUserRotationSpeed(v) : toUserRobotSpeed(v)
+			);
 		}
 
 		return translation;
@@ -431,5 +438,43 @@ public final class MecanumMath {
 	 */
 	private double toUserWheelSpeed(double radiansPerSecond) {
 		return radiansPerSecond * wheelSpeedFactor_;
+	}
+
+	/***
+	 * Convert a robot translation speed from distance
+	 * (where distance is in the length/width/radius units passed to the constructor) to user units
+	 * by multiplying the input value by the conversion factor passed to the
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double)}.
+	 * @param unitsPerSecond A N/S or E/W robot translation velocity component in in distance
+	 * as returned by {@link #forward(EnumMap)}.
+	 * @return Speed in user units as returned by {@link #forward(EnumMap)}.
+	 */
+	private double toUserRobotSpeed(double unitsPerSecond) {
+		return unitsPerSecond * robotSpeedFactor_;
+	}
+
+	/***
+	 * Convert a robot rotation speed from user units to radians
+	 * by dividing the input value by the conversion factor passed to the
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double, Point)}
+	 * @param userRotationSpeed A robot rotational velocity in user units
+	 * as input to {@link #inverse(EnumMap)}.
+	 * @return Rotational velocity (radians)
+	 * as expected by {@link #inverse(EnumMap)}.
+	 */
+	private double fromUserRotationSpeed(double userRotationSpeed) {
+		return userRotationSpeed / rotationSpeedFactor_;
+	}
+
+	/***
+	 * Convert a robot rotation speed from radians to user units
+	 * by multiplying the input value by the conversion factor passed to the
+	 * constructor {@link #MecanumMath(double, double, double, double, double, double)}.
+	 * @param radiansPerSecond A robot rotational velocity in radians
+	 * as returned by {@link #forward(EnumMap)}.
+	 * @return Speed in user units as returned by {@link #forward(EnumMap)}.
+	 */
+	private double toUserRotationSpeed(double radiansPerSecond) {
+		return radiansPerSecond * rotationSpeedFactor_;
 	}
 }

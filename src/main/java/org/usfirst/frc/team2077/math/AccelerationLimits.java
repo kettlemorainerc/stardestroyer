@@ -6,11 +6,11 @@
 package org.usfirst.frc.team2077.math;
 
 import org.usfirst.frc.team2077.drivetrain.DriveChassisIF;
-import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
 
 import java.util.EnumMap;
 
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
 public class AccelerationLimits {
@@ -20,7 +20,7 @@ public class AccelerationLimits {
         DECELERATION
     }
 
-    protected final EnumMatrix<Type, Direction> LIMITS = new EnumMatrix<>(Type.class, Direction.class);;
+    protected final EnumMatrix<Type, VelocityDirection> LIMITS = new EnumMatrix<>(Type.class, VelocityDirection.class);;
     protected final DriveChassisIF defaultChassis;
     public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
 
@@ -34,47 +34,47 @@ public class AccelerationLimits {
         put(NORTH, accelerationG, decelerationG, scale[NORTH.ordinal()]);
         put(EAST, accelerationG, decelerationG, scale[EAST.ordinal()]);
 
-        EnumMap<Direction, Double> max = chassis.getMaximumVelocity();
-        double inchesToDegrees = max.get(CLOCKWISE) / max.get(NORTH);
+        EnumMap<VelocityDirection, Double> max = chassis.getMaximumVelocity();
+        double inchesToDegrees = max.get(ROTATION) / max.get(NORTH);
 
-        put(CLOCKWISE, inchesToDegrees * accelerationG, inchesToDegrees * decelerationG, scale[CLOCKWISE.ordinal()]);
+        put(ROTATION, inchesToDegrees * accelerationG, inchesToDegrees * decelerationG, scale[ROTATION.ordinal()]);
     }
 
     public AccelerationLimits(double[][] doubles, DriveChassisIF chassis) {
         set(NORTH, doubles[NORTH.ordinal()]);
         set(EAST, doubles[EAST.ordinal()]);
-        set(CLOCKWISE, doubles[CLOCKWISE.ordinal()]);
+        set(ROTATION, doubles[ROTATION.ordinal()]);
 
         defaultChassis = chassis;
     }
 
-    private void put(Direction d, double acceleration, double deceleration, double scale) {
+    private void put(VelocityDirection d, double acceleration, double deceleration, double scale) {
         LIMITS.set(ACCELERATION, d, G * acceleration * scale);
         LIMITS.set(DECELERATION, d, G * deceleration * scale);
     }
 
-    public void set(Direction d, double[] limits) {
+    public void set(VelocityDirection d, double[] limits) {
         LIMITS.set(ACCELERATION, d, limits[ACCELERATION.ordinal()]);
         LIMITS.set(DECELERATION, d, limits[DECELERATION.ordinal()]);
     }
 
-    public double[] get(Direction d, DriveChassisIF chassis) {
+    public double[] get(VelocityDirection d, DriveChassisIF chassis) {
         double[] limits = LIMITS.getMatrix()[d.ordinal()];
-        if(d == CLOCKWISE) {
-            EnumMap<Direction, Double> max = chassis.getMaximumVelocity();
+        if(d == ROTATION) {
+            EnumMap<VelocityDirection, Double> max = chassis.getMaximumVelocity();
             double[] adjustedLimits = new double[2];
             int accel = ACCELERATION.ordinal();
             int decel = DECELERATION.ordinal();
 
-            adjustedLimits[accel] = limits[accel] > 0 ? limits[accel] : LIMITS.get(ACCELERATION, NORTH) * max.get(CLOCKWISE) / max.get(NORTH);
-            adjustedLimits[decel] = limits[decel] > 0 ? limits[decel] : LIMITS.get(DECELERATION, NORTH) * max.get(CLOCKWISE) / max.get(NORTH);
+            adjustedLimits[accel] = limits[accel] > 0 ? limits[accel] : LIMITS.get(ACCELERATION, NORTH) * max.get(ROTATION) / max.get(NORTH);
+            adjustedLimits[decel] = limits[decel] > 0 ? limits[decel] : LIMITS.get(DECELERATION, NORTH) * max.get(ROTATION) / max.get(NORTH);
 
             return adjustedLimits;
         }
         return LIMITS.getMatrix()[d.ordinal()];
     }
 
-    public double[] get(Direction d) {
+    public double[] get(VelocityDirection d) {
         return get(d, defaultChassis);
     }
 
@@ -82,9 +82,9 @@ public class AccelerationLimits {
      * gets the raw, unadjusted value of the limit
      * @param d Direction
      * @param t Type
-     * @return the limit for {@link Direction} {@code d} and {@link Type} {@code t}
+     * @return the limit for {@link VelocityDirection} {@code d} and {@link Type} {@code t}
      */
-    public double get(Direction d, Type t) {
+    public double get(VelocityDirection d, Type t) {
         return LIMITS.get(t, d);
     }
 

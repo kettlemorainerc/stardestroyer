@@ -6,11 +6,10 @@
 package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction;
 import org.usfirst.frc.team2077.math.Position;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.Direction.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
 /**
  * Continually adjust crosshairs based on robot movement.
@@ -33,13 +32,13 @@ public class TrackTarget extends CommandBase {
 	@Override
 	public void execute() {
 		double[] t = robot_.crosshairs_.get();
-		double n = oldPosition_.get(NORTH) + t[1] * Math.cos(Math.toRadians(t[0] + oldPosition_.get(CLOCKWISE))); // target absolute N
-		double e = oldPosition_.get(EAST) + t[1] * Math.sin(Math.toRadians(t[0] + oldPosition_.get(CLOCKWISE))); // target absolute E
+		double n = oldPosition_.get(NORTH) + t[1] * Math.cos(Math.toRadians(t[0] + oldPosition_.get(ROTATION))); // target absolute N
+		double e = oldPosition_.get(EAST) + t[1] * Math.sin(Math.toRadians(t[0] + oldPosition_.get(ROTATION))); // target absolute E
 		Position newPosition = robot_.chassis_.getPosition();
 		n -= newPosition.get(NORTH);
 		e -= newPosition.get(EAST);
 		double r = Math.sqrt(n * n + e * e);
-		double a = Math.toDegrees(Math.atan2(e, n)) - newPosition.get(CLOCKWISE);
+		double a = Math.toDegrees(Math.atan2(e, n)) - newPosition.get(ROTATION);
 		robot_.crosshairs_.set(a, r);
 		oldPosition_ = newPosition;
 	}
