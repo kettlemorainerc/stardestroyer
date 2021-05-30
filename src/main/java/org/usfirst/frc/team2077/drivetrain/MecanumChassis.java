@@ -9,6 +9,7 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import org.usfirst.frc.team2077.math.AccelerationLimits;
 
 import java.util.*;
+import java.util.stream.*;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
@@ -70,7 +71,6 @@ public class MecanumChassis extends AbstractChassis {
 		                  minimumSpeed_,
 		                  minimumRotation_);
 
-		double[][] a = getAccelerationLimits();
 		System.out.printf("%s ACCELERATION LIMITS: [DIRECTION MAX/MIN][NORTH %.1f/%.1f][EAST %.1f/%.1f][ROTATION %.1f/%.1f]%n",
 		                  getClass().getName(),
 		                  accelerationLimits.get(NORTH, ACCELERATION),
@@ -90,39 +90,26 @@ public class MecanumChassis extends AbstractChassis {
 	@Override
 	public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
 		setVelocity.put(NORTH, north);
-		northSet_ = north;
-
 		accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
-		northAccelerationLimit_ = accelerationLimits.get(NORTH);
 
 		setVelocity.put(EAST, east);
-		eastSet_ = east;
-
 		accelerationLimits.set(EAST, accelerationLimits.get(EAST));
-		eastAccelerationLimit_ = accelerationLimits.get(EAST);
+
 	}
 
 	@Override
 	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
 		setVelocity.put(ROTATION, clockwise);
-		clockwiseSet_ = clockwise;
-
 		accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
-		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
 	}
 
 	@Override
 	public EnumMap<VelocityDirection, Double> getVelocitySet() {
 		return setVelocity;
-//		return new double[]{northSet_, eastSet_, clockwiseSet_};
 	}
 
 	@Override
 	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
-		return calculatedVelocity;
-	}
-
-	public EnumMap<VelocityDirection, Double> getCalculatedVelocity() {
 		return calculatedVelocity;
 	}
 
@@ -133,12 +120,8 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updatePosition() {
-
-		// chassis velocity from internal set point
-//		velocitySet_ = getVelocityCalculated();
-		// chassis velocity from motor/wheel measurements
 		EnumMap<WheelPosition, Double> wheelVelocities = new EnumMap<>(WheelPosition.class);
-//		double[] wheelVelocities = new double[AssemblyPosition.values().length];
+
 		driveModule_.forEach((k, wheel) -> wheelVelocities.put(wheel.getWheelPosition(), wheel.getVelocity()));
 		velocityMeasured_ = mecanumMath_.forward(wheelVelocities);
 
@@ -146,18 +129,13 @@ public class MecanumChassis extends AbstractChassis {
 		// TODO: Measure actual vs measured E/W distances and insert an adjustment factor here.
 		// TODO: Put the adjustment factor in constants.
 		setVelocity.compute(EAST, (k, v) -> v * EAST_ADJUSTMENT);
-//		velocitySet_[VelocityDirection.EAST.ordinal()] *= EAST_ADJUSTMENT; // just a guess
-
 		velocityMeasured_.compute(EAST, (k, val) -> val * EAST_ADJUSTMENT); // just a guess
 
 		// update position with motion since last update
 		positionSet_.moveRelative(
 			setVelocity.get(NORTH) * timeSinceLastUpdate_,
-//			velocitySet_[NORTH.ordinal()] * timeSinceLastUpdate_,
 			setVelocity.get(EAST) * timeSinceLastUpdate_,
-//			velocitySet_[VelocityDirection.EAST.ordinal()] * timeSinceLastUpdate_,
 			setVelocity.get(ROTATION) * timeSinceLastUpdate_
-//			velocitySet_[VelocityDirection.CLOCKWISE.ordinal()] * timeSinceLastUpdate_
 		);
 		positionMeasured_.moveRelative(
 			velocityMeasured_.get(NORTH) * timeSinceLastUpdate_,
@@ -180,35 +158,14 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updateDriveModules() {
-
-//		double[] v = getVelocityCalculated();
-		//    if (debug_ ) System.out.print("CHASSIS: " + Math.round(v[0]*10.)/10. + " " + Math.round(v[1]*10.)/10. + " " + Math.round(v[2]*10.)/10.);
-//		double[] w = mecanumMath_.inverse(v);
-
-		// compute motor speeds
 		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(calculatedVelocity);
 
 		double max = wheelSpeed.values()
 		                       .stream()
-		                       .mapToDouble(a -> a)
-		                       .max()
+		                       .max(Double::compareTo)
 		                       .orElseThrow();
 
 		driveModule_.forEach((position, wheel) -> wheel.setVelocity(wheelSpeed.get(wheel.getWheelPosition()) / max));
-
-		// scale all motors proportionally if any are out of range
-//		double max = 1;
-//		for(double ws : w) {
-//			max = Math.max(max, Math.abs(ws) / maximumSpeed_);
-//		}
-
-		//    if (debug_ ) System.out.print(" WHEELS:");
-//		for(int i = 0; i < w.length; i++) {
-//			double ws = w[i] / max;
-//			driveModule_[i].setVelocity(ws);
-//			//        if (debug_ ) System.out.print(" " + Math.round(100.*ws)/100. + "(" + Math.round(100.*driveModule_[i].getVelocity())/100. + ")");
-//		}
-		// if (debug_ ) System.out.println(" " + this);
 	}
 
 	@Override

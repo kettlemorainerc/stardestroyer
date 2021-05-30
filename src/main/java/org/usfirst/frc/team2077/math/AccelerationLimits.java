@@ -13,6 +13,16 @@ import java.util.EnumMap;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
+/**
+ * Acceleration limits by {@link VelocityDirection} and {@link AccelerationLimits.Type}
+ *
+ * Ideally accel/decel values are set just below wheelspin or skidding to a stop.
+ * Optimal values are highly dependent on wheel/surface traction and somewhat on weight distribution.
+ * For safety err on the low side for acceleration, high for deceleration.
+ *
+ * North/East limits are in inches/second/second
+ * Rotation limits are in degrees/second/second
+ */
 public class AccelerationLimits {
 
     public enum Type {
@@ -56,6 +66,11 @@ public class AccelerationLimits {
     public void set(VelocityDirection d, double[] limits) {
         LIMITS.set(ACCELERATION, d, limits[ACCELERATION.ordinal()]);
         LIMITS.set(DECELERATION, d, limits[DECELERATION.ordinal()]);
+    }
+
+    public void set(VelocityDirection d, double acceleration, double deceleration) {
+        LIMITS.set(ACCELERATION, d, acceleration);
+        LIMITS.set(DECELERATION, d, deceleration);
     }
 
     public double[] get(VelocityDirection d, DriveChassisIF chassis) {
