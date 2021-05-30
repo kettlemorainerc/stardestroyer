@@ -391,12 +391,9 @@ public final class MecanumMath {
 			}
 		}
 
-		for(VelocityDirection direction : VelocityDirection.values()) {
-			translation.compute(
-				direction,
-				(k, v) -> direction == ROTATION ? toUserRotationSpeed(v) : toUserRobotSpeed(v)
-			);
-		}
+		translation.compute(NORTH, (k, v) -> toUserRobotSpeed(v));
+		translation.compute(EAST, (k, v) -> toUserRobotSpeed(v));
+		translation.compute(ROTATION, (k, v) -> toUserRotationSpeed(v));
 
 		return translation;
 	}
