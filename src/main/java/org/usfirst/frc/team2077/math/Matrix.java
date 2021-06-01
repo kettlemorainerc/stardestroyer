@@ -6,6 +6,14 @@ import java.util.function.Function;
 public class Matrix {
 	protected double[][] matrix;
 
+	private static double[][] matrixOfSize(int height, int width) {
+		double[][] matrix = new double[height][width];
+
+		for(int i = 0; i < matrix.length; i++) matrix[i] = new double[width];
+
+		return matrix;
+	}
+
 	public Matrix(int height, int width) {
 		/* 3 x 1 matrix
 		double[3][1] = {
@@ -14,7 +22,7 @@ public class Matrix {
 		 {0}
 		};
 		 */
-		this(new double[height][width]);
+		this(matrixOfSize(height, width));
 	}
 
 	protected Matrix(Matrix toTranspose) {
