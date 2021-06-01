@@ -16,7 +16,6 @@ public class RunGrabber extends CommandBase {
 
   public RunGrabber(double speed) {
     addRequirements(robot_.tgrabber_);
-    speed_ = speed;
   }
 
   @Override

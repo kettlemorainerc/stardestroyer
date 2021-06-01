@@ -7,21 +7,20 @@ package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-import static org.usfirst.frc.team2077.Robot.*;
+import static org.usfirst.frc.team2077.Robot.robot_;
 
 
-public class RunGrabber extends CommandBase {
+public class StopGrabber extends CommandBase {
 
   private double speed_;
 
-  public RunGrabber(double speed) {
+  public StopGrabber() {
     addRequirements(robot_.tgrabber_);
-    speed_ = speed;
   }
 
   @Override
   public void initialize() {
-    robot_.tgrabber_.toggleGrabber(speed_);
+    robot_.tgrabber_.stopGrabber();
     //System.out.println("Grabbing!");
   }
 

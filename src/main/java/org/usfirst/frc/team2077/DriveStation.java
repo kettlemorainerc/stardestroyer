@@ -102,24 +102,20 @@ public class DriveStation {
 
         primaryTrigger_.whileHeld(new RunGrabber(1));
         primary4_.whenPressed(new resetCrosshairs());
-        testing1_.whileHeld(new RunGrabber(0.5)); //for flysky controller
+//        testing1_.whileHeld(new RunGrabber(0.5)); //for flysky controller
 
-        secondary6_.whileHeld(new RunGrabber(.5));
-
-        secondary2_.whileHeld(new SteerToCrosshairs());
+        testing10_.whileHeld(new SteerToCrosshairs());
 //        secondary2_.whileHeld(new RangeToCrosshairs());
         //secondary3_.whenPressed(new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.DOUBLE_CAMERA_HEIGHT));
         secondary4_.whenPressed(new LoadLauncherBack());
-        secondary5_.whileHeld(new launch());
-        secondaryTrigger_.whileHeld(new LoadLauncher());
-        secondary7_.whenPressed(new LauncherSpinTest(-100));
-        secondary6_.whenPressed(new LauncherSpinTest(100));
+        testing3_.whileHeld(new launch());
+        testing4_.whileHeld(new LoadLauncher());
 //        secondary8_.whenPressed(new LauncherSpinTest(-10));
         secondary9_.whenPressed(new ZeroScrew());
         secondary10_.whileHeld(new LauncherScrewTest(false));
         secondary11_.whileHeld(new LauncherScrewTest(true));
 
-        secondary3_.whenPressed(new ToggleLauncher());
+        testing1_.whenPressed(new ToggleLauncher());
         //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 
