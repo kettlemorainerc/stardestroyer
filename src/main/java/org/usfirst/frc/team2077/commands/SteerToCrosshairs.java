@@ -13,7 +13,6 @@ public class SteerToCrosshairs extends CommandBase {
 
   private final double maxRPMFine;
   private final double maxRPMCoarse;
-  private final double deceleration_;
   private final double angleToBeginSlowingDown;
   private final double deadZoneToCentered;        //In degrees
   
@@ -22,7 +21,6 @@ public class SteerToCrosshairs extends CommandBase {
     maxRPMFine = 800;
     maxRPMCoarse = 3000;
     angleToBeginSlowingDown = 45;
-    deceleration_ = robot_.chassis_.getAccelerationLimits()[2][1];
     deadZoneToCentered = .5; //TODO: Requires tuning
   }
 
