@@ -68,9 +68,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double z = robot_.driveStation_.Flight.getZ();
 		if (z > .5) (new RunGrabber(1)).schedule();
 		else (new StopGrabber()).schedule();
-//		else if (z < -.5) {
-//
-//		}
 
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
@@ -81,10 +78,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
 
 			if (north == 0 && east == 0 && clockwise == 0) {
-//				System.out.println("Halting");
 				robot_.chassis_.halt();
 			} else {
-//				System.out.println("Moving");
 				robot_.chassis_.setVelocity01(
 						north * speedLimit * throttle,
 						east * speedLimit * throttle,
