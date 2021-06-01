@@ -67,14 +67,20 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
+		double z = robot_.driveStation_.Flight.getZ();
+		if (z > .5) (new RunGrabber(1)).schedule();
+		else (new StopGrabber()).schedule();
+//		else if (z < -.5) {
+//
+//		}
+
+
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
 			//System.out.println(" STICK(3): " + north + " \t" + east);
 			robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
 		} else { // we control heading
 //			 double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
-//			y(robot_.driveStation_.Flight.getRawAxis(4), .2, 1);
-			// System.out.println(" STICK(2): " + north + " \t" + east + " \t" + clockwise);
 
 			if (north == 0 && east == 0 && clockwise == 0) {
 //				System.out.println("Halting");
