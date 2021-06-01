@@ -26,11 +26,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double speedLimit = 1.0;
 		// Rotation limit as a percentage (0.0-1.0) of maximum wheel speed
 		double rotationLimit = 1.0; // 0.3;
-		// Acceleration/deceleration limit, in Gs
-		// Should be at or below the static coefficient of friction (CoF) between the wheels and the floor
-		// Too high allows wheelspin, too low is hazardous due to slow deceleration
-		//double accelerationLimit = 1.0;
-		double accelerationLimit = ACCELERATION_G_LIMIT;
 
 		if(robot_.analogSettings_ != null) {
 			double[] dialSetting = { // analog input dials, scaled to 0.0 - 1.0
@@ -46,14 +41,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			double rotationLimitMin = 0.2;
 			double rotationLimitMax = 1.0;
 			rotationLimit = rotationLimitMin + (rotationLimitMax - rotationLimitMin) * dialSetting[1];
-
-			double accelerationLimitMin = .05;
-			double accelerationLimitMax = 0.5;
-			accelerationLimit = accelerationLimitMin +
-								(accelerationLimitMax - accelerationLimitMin) * (1 - dialSetting[2]); // reverse dial
-			//decelerationLimit = Math.max(accelerationLimit, .25); // don't let this go too low for safety
 		}
-//		double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
 		double throttle = 1;
 
 		robot_.chassis_.setGLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT);
@@ -70,9 +58,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double z = robot_.driveStation_.Flight.getZ();
 		if (z > .5) (new RunGrabber(1)).schedule();
 		else (new StopGrabber()).schedule();
-//		else if (z < -.5) {
-//
-//		}
 
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
