@@ -28,7 +28,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected EnumMap<VelocityDirection, Double> setVelocity = defaultedDirectionMap(0d);
     // Velocity setpoint after adjustments for acceleration and velocity.
     protected EnumMap<VelocityDirection, Double> calculatedVelocity = defaultedDirectionMap(0d);
-    protected AccelerationLimits accelerationLimits;
+    protected AccelerationLimits accelerationLimits = new AccelerationLimits(0.5, 0.5, this);
 
     protected final Position positionSet_ = new Position(); // Continuously updated by integrating velocity setpoints.
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
