@@ -86,10 +86,9 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //			 double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
 
-//			if (north == 0 && east == 0 && clockwise == 0) {
-//				robot_.chassis_.halt();
-//			} else
-				{
+			if (north == 0 && east == 0 && clockwise == 0) {
+				robot_.chassis_.halt();
+			} else {
 				robot_.chassis_.setVelocity01(
 						north * speedLimit * throttle,
 						east * speedLimit * throttle,
