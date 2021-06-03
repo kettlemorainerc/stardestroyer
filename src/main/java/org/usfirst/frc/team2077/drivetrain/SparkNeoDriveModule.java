@@ -91,10 +91,10 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
     public void setVelocity(final double velocity) {
         //convert from inches/second to rpm
         setPoint = velocity*position.gearRatio*60/circumference;
-        if (setPoint > maxRPM) {
-            setPoint = maxRPM;
-        }
-        setRPM(setPoint);
+//        if (setPoint > maxRPM) {
+//            setPoint = maxRPM;
+//        }
+        setRPM(setPoint > maxRPM ? maxRPM : setPoint);
     }
 
     public void setRPM(double rpm) {
