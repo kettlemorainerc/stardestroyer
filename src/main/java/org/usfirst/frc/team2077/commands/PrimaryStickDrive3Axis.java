@@ -23,9 +23,12 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 	public void execute() {
 
 		// Speed limit as a percentage (0.0-1.0) of maximum wheel speed
+		boolean wasLoading = false;
 		double speedLimit = 1.0;
 		// Rotation limit as a percentage (0.0-1.0) of maximum wheel speed
 		double rotationLimit = 1.0; // 0.3;
+
+		RunGrabber grabCommand = new RunGrabber(1);
 
 		if(robot_.analogSettings_ != null) {
 			double[] dialSetting = { // analog input dials, scaled to 0.0 - 1.0
@@ -56,8 +59,14 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
 		double z = robot_.driveStation_.Flight.getZ();
-		if (z > .5) (new RunGrabber(1)).schedule();
-		else (new StopGrabber()).schedule();
+//		if (z > .5) {
+//			grabCommand.schedule();
+//			wasLoading = true;
+//		}
+//		else if (wasLoading){
+//			grabCommand.end(false);
+//			wasLoading = false;
+//		}
 
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
@@ -68,10 +77,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
 
 			if (north == 0 && east == 0 && clockwise == 0) {
-//				System.out.println("Halting");
 				robot_.chassis_.halt();
 			} else {
-//				System.out.println("Moving");
 				robot_.chassis_.setVelocity01(
 						north * speedLimit * throttle,
 						east * speedLimit * throttle,

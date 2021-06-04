@@ -184,7 +184,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public void launch() {
         // if (isLoaded()) {
         setRangeUpper(robot_.crosshairs_.getRange());
-//        setRunning(true);
+        setRunning(true);
 //        if (isReady()) {
 //            runLoader(0.6);
 //

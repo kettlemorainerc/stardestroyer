@@ -7,6 +7,7 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import org.usfirst.frc.team2077.commands.*;
@@ -33,18 +34,6 @@ public class DriveStation {
 
         bindDriverControl(primaryStick_);
         bindTechnicalControl(testingStick_);
-
-        JoystickButton secondary4_ = new JoystickButton(secondaryStick_, 4);
-        secondary4_.whenPressed(new LoadLauncherBack());
-
-        JoystickButton secondary9_ = new JoystickButton(secondaryStick_, 9);
-        secondary9_.whenPressed(new ZeroScrew());
-
-        JoystickButton secondary10_ = new JoystickButton(secondaryStick_, 10);
-        secondary10_.whileHeld(new LauncherScrewTest(false));
-
-        JoystickButton secondary11_ = new JoystickButton(secondaryStick_, 11);
-        secondary11_.whileHeld(new LauncherScrewTest(true));
     }
 
     private static void bindDriverControl(Joystick primary) {
@@ -58,7 +47,11 @@ public class DriveStation {
         new JoystickButton(testing, 1).whenPressed(new ToggleLauncher());
         new JoystickButton(testing, 3).whileHeld(new Launch());
         new JoystickButton(testing, 4).whileHeld(new LoadLauncher());
+        new JoystickButton(testing, 8).whenPressed(new LoadLauncherBack());
+        new JoystickButton(testing, 9).whileHeld(new RunGrabber(1));
         new JoystickButton(testing, 10).whileHeld(new SteerToCrosshairs());
+        new JoystickButton(testing, 12).whileHeld(new LauncherScrewTest(false));
+        new JoystickButton(testing, 16).whileHeld(new LauncherScrewTest(true));
     }
 
     /**
