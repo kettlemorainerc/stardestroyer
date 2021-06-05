@@ -49,6 +49,11 @@ public class SparkNeoDriveModule extends CANSparkMax implements DriveModuleIF {
             this.D = d;
         }
 
+        public static DrivePosition forWheelPosition(WheelPosition pos) {
+            for(DrivePosition drivePos : values()) if (drivePos.WHEEL_POSITION == pos) return drivePos;
+
+            throw new IllegalArgumentException("No DrivePosition found for wheel position: " + pos);
+        }
     }
 
     //6 inch wheels on rnd bot

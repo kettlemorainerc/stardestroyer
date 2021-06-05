@@ -89,6 +89,10 @@ public class Position extends EnumMap<VelocityDirection, Double> {
     public void set(double north, double east, double heading) {
         put(NORTH, north);
         put(EAST, east);
+        setHeading(heading);
+    }
+
+    public void setHeading(double heading) {
         put(ROTATION, heading);
     }
 

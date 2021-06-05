@@ -17,8 +17,8 @@ import org.usfirst.frc.team2077.commands.ZeroScrew;
 
 
 public class DriveStation {
-    public final Joystick primaryStick_ = new Joystick(0);
-    public final Joystick secondaryStick_ = new Joystick(1);
+//    public final Joystick primaryStick_ = new Joystick(0);
+//    public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
 
@@ -29,10 +29,10 @@ public class DriveStation {
                         .setDefaultCommand(position_, new PrimaryStickDrive3Axis());
         CommandScheduler.getInstance()
                         .setDefaultCommand(target_, new TrackTarget());
-        CommandScheduler.getInstance()
-                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
+//        CommandScheduler.getInstance()
+//                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
 
-        bindDriverControl(primaryStick_);
+//        bindDriverControl(primaryStick_);
         bindTechnicalControl(testingStick_);
     }
 
@@ -44,14 +44,14 @@ public class DriveStation {
     }
 
     private static void bindTechnicalControl(Joystick testing) {
-        new JoystickButton(testing, 1).whenPressed(new ToggleLauncher());
-        new JoystickButton(testing, 3).whileHeld(new Launch());
-        new JoystickButton(testing, 4).whileHeld(new LoadLauncher());
-        new JoystickButton(testing, 8).whenPressed(new LoadLauncherBack());
-        new JoystickButton(testing, 9).whileHeld(new RunGrabber(1));
-        new JoystickButton(testing, 10).whileHeld(new SteerToCrosshairs());
-        new JoystickButton(testing, 12).whileHeld(new LauncherScrewTest(false));
-        new JoystickButton(testing, 16).whileHeld(new LauncherScrewTest(true));
+//        new JoystickButton(testing, 1).whenPressed(new ToggleLauncher());
+//        new JoystickButton(testing, 3).whileHeld(new Launch());
+//        new JoystickButton(testing, 4).whileHeld(new LoadLauncher());
+//        new JoystickButton(testing, 8).whenPressed(new LoadLauncherBack());
+//        new JoystickButton(testing, 9).whileHeld(new RunGrabber(1));
+//        new JoystickButton(testing, 10).whileHeld(new SteerToCrosshairs());
+//        new JoystickButton(testing, 12).whileHeld(new LauncherScrewTest(false));
+//        new JoystickButton(testing, 16).whileHeld(new LauncherScrewTest(true));
     }
 
     /**

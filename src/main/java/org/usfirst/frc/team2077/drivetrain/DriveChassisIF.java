@@ -78,7 +78,7 @@ public interface DriveChassisIF extends Subsystem {
      * Acceleration and deceleration limits in units inches/second/second and degrees/second/second.
      * @return {linearAcceleration, linearDeceleration, rotationalAcceleration, rotationalDeceleration}
      */
-    double[][] getAccelerationLimits();
+    AccelerationLimits getAccelerationLimits();
 
     /**
      * @param north In inches per second.
@@ -147,10 +147,10 @@ public interface DriveChassisIF extends Subsystem {
      */
     EnumMap<VelocityDirection, Double> getVelocityCalculated();
 
-    /**
-     * Measured velocity based on motor or wheel encoders if present.
-     * May be affected by acceleration limits or calculated from relative settings.
-     * @return {north, east, rotation} Units are inches and degrees per second.
-     */
-    EnumMap<VelocityDirection, Double> getVelocityMeasured();
+//    /**
+//     * Measured velocity based on motor or wheel encoders if present.
+//     * May be affected by acceleration limits or calculated from relative settings.
+//     * @return {north, east, rotation} Units are inches and degrees per second.
+//     */
+//    EnumMap<VelocityDirection, Double> getCalculatedVelocity();
 }

@@ -58,7 +58,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
-		double z = robot_.driveStation_.Flight.getZ();
+//		double z = robot_.driveStation_.Flight.getZ();
 //		if (z > .5) {
 //			grabCommand.schedule();
 //			wasLoading = true;
@@ -79,6 +79,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			if (north == 0 && east == 0 && clockwise == 0) {
 				robot_.chassis_.halt();
 			} else {
+				System.out.printf("[Non-0 Stick inputs: N%s E%s R%s]%n", north, east, clockwise);
 				robot_.chassis_.setVelocity01(
 						north * speedLimit * throttle,
 						east * speedLimit * throttle,
