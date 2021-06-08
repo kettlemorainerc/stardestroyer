@@ -164,7 +164,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     }
 
     @Override
-    public EnumMap<VelocityDirection, Double> getPosition() {
+    public Position getPosition() {
         return positionSet_;
 //        return positionSet_.get();
         //return positionMeasured_.get();
