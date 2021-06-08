@@ -31,14 +31,23 @@ public class MecanumMathTest {
     }
 
     public <T extends Enum<T>> void assertEnumMapEquals(EnumMap<T, Double> expected, EnumMap<T, Double> actual) {
+        // I'm using a 0 delta so that I can feel confident that MecanumMath acts EXACTLY like, or at least within a VERY tight margin of, the original
+        assertEnumMapEquals(expected, actual, .0);
+    }
+
+    public <T extends Enum<T>> void assertEnumMapEquals(EnumMap<T, Double> expected, EnumMap<T, Double> actual, double tolerance) {
         for(T key : expected.keySet()) {
-            // I'm using a 0 delta so that I can feel confident that MecanumMath acts EXACTLY like, or at least within a VERY tight margin of, the original
-            assertEquals(String.format("Value of %s outside of wanted delta", key), expected.get(key), actual.get(key), .0);
+            assertEquals(String.format("Value of %s outside of wanted delta", key), expected.get(key), actual.get(key), tolerance);
         }
     }
 
     @Test
     public void forward_produces_expected_results() {
+        assertEnumMapEquals(
+            botVelocity(0, 0, 0),
+            math.forward(wheelVelocities(0, 0, 0, 0)),
+            0
+        );
         // move directionally N/S/E/W
         
         assertEnumMapEquals(
@@ -85,6 +94,10 @@ public class MecanumMathTest {
     
     @Test
     public void inverse_produces_expected_results() {
+        assertEnumMapEquals(
+            wheelVelocities(0, 0, 0, 0),
+            math.inverse(botVelocity(0, 0, 0))
+        );
         // move directionally N/S/E/W
         assertEnumMapEquals(
             wheelVelocities(4, 4, 4, 4),

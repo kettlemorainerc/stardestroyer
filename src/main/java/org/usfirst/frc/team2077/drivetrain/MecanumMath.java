@@ -3,6 +3,7 @@ package org.usfirst.frc.team2077.drivetrain;
 import org.usfirst.frc.team2077.math.EnumMatrix;
 
 import java.util.EnumMap;
+import java.util.ServiceLoader.Provider;
 
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.WheelPosition.*;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
@@ -136,6 +137,24 @@ import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.
  * @author 2077
  */
 public final class MecanumMath {
+	/**
+	 * Creates an enum map of keys and values. Values should be the same length, or longer, than keys.
+	 * @param keyClass the enum class to use for kesy
+	 * @param values the values for the mapped item of keyClass
+	 * @param <Key>
+	 * @param <Value>
+	 * @throws IndexOutOfBoundsException if there are more values than keys
+	 * @return
+	 */
+	public static <Key extends Enum<Key>, Value> EnumMap<Key, Value> mapOf(Class<Key> keyClass, Value... values) {
+		EnumMap<Key, Value> ret = new EnumMap<>(keyClass);
+		Key[] keys = keyClass.getEnumConstants();
+		for(int i = 0; i < keys.length; i++) {
+			ret.put(keys[i], values[i]);
+		}
+
+		return ret;
+	}
 	public enum WheelPosition {
 		NORTH_EAST,
 		SOUTH_EAST,

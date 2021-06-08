@@ -17,7 +17,7 @@ public class TestGrabber extends SubsystemBase {
     private boolean wasBLoaded = false; 
     private double liftSpeed = 0;
     private double inputSpeed = 0;
-    private boolean loading = false;
+    public boolean loading = false;
     private boolean InBetween = false;
     private boolean emptyT = false;
     private boolean emptyB = false;

@@ -7,26 +7,31 @@ package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-import static org.usfirst.frc.team2077.Robot.*;
+import static org.usfirst.frc.team2077.Robot.robot_;
 
-import org.usfirst.frc.team2077.DriveStation;
 
-public class SecondaryStickDrive extends CommandBase {
+public class StopGrabber extends CommandBase {
 
-  public SecondaryStickDrive() {
-    addRequirements(robot_.heading_);
+  private double speed_;
+
+  public StopGrabber() {
+    addRequirements(robot_.tgrabber_);
+  }
+
+  @Override
+  public void initialize() {
+    robot_.tgrabber_.stopGrabber();
+    //System.out.println("Grabbing!");
   }
 
   @Override
   public void execute() {
-    // TODO: Check joystick capabilities.
-    // TODO: Put deadband and exponent in drive station constants.
-    double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.secondaryStick_.getZ(), .2, 2.5);
-    robot_.chassis_.setRotation01(clockwise);
   }
 
   @Override
   public void end(boolean interrupted) {
+    robot_.tgrabber_.stopGrabber();
+    //System.out.println("Stopping!");
   }
 
   @Override
