@@ -8,7 +8,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class MecanumMathTest {
-    private MecanumMath math = new MecanumMath(20.375, 22.625, 4d, 4d, 1, 180 / Math.PI);
+    private final MecanumMath math = new MecanumMath(20.375, 22.625, 4d, 4d, 1, 180 / Math.PI);
 
     private EnumMap<WheelPosition, Double> wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
         EnumMap<WheelPosition, Double> velocities = new EnumMap<>(WheelPosition.class);
@@ -25,14 +25,15 @@ public class MecanumMathTest {
         velocity.put(VelocityDirection.NORTH, north);
         velocity.put(VelocityDirection.EAST, east);
         velocity.put(VelocityDirection.ROTATION, rotation);
-        
+
         return velocity;
 //        return new double[] {north, east, rotation};
     }
 
     public <T extends Enum<T>> void assertEnumMapEquals(EnumMap<T, Double> expected, EnumMap<T, Double> actual) {
         for(T key : expected.keySet()) {
-            assertEquals(String.format("Value of %s outside of wanted delta", key), expected.get(key), actual.get(key), .1);
+            // I'm using a 0 delta so that I can feel confident that MecanumMath acts EXACTLY like, or at least within a VERY tight margin of, the original
+            assertEquals(String.format("Value of %s outside of wanted delta", key), expected.get(key), actual.get(key), .0);
         }
     }
 
@@ -59,25 +60,25 @@ public class MecanumMathTest {
 
         // rotation
         assertEnumMapEquals(
-            botVelocity(0, 0, -10.65),
+            botVelocity(0, 0, -10.659679909410666),
             math.forward(wheelVelocities(4, 4, -4, -4))
         );
         assertEnumMapEquals(
-            botVelocity(0, 0, 39.97),
+            botVelocity(0, 0, 39.97379966029),
             math.forward(wheelVelocities(-15, -15, 15, 15))
         );
 
         // arbitrary inputs for more coverage
         assertEnumMapEquals(
-            botVelocity(72.25, 55.75, -177.88),
+            botVelocity(72.2475, 55.7475, -177.86342158846034),
             math.forward(wheelVelocities(83.24, 194.74, -50.24, 61.25))
         );
         assertEnumMapEquals(
-            botVelocity(44.75, 16.75, -44.63),
+            botVelocity(44.745, 16.75, -44.6240850207704),
             math.forward(wheelVelocities(44.74, 78.24, 11.25, 44.75))
         );
         assertEnumMapEquals(
-            botVelocity(1.75, -8.25, 3.33),
+            botVelocity(1.75, -8.245000000000001, 3.3178253718040693),
             math.forward(wheelVelocities(8.75, -7.74, 11.24, -5.25))
         );
     }
@@ -104,25 +105,25 @@ public class MecanumMathTest {
 
         // rotation
         assertEnumMapEquals(
-            wheelVelocities(4, 4, -4, -4),
+            wheelVelocities(3.996367654754016, 3.996367654754016, -3.996367654754016, -3.996367654754016),
             math.inverse(botVelocity(0, 0, -10.65))
         );
         assertEnumMapEquals(
-            wheelVelocities(-15, -15, 15, 15),
+            wheelVelocities(-14.998574193475871, -14.998574193475871, 14.998574193475871, 14.998574193475871),
             math.inverse(botVelocity(0, 0, 39.97))
         );
 
         // arbitrary inputs for more coverage
         assertEnumMapEquals(
-            wheelVelocities(83.24, 194.74, -50.24, 61.25),
+            wheelVelocities(83.24872097912154, 194.74872097912154, -50.24872097912154, 61.25127902087846),
             math.inverse(botVelocity(72.25, 55.75, -177.88))
         );
         assertEnumMapEquals(
-            wheelVelocities(44.74, 78.24, 11.25, 44.75),
+            wheelVelocities(44.74721957104899, 78.24721957104899, 11.25278042895101, 44.75278042895101),
             math.inverse(botVelocity(44.75, 16.75, -44.63))
         );
         assertEnumMapEquals(
-            wheelVelocities(8.75, -7.74, 11.24, -5.25),
+            wheelVelocities(8.75043152203466, -7.74956847796534, 11.24956847796534, -5.25043152203466),
             math.inverse(botVelocity(1.75, -8.25, 3.33))
         );
     }
