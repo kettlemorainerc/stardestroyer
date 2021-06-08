@@ -99,8 +99,11 @@ public class MecanumChassis extends AbstractChassis {
 	public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
 		northSet_ = north;
 		eastSet_ = east;
-		accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
-		accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+		this.accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
+		northAccelerationLimit_ = accelerationLimits.get(NORTH);
+
+		this.accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+		eastAccelerationLimit_ = accelerationLimits.get(EAST);
 //		northAccelerationLimit_ = accelerationLimits[0];
 //		eastAccelerationLimit_ = accelerationLimits[1];
 	}
@@ -108,7 +111,8 @@ public class MecanumChassis extends AbstractChassis {
 	@Override
 	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
 		clockwiseSet_ = clockwise;
-		accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
+		this.accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
+		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
 //		rotationAccelerationLimit_ = accelerationLimits[2];
 	}
 
