@@ -22,15 +22,9 @@ public class MecanumChassis extends AbstractChassis {
 		};
 	}
 
-	/**
-	 * @param driveModule [4]
-	 * @param wheelbase
-	 * @param trackWidth
-	 * @param wheelRadius
-	 */
-	public MecanumChassis(Constants constants_) {
+	MecanumChassis(DriveModuleIF[] driveModule, Constants constants_) {
 		super(
-			buildDriveModule(),
+			driveModule,
 			constants_.STARDESTROYER_WHEELBASE,
 			constants_.STARDESTROYER_TRACK_WIDTH,
 			constants_.STARDESTROYER_WHEEL_RADIUS
@@ -56,22 +50,26 @@ public class MecanumChassis extends AbstractChassis {
 		minimumRotation_ = maximumRotation_ * .1;
 
 		System.out.println(getClass().getName() +
-						   "MAXIMUM SPEED:" +
-						   Math.round(maximumSpeed_ * 10.) / 10. +
-						   " IN/SEC MAXIMUM ROTATION:" +
-						   Math.round(maximumRotation_ * 10.) / 10. +
-						   " DEG/SEC");
+		                   "MAXIMUM SPEED:" +
+		                   Math.round(maximumSpeed_ * 10.) / 10. +
+		                   " IN/SEC MAXIMUM ROTATION:" +
+		                   Math.round(maximumRotation_ * 10.) / 10. +
+		                   " DEG/SEC");
 		System.out.println(getClass().getName() +
-						   "MINIMUM SPEED:" +
-						   Math.round(minimumSpeed_ * 10.) / 10. +
-						   " IN/SEC MINIMUM ROTATION:" +
-						   Math.round(minimumRotation_ * 10.) / 10. +
-						   " DEG/SEC");
+		                   "MINIMUM SPEED:" +
+		                   Math.round(minimumSpeed_ * 10.) / 10. +
+		                   " IN/SEC MINIMUM ROTATION:" +
+		                   Math.round(minimumRotation_ * 10.) / 10. +
+		                   " DEG/SEC");
 		double[][] a = getAccelerationLimits();
 		System.out.println(getClass().getName() + "ACCELERATION:"
-						   + Math.round(a[0][0] * 10.) / 10. + "/" + Math.round(a[0][1] * 10.) / 10. + "/"
-						   + Math.round(a[1][0] * 10.) / 10. + "/" + Math.round(a[1][1] * 10.) / 10. + "/"
-						   + Math.round(a[2][0] * 10.) / 10. + "/" + Math.round(a[2][1] * 10.) / 10.);
+		                   + Math.round(a[0][0] * 10.) / 10. + "/" + Math.round(a[0][1] * 10.) / 10. + "/"
+		                   + Math.round(a[1][0] * 10.) / 10. + "/" + Math.round(a[1][1] * 10.) / 10. + "/"
+		                   + Math.round(a[2][0] * 10.) / 10. + "/" + Math.round(a[2][1] * 10.) / 10.);
+	}
+
+	public MecanumChassis(Constants constants_) {
+		this(buildDriveModule(), constants_);
 	}
 
 	@Override
