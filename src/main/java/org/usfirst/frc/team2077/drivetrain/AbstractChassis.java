@@ -224,7 +224,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 //            rotationAccelerationLimit_[1]>0 ? rotationAccelerationLimit_[1] : (northAccelerationLimit_[1]*max[2]/max[0])};
 //        return new double[][] {northAccelerationLimit_, eastAccelerationLimit_, rotationAccelerationLimit};
 
-        return accelerationLimits;
+        return accelerationLimits.getAdjustedAdjustments();
     }
 
     /**

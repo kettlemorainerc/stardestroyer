@@ -90,7 +90,23 @@ public class AccelerationLimits {
     }
 
     public double[] get(VelocityDirection d) {
-        return get(d, defaultChassis);
+        return LIMITS.getMatrix()[d.ordinal()];
+    }
+
+    public double[][] getAdjusted(DriveChassisIF chassisIF) {
+        return new double[][] {
+            get(NORTH, chassisIF),
+            get(EAST, chassisIF),
+            get(ROTATION, chassisIF)
+        };
+    }
+
+    public double[][] getAdjusted() {
+        return getAdjusted(defaultChassis);
+    }
+
+    public AccelerationLimits getAdjustedAdjustments() {
+        return new AccelerationLimits(getAdjusted(), defaultChassis);
     }
 
     /**
