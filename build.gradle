@@ -73,4 +73,7 @@ jar {
 
 test {
     useJUnit()
+    testLogging.showStandardStreams = true
+    testLogging.showStackTraces = true
+    testLogging.exceptionFormat = "full"
 }

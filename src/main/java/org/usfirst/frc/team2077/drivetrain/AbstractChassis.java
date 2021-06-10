@@ -12,6 +12,7 @@ import org.usfirst.frc.team2077.math.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.EnumMap;
+import java.util.function.*;
 
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
@@ -27,6 +28,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final double wheelbase_;
     protected final double trackWidth_;
     protected final double wheelRadius_;
+    protected final Supplier<Double> getSeconds;
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -43,7 +45,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected double minimumSpeed_;
     protected double minimumRotation_;
 
-    protected static final double G = 386.09; // Acceleration of gravity in inches/second/second.
+    public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
     // Ideally accel/decel values are set just below wheelspin or skidding to a stop.
     // Optimal values are highly dependent on wheel/surface traction and somewhat on
     // weight distribution.
@@ -67,11 +69,16 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     private long debugCounter_ = 0; // internal counter
     public boolean debug_ = false; // Use to throttle debug output.
 
-    public AbstractChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, double wheelbase, double trackWidth, double wheelRadius) {
+    public AbstractChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, double wheelbase, double trackWidth, double wheelRadius, Supplier<Double> getSeconds) {
         driveModule_ = driveModule;
         wheelbase_ = wheelbase;
         trackWidth_ = trackWidth;
         wheelRadius_ = wheelRadius;
+        this.getSeconds = getSeconds;
+    }
+
+    public AbstractChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule_, double wheelbase, double trackWidth, double wheelRadius) {
+        this(driveModule_, wheelbase, trackWidth, wheelRadius, Clock::getSeconds);
     }
 
     @Override
@@ -79,7 +86,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
         debug_ = (debugCounter_++ % debugFrequency_) == 0;
 
-        double now = Clock.getSeconds();
+        double now = getSeconds.get();
         timeSinceLastUpdate_ = now - lastUpdateTime_;
         lastUpdateTime_ = now;
 

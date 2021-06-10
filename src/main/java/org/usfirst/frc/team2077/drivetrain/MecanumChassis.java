@@ -5,6 +5,7 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import org.usfirst.frc.team2077.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.DrivePosition;
 import org.usfirst.frc.team2077.math.AccelerationLimits;
@@ -12,6 +13,7 @@ import org.usfirst.frc.team2077.math.AccelerationLimits;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.function.*;
 
 import static java.util.stream.Collectors.*;
 import static org.usfirst.frc.team2077.Robot.*;
@@ -43,7 +45,11 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	public MecanumChassis() {
-		super(buildDriveModule(), WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS);
+		this(buildDriveModule(), Clock::getSeconds);
+	}
+
+	MecanumChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, Supplier<Double> getSeconds) {
+		super(driveModule, WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 
 		mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180 / Math.PI);
 
