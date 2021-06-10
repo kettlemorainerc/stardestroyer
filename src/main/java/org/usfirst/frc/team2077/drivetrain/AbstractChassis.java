@@ -184,7 +184,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public double[] getVelocityMeasured() {
-        return getVelocityCalculated();
+        return velocityMeasured_;
     }
 
     @Override
