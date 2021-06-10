@@ -5,7 +5,9 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
-import org.usfirst.frc.team2077.Constants;
+import org.usfirst.frc.team2077.*;
+
+import java.util.function.Supplier;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 
@@ -22,12 +24,13 @@ public class MecanumChassis extends AbstractChassis {
 		};
 	}
 
-	MecanumChassis(DriveModuleIF[] driveModule, Constants constants_) {
+	MecanumChassis(DriveModuleIF[] driveModule, Constants constants_, Supplier<Double> getSeconds) {
 		super(
 			driveModule,
 			constants_.STARDESTROYER_WHEELBASE,
 			constants_.STARDESTROYER_TRACK_WIDTH,
-			constants_.STARDESTROYER_WHEEL_RADIUS
+			constants_.STARDESTROYER_WHEEL_RADIUS,
+			getSeconds
 		);
 
 		mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180 / Math.PI);
@@ -69,7 +72,7 @@ public class MecanumChassis extends AbstractChassis {
 	}
 
 	public MecanumChassis(Constants constants_) {
-		this(buildDriveModule(), constants_);
+		this(buildDriveModule(), constants_, Clock::getSeconds);
 	}
 
 	@Override

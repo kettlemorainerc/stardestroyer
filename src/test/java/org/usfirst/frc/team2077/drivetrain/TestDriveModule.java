@@ -13,12 +13,9 @@ public class TestDriveModule implements DriveModuleIF {
         return maxSpeed;
     }
 
-    // this tends to get called every period in chassis
     @Override
     public void setVelocity(double velocity) {
-        double diff = currentVelocity;
-        currentVelocity += Math.signum(diff) * Math.min(1, Math.abs(diff));
-        currentVelocity = Math.signum(currentVelocity) * Math.min(Math.abs(maxSpeed), Math.abs(currentVelocity));
+        currentVelocity = velocity;
     }
 
     @Override
@@ -26,7 +23,6 @@ public class TestDriveModule implements DriveModuleIF {
         return currentVelocity;
     }
 
-    // I don't think the following are EVER used
     @Override
     public double getDistance() {
         return 0;

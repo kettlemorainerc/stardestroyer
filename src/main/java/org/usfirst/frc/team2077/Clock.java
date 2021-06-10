@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.Timer;
  * without RoboRio hardware.
  */
 public final class Clock {
-
     private static final double NS_PER_SECOND = 1000000000.;
     private static final long nanoTimeBase_ = System.nanoTime();
 
