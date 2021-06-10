@@ -16,13 +16,20 @@ public class TestDriveModule implements DriveModuleIF {
     // this tends to get called every period in chassis
     @Override
     public void setVelocity(double velocity) {
-        double diff = currentVelocity;
-        currentVelocity += Math.signum(diff) * Math.min(1, Math.abs(diff));
-        currentVelocity = Math.signum(currentVelocity) * Math.min(Math.abs(maxSpeed), Math.abs(currentVelocity));
+        currentVelocity = velocity;
+//        System.out.println("New velocity: " + currentVelocity + "target: " + velocity);
     }
 
+    /**
+     * Should ONLY get called by robot code. NOT test code
+     * @return
+     */
     @Override
     public double getVelocity() {
+        return currentVelocity;
+    }
+
+    public double safeGetVelocity() {
         return currentVelocity;
     }
 

@@ -5,6 +5,8 @@
 
 package org.usfirst.frc.team2077.math;
 
+import java.util.Objects;
+
 public class Position {
 
     protected double north_ = 0;
@@ -88,6 +90,21 @@ public class Position {
             sb.append(" ");
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return Double.compare(position.north_, north_) == 0 &&
+               Double.compare(position.east_, east_) == 0 &&
+               Double.compare(position.heading_, heading_) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(north_, east_, heading_);
     }
 
     /**

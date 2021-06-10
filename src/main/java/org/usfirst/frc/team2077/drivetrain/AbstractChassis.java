@@ -5,13 +5,13 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
-import jdk.jfr.StackTrace;
 import org.usfirst.frc.team2077.Clock;
 import org.usfirst.frc.team2077.math.Position;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public abstract class AbstractChassis extends SubsystemBase implements DriveChassisIF {
 
@@ -19,6 +19,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final double wheelbase_;
     protected final double trackWidth_;
     protected final double wheelRadius_;
+    protected final Supplier<Double> getSeconds;
 
     // Velocity setpoint.
     protected double northSet_ = 0;
@@ -58,11 +59,16 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     private long debugCounter_ = 0; // internal counter
     public boolean debug_ = false; // Use to throttle debug output.
 
-    public AbstractChassis(DriveModuleIF[] driveModule, double wheelbase, double trackWidth, double wheelRadius) {
+    public AbstractChassis(DriveModuleIF[] driveModule, double wheelbase, double trackWidth, double wheelRadius, Supplier<Double> getSeconds) {
         driveModule_ = driveModule;
         wheelbase_ = wheelbase;
         trackWidth_ = trackWidth;
         wheelRadius_ = wheelRadius;
+        this.getSeconds = getSeconds;
+    }
+
+    public AbstractChassis(DriveModuleIF[] driveModule_, double wheelbase, double trackWidth, double wheelRadius) {
+        this(driveModule_, wheelbase, trackWidth, wheelRadius, Clock::getSeconds);
     }
 
     @Override
@@ -70,14 +76,18 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
         debug_ = (debugCounter_++ % debugFrequency_) == 0;
 
-        double now = Clock.getSeconds();
+        double now = getSeconds.get();
         timeSinceLastUpdate_ = now - lastUpdateTime_;
         lastUpdateTime_ = now;
 
         updatePosition();
+        System.out.printf("Measured North [Current: %s]", north_);
         north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
+        System.out.printf("%nMeasured East [Current: %s]", east_);
         east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
+        System.out.printf("%nMeasured Rotation [Current: %s]", clockwise_);
         clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
+        System.out.println();
         updateDriveModules();
     }
 
@@ -218,10 +228,15 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
      */
     protected double limit(double newV, double oldV, double maxV, double[] accelerationLimits) {
         boolean accelerating = Math.abs(newV) >= Math.abs(oldV) && Math.signum(newV) == Math.signum(oldV);
-        double deltaLimit = (accelerating ? accelerationLimits[0] : accelerationLimits[1]) * timeSinceLastUpdate_; // always positive
+        System.out.printf("[Accelerating: %s]", accelerating);
+        double deltaLimit = (accelerating ? accelerationLimits[0] : accelerationLimits[1] ) * timeSinceLastUpdate_; // always positive
+        System.out.printf("[Change Limit: %s]", deltaLimit);
         double deltaRequested = newV - oldV;
+        System.out.printf("[Change Requested: %s]", deltaRequested);
         double delta = Math.min(deltaLimit, Math.abs(deltaRequested)) * Math.signum(deltaRequested);
+        System.out.printf("[Change: %s]", delta);
         double v = oldV + delta;
+        System.out.printf("[New velocity: %s][Result: %s]", v, Math.max(-maxV, Math.min(maxV, v)));
         return Math.max(-maxV, Math.min(maxV, v));
         
         //return Math.max(-maxV, Math.min(maxV, newV));
