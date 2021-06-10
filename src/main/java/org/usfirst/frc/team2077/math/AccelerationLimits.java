@@ -35,19 +35,31 @@ public class AccelerationLimits {
     public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
 
     public AccelerationLimits(double accelerationG, double decelerationG, DriveChassisIF chassis) {
-        this(accelerationG, decelerationG, chassis, new double[] {1, 1, 1});
+        this(accelerationG, decelerationG, chassis, new double[] {1, 1, 0});
     }
 
-    public AccelerationLimits(double accelerationG, double decelerationG, DriveChassisIF chassis, double[] scale) {
+    public AccelerationLimits(double accelerationG, double decelerationG, DriveChassisIF chassisIF, double[] scale) {
+        this(true, accelerationG, decelerationG, chassisIF, scale);
+    }
+
+    public AccelerationLimits(boolean calculateRotation, double accelerationG, double decelerationG, DriveChassisIF chassis) {
+        this(calculateRotation, accelerationG, decelerationG, chassis, new double[]{1, 1, 1});
+    }
+
+    public AccelerationLimits(boolean calculateRotation, double accelerationG, double decelerationG, DriveChassisIF chassis, double[] scale) {
         this.defaultChassis = chassis;
 
         put(NORTH, accelerationG, decelerationG, scale[NORTH.ordinal()]);
         put(EAST, accelerationG, decelerationG, scale[EAST.ordinal()]);
 
-        EnumMap<VelocityDirection, Double> max = chassis.getMaximumVelocity();
-        double inchesToDegrees = max.get(ROTATION) / max.get(NORTH);
+        if(calculateRotation) {
+            EnumMap<VelocityDirection, Double> max = chassis.getMaximumVelocity();
+            double inchesToDegrees = max.get(ROTATION) / max.get(NORTH);
 
-        put(ROTATION, inchesToDegrees * accelerationG, inchesToDegrees * decelerationG, scale[ROTATION.ordinal()]);
+            put(ROTATION, inchesToDegrees * accelerationG, inchesToDegrees * decelerationG, scale[ROTATION.ordinal()]);
+        } else {
+            put(ROTATION, 0, 0, 0);
+        }
     }
 
     public AccelerationLimits(double[][] doubles, DriveChassisIF chassis) {
@@ -58,9 +70,9 @@ public class AccelerationLimits {
         defaultChassis = chassis;
     }
 
-    private void put(VelocityDirection d, double acceleration, double deceleration, double scale) {
-        LIMITS.set(ACCELERATION, d, G * acceleration * scale);
-        LIMITS.set(DECELERATION, d, G * deceleration * scale);
+    private void put(VelocityDirection d, double accelerationInGs, double decelerationInGs, double scale) {
+        LIMITS.set(ACCELERATION, d, G * accelerationInGs * scale);
+        LIMITS.set(DECELERATION, d, G * decelerationInGs * scale);
     }
 
     public void set(VelocityDirection d, double[] limits) {

@@ -103,44 +103,31 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
-		northSet_ = north;
-		eastSet_ = east;
+		//		northSet_ = north;
+		targetVelocity.put(NORTH, north);
+		//		northAccelerationLimit_ = accelerationLimits[0];
 		this.accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
-		northAccelerationLimit_ = accelerationLimits.get(NORTH);
+//		northAccelerationLimit_ = accelerationLimits.get(NORTH);
 
-		this.accelerationLimits.set(EAST, accelerationLimits.get(EAST));
-		eastAccelerationLimit_ = accelerationLimits.get(EAST);
-//		northAccelerationLimit_ = accelerationLimits[0];
+		//		eastSet_ = east;
+		targetVelocity.put(EAST, east);
 //		eastAccelerationLimit_ = accelerationLimits[1];
+		this.accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+//		eastAccelerationLimit_ = accelerationLimits.get(EAST);
 	}
 
 	@Override
 	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
-		clockwiseSet_ = clockwise;
+//		clockwiseSet_ = clockwise;
+		targetVelocity.put(ROTATION, clockwise);
 		this.accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
-		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
+//		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
 //		rotationAccelerationLimit_ = accelerationLimits[2];
 	}
 
 	@Override
-	public EnumMap<VelocityDirection, Double> getVelocitySet() {
-		EnumMap<VelocityDirection, Double> stuff = new EnumMap<>(VelocityDirection.class);
-
-		stuff.put(NORTH, northSet_);
-		stuff.put(EAST, eastSet_);
-		stuff.put(ROTATION, clockwiseSet_);
-
-		return stuff;
-	}
-
-	@Override
-	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
-		return velocity.clone();
-	}
-
-	@Override
 	protected void updatePosition() {
-
+		System.out.println("Updating Position of: " + this);
 		// chassis velocity from internal set point
 		velocitySet_ = getVelocityCalculated();
 		// chassis velocity from motor/wheel measurements
@@ -184,11 +171,11 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updateDriveModules() {
-
-		EnumMap<VelocityDirection, Double> v = getVelocityCalculated();
+		System.out.println("Updating drive modules: " + this);
+		EnumMap<VelocityDirection, Double> botVelocity = getVelocityCalculated();
 
 		// compute motor speeds
-		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(v);
+		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(botVelocity);
 
 		// scale all motors proportionally if any are out of range
 		double max = wheelSpeed.values()
@@ -207,14 +194,29 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public String toString() {
-		return "V:" +
-			   Math.round(north_ * 10.) / 10. +
-			   "/" +
-			   Math.round(east_ * 10.) / 10. +
-			   "/" +
-			   Math.round(clockwise_ * 10.) / 10.
-			   +
-			   " W:" +
-			   driveModule_;
+		return String.format(
+			"MecanumChassis\n\t" +
+			"Velocity: %s\n\t" +
+			"Set Velocity: %s\n\t" +
+			"MeasuredVelocity: %s\n\t" +
+			"Drive Modules: %s\n\t" +
+			"Set Position: %s\n\t" +
+			"Measured Position: %s\n",
+			velocity,
+			velocitySet_,
+			velocityMeasured_,
+			driveModule_,
+			positionSet_,
+			positionMeasured_
+		);
+//		return "V:" +
+//			   Math.round(velocity.get(NORTH) * 10.) / 10. +
+//			   "/" +
+//			   Math.round(velocity.get(EAST) * 10.) / 10. +
+//			   "/" +
+//			   Math.round(velocity.get(ROTATION) * 10.) / 10.
+//			   +
+//			   " W:" +
+//			   driveModule_;
 	}
 }

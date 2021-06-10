@@ -10,6 +10,7 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import org.usfirst.frc.team2077.math.*;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.usfirst.frc.team2077.math.AccelerationLimits.*;
 
 import java.util.EnumMap;
 import java.util.function.*;
@@ -35,15 +36,15 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected double minimumSpeed_;
     protected double minimumRotation_;
 
-    public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
+//    public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
     // Ideally accel/decel values are set just below wheelspin or skidding to a stop.
     // Optimal values are highly dependent on wheel/surface traction and somewhat on
     // weight distribution.
     // For safety err on the low side for acceleration, high for deceleration.
-    protected AccelerationLimits accelerationLimits = new AccelerationLimits(G/2, G/2, this);
-    protected double[] northAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
-    protected double[] eastAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
-    protected double[] rotationAccelerationLimit_ = {0, 0}; // maximum acceleration/deceleration in tangential inches/second/second.
+    protected AccelerationLimits accelerationLimits = new AccelerationLimits(false, .5, .5, this);
+//    protected double[] northAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
+//    protected double[] eastAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
+//    protected double[] rotationAccelerationLimit_ = {0, 0}; // maximum acceleration/deceleration in tangential inches/second/second.
 
     protected double lastUpdateTime_ = 0;
     protected double timeSinceLastUpdate_ = 0;
@@ -52,6 +53,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
 
     protected EnumMap<VelocityDirection, Double> velocity = defaultedDirectionMap(0d); // target velocity for next period
+    protected EnumMap<VelocityDirection, Double> targetVelocity = defaultedDirectionMap(0d);
     protected EnumMap<VelocityDirection, Double> velocitySet_ = defaultedDirectionMap(0d); // target velocity overall
     protected EnumMap<VelocityDirection, Double> velocityMeasured_ = defaultedDirectionMap(0d); //
 
@@ -82,13 +84,30 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         lastUpdateTime_ = now;
 
         updatePosition();
-        velocity.compute(NORTH, (k, north) -> limit(velocitySet_.get(NORTH), north, maximumSpeed_, accelerationLimits.get(NORTH)));
-        velocity.compute(EAST, (k, east) -> limit(velocitySet_.get(EAST), east, maximumSpeed_, accelerationLimits.get(NORTH)));
-        velocity.compute(ROTATION, (k, rotation) -> limit(velocitySet_.get(ROTATION), rotation, maximumRotation_, accelerationLimits.get(ROTATION)));
+        limitVelocity(NORTH, maximumSpeed_);
+        limitVelocity(EAST, maximumSpeed_);
+        limitVelocity(ROTATION, maximumRotation_);
+//        velocity.compute(NORTH, (k, north) -> limit(targetVelocity.get(NORTH), north, maximumSpeed_, accelerationLimits.get(NORTH)));
+//        velocity.compute(EAST, (k, east) -> limit(targetVelocity.get(EAST), east, maximumSpeed_, accelerationLimits.get(NORTH)));
+//        velocity.compute(ROTATION, (k, rotation) -> limit(targetVelocity.get(ROTATION), rotation, maximumRotation_, accelerationLimits.get(ROTATION)));
 //        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
 //        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
 //        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
         updateDriveModules();
+    }
+
+    protected void limitVelocity(VelocityDirection direction, double max) {
+        double currentVelocity = this.velocity.get(direction);
+        double targetVelocity = this.targetVelocity.get(direction);
+
+        boolean accelerating = Math.abs(targetVelocity) >= Math.abs(currentVelocity) && Math.signum(targetVelocity) == Math.signum(currentVelocity);
+        double deltaLimit = accelerationLimits.get(direction, accelerating ? Type.ACCELERATION : Type.DECELERATION) * timeSinceLastUpdate_; // always positive
+        double deltaRequested = targetVelocity - currentVelocity;
+        double delta = Math.min(deltaLimit, Math.abs(deltaRequested)) * Math.signum(deltaRequested);
+        double v = currentVelocity + delta;
+        double newDirectionVelocity = Math.max(-max, Math.min(max, v));
+
+        velocity.put(direction, newDirectionVelocity);
     }
 
     /**
@@ -106,7 +125,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public EnumMap<VelocityDirection, Double> getVelocitySet() {
-        return velocitySet_.clone();
+        return targetVelocity.clone();
     }
 
     @Override
@@ -224,12 +243,13 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public void setGLimits(double accelerationG, double decelerationG) {
-        //accelerationG_ = accelerationG;
-        //decelerationG_ = decelerationG;
-        northAccelerationLimit_ = new double[] {accelerationG * G, decelerationG * G};
+//        accelerationG_ = accelerationG;
+//        decelerationG_ = decelerationG;
+//        northAccelerationLimit_ = new double[] {accelerationG * G, decelerationG * G};
         double eastAccelerationRatio = .7;
-        eastAccelerationLimit_ = new double [] {northAccelerationLimit_[0] * eastAccelerationRatio, northAccelerationLimit_[1] * eastAccelerationRatio};
-        rotationAccelerationLimit_ = new double[] {0, 0};
+        accelerationLimits = new AccelerationLimits(false, accelerationG, decelerationG, this, new double[]{1, eastAccelerationRatio, 1});
+//        eastAccelerationLimit_ = new double [] {northAccelerationLimit_[0] * eastAccelerationRatio, northAccelerationLimit_[1] * eastAccelerationRatio};
+//        rotationAccelerationLimit_ = new double[] {0, 0};
     }
 
     @Override
@@ -241,55 +261,5 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 //        return new double[][] {northAccelerationLimit_, eastAccelerationLimit_, rotationAccelerationLimit};
 
         return accelerationLimits.getAdjustedAdjustments();
-    }
-
-    /**
-     * Limit set point change for linear or rotational set points based on velocity or acceleration constraints.
-     * Depends on {@linkplain timeSinceLastUpdate_} being called at the beginning of {@link #setVelocity}
-     * and {@link #setRotation}.
-     * @param newV
-     * @param oldV
-     * @param maxV
-     * @param accelerationLimits
-     * @return Acceleration/range constrained set point.
-     */
-    protected double limit(double newV, double oldV, double maxV, double[] accelerationLimits) {
-        boolean accelerating = Math.abs(newV) >= Math.abs(oldV) && Math.signum(newV) == Math.signum(oldV);
-        double deltaLimit = (accelerating ? accelerationLimits[0] : accelerationLimits[1]) * timeSinceLastUpdate_; // always positive
-        double deltaRequested = newV - oldV;
-        double delta = Math.min(deltaLimit, Math.abs(deltaRequested)) * Math.signum(deltaRequested);
-        double v = oldV + delta;
-        return Math.max(-maxV, Math.min(maxV, v));
-        
-        //return Math.max(-maxV, Math.min(maxV, newV));
-    }
-
-    /**
-     * Cartesian to polar coordinate conversion.
-     * @param north (inches)
-     * @param east (inches)
-     * @return {
-     * <br> magnitude (inches)
-     * <br> direction (degrees clockwise from north)
-     * <br>}
-     */
-    public static double[] cartesianToPolar(double north, double east) {
-        double magnitude = Math.sqrt(north*north + east*east);
-        double direction = Math.toDegrees(Math.atan2(north, east));
-        return new double[] {magnitude, direction};
-    }
-    /**
-     * Polar to cartesian coordinate conversion.
-     * @param magnitude (inches)
-     * @param direction (degrees clockwise from north)
-     * @return {
-     * <br> north (inches)
-     * <br> east (inches)
-     * <br>}
-     */
-    public static double[] polarToCartesian(double magnitude, double direction) {
-        double north = magnitude * Math.cos(direction);
-        double east = magnitude * Math.sin(direction);
-        return new double[] {north, east};
     }
 }

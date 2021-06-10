@@ -8,7 +8,7 @@ import org.usfirst.frc.team2077.math.Position;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.usfirst.frc.team2077.drivetrain.AbstractChassis.*;
+import static org.usfirst.frc.team2077.math.AccelerationLimits.*;
 
 public class ChassisTest {
     private static TestDriveModule NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST;
@@ -22,10 +22,10 @@ public class ChassisTest {
     public void beforeEach() {
         TestClock.reset();
 
-        NORTH_EAST = new TestDriveModule(11);
-        SOUTH_EAST = new TestDriveModule(8);
-        SOUTH_WEST = new TestDriveModule(10);
-        NORTH_WEST = new TestDriveModule(9);
+        NORTH_EAST = new TestDriveModule(11, WheelPosition.NORTH_EAST);
+        SOUTH_EAST = new TestDriveModule(8, WheelPosition.SOUTH_EAST);
+        SOUTH_WEST = new TestDriveModule(10, WheelPosition.SOUTH_WEST);
+        NORTH_WEST = new TestDriveModule(9, WheelPosition.NORTH_EAST);
 
         EnumMap<WheelPosition, DriveModuleIF> driveModule = new EnumMap<>(WheelPosition.class);
         driveModule.put(WheelPosition.NORTH_EAST, NORTH_EAST);
