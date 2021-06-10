@@ -36,31 +36,28 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected double minimumSpeed_;
     protected double minimumRotation_;
 
-//    public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
     // Ideally accel/decel values are set just below wheelspin or skidding to a stop.
     // Optimal values are highly dependent on wheel/surface traction and somewhat on
     // weight distribution.
     // For safety err on the low side for acceleration, high for deceleration.
     protected AccelerationLimits accelerationLimits = new AccelerationLimits(false, .5, .5, this);
-//    protected double[] northAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
-//    protected double[] eastAccelerationLimit_ = {G/2, G/2}; // maximum acceleration/deceleration in inches/second/second.
-//    protected double[] rotationAccelerationLimit_ = {0, 0}; // maximum acceleration/deceleration in tangential inches/second/second.
 
     protected double lastUpdateTime_ = 0;
     protected double timeSinceLastUpdate_ = 0;
 
-    protected final Position positionSet_ = new Position(); // Continuously updated by integrating velocity setpoints.
-    protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
+    protected final Position positionSet_ = new Position(); // Continuously updated by integrating velocity setpoints (velocitySet_).
+    protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities (velocityMeasured_).
 
     protected EnumMap<VelocityDirection, Double> velocity = defaultedDirectionMap(0d); // target velocity for next period
-    protected EnumMap<VelocityDirection, Double> targetVelocity = defaultedDirectionMap(0d);
-    protected EnumMap<VelocityDirection, Double> velocitySet_ = defaultedDirectionMap(0d); // target velocity overall
-    protected EnumMap<VelocityDirection, Double> velocityMeasured_ = defaultedDirectionMap(0d); //
+    protected EnumMap<VelocityDirection, Double> targetVelocity = defaultedDirectionMap(0d); // Actual velocity target
+    protected EnumMap<VelocityDirection, Double> velocitySet_ = defaultedDirectionMap(0d); // The previous period's set
+    protected EnumMap<VelocityDirection, Double> velocityMeasured_ = defaultedDirectionMap(0d); // The next period's target velocities from mecanum math
 
-    // Debug flag gets set to true every Nth call to beginUpdate().
-    protected int debugFrequency_ = 100; // N
-    private long debugCounter_ = 0; // internal counter
-    public boolean debug_ = false; // Use to throttle debug output.
+// NOTE: If you uncomment the debug stuff here don't forget to do the same to the commented set in periodic
+// Debug flag gets set to true every Nth call to beginUpdate().
+//    protected int debugFrequency_ = 100; // 50 / s
+//    private long debugCounter_ = 0; // internal counter
+//    public boolean debug_ = false;
 
     public AbstractChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, double wheelbase, double trackWidth, double wheelRadius, Supplier<Double> getSeconds) {
         driveModule_ = driveModule;
@@ -76,8 +73,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public void periodic() {
-
-        debug_ = (debugCounter_++ % debugFrequency_) == 0;
+//        debug_ = (debugCounter_++ % debugFrequency_) == 0;
 
         double now = getSeconds.get();
         timeSinceLastUpdate_ = now - lastUpdateTime_;
@@ -87,12 +83,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         limitVelocity(NORTH, maximumSpeed_);
         limitVelocity(EAST, maximumSpeed_);
         limitVelocity(ROTATION, maximumRotation_);
-//        velocity.compute(NORTH, (k, north) -> limit(targetVelocity.get(NORTH), north, maximumSpeed_, accelerationLimits.get(NORTH)));
-//        velocity.compute(EAST, (k, east) -> limit(targetVelocity.get(EAST), east, maximumSpeed_, accelerationLimits.get(NORTH)));
-//        velocity.compute(ROTATION, (k, rotation) -> limit(targetVelocity.get(ROTATION), rotation, maximumRotation_, accelerationLimits.get(ROTATION)));
-//        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
-//        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
-//        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
         updateDriveModules();
     }
 
@@ -147,7 +137,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         stuff.put(ROTATION, maximumRotation_);
 
         return stuff;
-//        return new double[] {maximumSpeed_, maximumSpeed_, maximumRotation_};
     }
 
     @Override
@@ -159,7 +148,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         stuff.put(ROTATION, minimumRotation_);
 
         return stuff;
-//        return new double[] {minimumSpeed_, minimumSpeed_, minimumRotation_};
     }
 
     @Override
@@ -200,9 +188,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public Position getPosition() {
-        return positionSet_;
-//        return positionSet_.get();
-        //return positionMeasured_.get();
+        return positionSet_.copy();
     }
 
     @Override
@@ -243,23 +229,12 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
 
     @Override
     public void setGLimits(double accelerationG, double decelerationG) {
-//        accelerationG_ = accelerationG;
-//        decelerationG_ = decelerationG;
-//        northAccelerationLimit_ = new double[] {accelerationG * G, decelerationG * G};
         double eastAccelerationRatio = .7;
         accelerationLimits = new AccelerationLimits(false, accelerationG, decelerationG, this, new double[]{1, eastAccelerationRatio, 1});
-//        eastAccelerationLimit_ = new double [] {northAccelerationLimit_[0] * eastAccelerationRatio, northAccelerationLimit_[1] * eastAccelerationRatio};
-//        rotationAccelerationLimit_ = new double[] {0, 0};
     }
 
     @Override
     public AccelerationLimits getAccelerationLimits() {
-//        double[] max = getMaximumVelocity();
-//        double[] rotationAccelerationLimit = {
-//            rotationAccelerationLimit_[0]>0 ? rotationAccelerationLimit_[0] : (northAccelerationLimit_[0]*max[2]/max[0]),
-//            rotationAccelerationLimit_[1]>0 ? rotationAccelerationLimit_[1] : (northAccelerationLimit_[1]*max[2]/max[0])};
-//        return new double[][] {northAccelerationLimit_, eastAccelerationLimit_, rotationAccelerationLimit};
-
         return accelerationLimits.getAdjustedAdjustments();
     }
 }
