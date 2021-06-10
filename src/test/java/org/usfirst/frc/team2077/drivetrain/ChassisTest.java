@@ -60,7 +60,7 @@ public class ChassisTest {
         assertEquals(chassis.getMaximumVelocity()[0], 8, 0);
         assertEquals(chassis.getMaximumVelocity()[1], 8, 0);
         assertEquals(
-            Math.abs(new MecanumMath(20.375, 22.625, 4.0, 4.0, 1, 180 / Math.PI).forward(new double[]{8, 8, -8, -8})[2]),
+            21.319359818821333,
             chassis.getMaximumVelocity()[2],
             0
         );
