@@ -13,27 +13,16 @@ public class TestDriveModule implements DriveModuleIF {
         return maxSpeed;
     }
 
-    // this tends to get called every period in chassis
     @Override
     public void setVelocity(double velocity) {
         currentVelocity = velocity;
-//        System.out.println("New velocity: " + currentVelocity + "target: " + velocity);
     }
 
-    /**
-     * Should ONLY get called by robot code. NOT test code
-     * @return
-     */
     @Override
     public double getVelocity() {
         return currentVelocity;
     }
 
-    public double safeGetVelocity() {
-        return currentVelocity;
-    }
-
-    // I don't think the following are EVER used
     @Override
     public double getDistance() {
         return 0;

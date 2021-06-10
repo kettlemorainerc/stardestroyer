@@ -36,7 +36,7 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected double minimumSpeed_;
     protected double minimumRotation_;
 
-    protected static final double G = 386.09; // Acceleration of gravity in inches/second/second.
+    public static final double G = 386.09; // Acceleration of gravity in inches/second/second.
     // Ideally accel/decel values are set just below wheelspin or skidding to a stop.
     // Optimal values are highly dependent on wheel/surface traction and somewhat on
     // weight distribution.
@@ -81,11 +81,11 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         lastUpdateTime_ = now;
 
         updatePosition();
-        System.out.printf("Measured North [Current: %s]", north_);
+        System.out.printf("Measured North [Set: %s] [Current: %s]", northSet_, north_);
         north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
-        System.out.printf("%nMeasured East [Current: %s]", east_);
+        System.out.printf("%nMeasured East [Set: %s] [Current: %s]", eastSet_, east_);
         east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
-        System.out.printf("%nMeasured Rotation [Current: %s]", clockwise_);
+        System.out.printf("%nMeasured Rotation [Set: %s] [Current: %s]", clockwiseSet_, clockwise_);
         clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
         System.out.println();
         updateDriveModules();

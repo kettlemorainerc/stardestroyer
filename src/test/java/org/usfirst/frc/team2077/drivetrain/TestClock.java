@@ -11,4 +11,8 @@ public class TestClock {
 	public static double getSeconds() {
 		return seconds;
 	}
+
+	public static void reset() {
+		seconds = 0;
+	}
 }

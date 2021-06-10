@@ -13,11 +13,6 @@ import edu.wpi.first.wpilibj.Timer;
  * without RoboRio hardware.
  */
 public final class Clock {
-    // for testing can be commented out when not needed
-    public static boolean INCREMENT_ON_CALL = false;
-    private static double seconds = 0;
-
-
     private static final double NS_PER_SECOND = 1000000000.;
     private static final long nanoTimeBase_ = System.nanoTime();
 
@@ -27,7 +22,6 @@ public final class Clock {
      * @return Seconds since an indeterminate but consistent point in time.
      */
     public static double getSeconds() {
-        if(INCREMENT_ON_CALL) return seconds += .02; // periodic is called ~50 times per seconds. Tests are a "perfect" representation of that
         return Robot.robot_ != null ? Timer.getFPGATimestamp() : ((System.nanoTime()-nanoTimeBase_) / NS_PER_SECOND);
     }
 }
