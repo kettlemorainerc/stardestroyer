@@ -147,10 +147,10 @@ public interface DriveChassisIF extends Subsystem {
      */
     EnumMap<VelocityDirection, Double> getVelocityCalculated();
 
-//    /**
-//     * Measured velocity based on motor or wheel encoders if present.
-//     * May be affected by acceleration limits or calculated from relative settings.
-//     * @return {north, east, rotation} Units are inches and degrees per second.
-//     */
-//    EnumMap<VelocityDirection, Double> getCalculatedVelocity();
+    /**
+     * Measured velocity based on motor or wheel encoders if present.
+     * May be affected by acceleration limits or calculated from relative settings.
+     * @return {north, east, rotation} Units are inches and degrees per second.
+     */
+    EnumMap<VelocityDirection, Double> getVelocityMeasured();
 }

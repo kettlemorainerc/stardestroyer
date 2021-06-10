@@ -135,13 +135,7 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
-		EnumMap<VelocityDirection, Double> stuff = new EnumMap<>(VelocityDirection.class);
-
-		stuff.put(NORTH, north_);
-		stuff.put(EAST, east_);
-		stuff.put(ROTATION, clockwise_);
-
-		return stuff;
+		return velocity.clone();
 	}
 
 	@Override
@@ -192,35 +186,23 @@ public class MecanumChassis extends AbstractChassis {
 	protected void updateDriveModules() {
 
 		EnumMap<VelocityDirection, Double> v = getVelocityCalculated();
-		//    if (debug_ ) System.out.print("CHASSIS: " + Math.round(v[0]*10.)/10. + " " + Math.round(v[1]*10.)/10. + " " + Math.round(v[2]*10.)/10.);
 
 		// compute motor speeds
-		EnumMap<WheelPosition, Double> w = mecanumMath_.inverse(v);
+		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(v);
 
 		// scale all motors proportionally if any are out of range
-		double max = w.values()
-					  .stream()
+		double max = wheelSpeed.values()
+		                       .stream()
 					  .map(vel -> Math.abs(vel) / maximumSpeed_)
 					  .max(Comparator.naturalOrder())
+		              .map(val -> Math.max(1, val))
 					  .orElseThrow();
-
-//		double max = 1;
-//		for(double ws : w) {
-//			max = Math.max(max, Math.abs(ws) / maximumSpeed_);
-//		}
 
 		for (WheelPosition position : WheelPosition.values()) {
 			driveModule_.get(position).setVelocity(
-				w.get(position) / max
+				wheelSpeed.get(position) / max
 			);
 		}
-		//    if (debug_ ) System.out.print(" WHEELS:");
-//		for(int i = 0; i < w.length; i++) {
-//			double ws = w[i] / max;
-//			driveModule_[i].setVelocity(ws);
-//			//        if (debug_ ) System.out.print(" " + Math.round(100.*ws)/100. + "(" + Math.round(100.*driveModule_[i].getVelocity())/100. + ")");
-//		}
-		// if (debug_ ) System.out.println(" " + this);
 	}
 
 	@Override

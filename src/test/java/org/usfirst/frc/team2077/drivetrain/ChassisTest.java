@@ -38,16 +38,27 @@ public class ChassisTest {
         chassis.setGLimits(1 / G, 1 / G); // set acc/deceleration limits to ~ 1 in/s
     }
 
+    private <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap, double delta) {
+        double[] expected = new double[expectedMap.size()], actual = new double[expectedMap.size()];
+
+        for(T key : expectedMap.keySet()) {
+            expected[key.ordinal()] = expectedMap.get(key);
+            actual[key.ordinal()] = actualMap.get(key);
+        }
+
+        Assert.assertArrayEquals(message, expected, actual, delta);
+    }
+
     private void assertPeriodicUpdate(BotValues expected) {
         chassis.periodic();
 
         BotValues actual = new BotValues(chassis);
         double delta = 0.000000000000001; // HIGH degree of accuracy
-        assertArrayEquals("Wheel Velocities", expected.wheelVelocities, actual.wheelVelocities, delta);
+        assertEnumMapEquals("Wheel Velocities", expected.wheelVelocities, actual.wheelVelocities, delta);
 
-        assertArrayEquals("Calculated Velocity", expected.calculateVelocity, actual.calculateVelocity, delta);
-        assertArrayEquals("Set Velocity", expected.setVelocity, actual.setVelocity, delta);
-        assertArrayEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity, delta);
+        assertEnumMapEquals("Calculated Velocity", expected.calculateVelocity, actual.calculateVelocity, delta);
+        assertEnumMapEquals("Set Velocity", expected.setVelocity, actual.setVelocity, delta);
+        assertEnumMapEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity, delta);
 
         assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), delta);
         assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), delta);
@@ -58,7 +69,7 @@ public class ChassisTest {
         assertEquals(8, chassis.getMaximumVelocity().get(VelocityDirection.NORTH), 0);
         assertEquals(8, chassis.getMaximumVelocity().get(VelocityDirection.EAST), 0);
         assertEquals(
-            0,
+            21.319359818821333,
             chassis.getMaximumVelocity().get(VelocityDirection.ROTATION),
             0
         );
@@ -204,7 +215,8 @@ public class ChassisTest {
 
     private static class BotValues {
         // Unset things are considered equal
-        double[] wheelVelocities, calculateVelocity, setVelocity, measuredVelocity;
+        EnumMap<VelocityDirection, Double> calculateVelocity, setVelocity, measuredVelocity;
+        EnumMap<WheelPosition, Double> wheelVelocities;
         Position setPosition, measuredPosition;
 
         BotValues() {}
@@ -224,22 +236,26 @@ public class ChassisTest {
         }
 
         public BotValues wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
-            wheelVelocities = new double[] {northEast, southEast, southWest, northWest};
+            wheelVelocities = MecanumMathTest.wheelVelocities(northEast, southEast, southWest, northWest);
+//            wheelVelocities = new double[] {northEast, southEast, southWest, northWest};
             return this;
         }
 
         public BotValues calculatedVelocities(double north, double east, double rotation) {
-            calculateVelocity = new double[] {north, east, rotation};
+//            calculateVelocity = new double[] {north, east, rotation};
+            calculateVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
         public BotValues setVelocities(double north, double east, double rotation) {
-            setVelocity = new double[] {north, east, rotation};
+//            setVelocity = new double[] {north, east, rotation};
+            setVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
         public BotValues measuredVelocities(double north, double east, double rotation) {
-            measuredVelocity = new double[] {north, east, rotation};
+//            measuredVelocity = new double[] {north, east, rotation};
+            measuredVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
@@ -263,10 +279,10 @@ public class ChassisTest {
               "measured vel: %s\n\t" +
               "set pos: %s\n\t" +
               "measured pos: %s\n",
-              Arrays.toString(wheelVelocities),
-              Arrays.toString(calculateVelocity),
-              Arrays.toString(setVelocity),
-              Arrays.toString(measuredVelocity),
+              /*Arrays.toString*/(wheelVelocities),
+              /*Arrays.toString*/(calculateVelocity),
+              /*Arrays.toString*/(setVelocity),
+              /*Arrays.toString*/(measuredVelocity),
               setPosition,
               measuredPosition
             );

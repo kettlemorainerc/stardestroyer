@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class MecanumMathTest {
     private final MecanumMath math = new MecanumMath(20.375, 22.625, 4d, 4d, 1, 180 / Math.PI);
 
-    private EnumMap<WheelPosition, Double> wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
+    public static EnumMap<WheelPosition, Double> wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
         EnumMap<WheelPosition, Double> velocities = new EnumMap<>(WheelPosition.class);
         velocities.put(WheelPosition.NORTH_EAST, northEast);
         velocities.put(WheelPosition.SOUTH_EAST, southEast);
@@ -20,7 +20,7 @@ public class MecanumMathTest {
 //        return new double[] {northEast, southEast, southWest, northWest} ;
     }
     
-    private EnumMap<VelocityDirection, Double> botVelocity(double north, double east, double rotation) {
+    public static EnumMap<VelocityDirection, Double> botVelocity(double north, double east, double rotation) {
         EnumMap<VelocityDirection, Double> velocity = new EnumMap<>(VelocityDirection.class);
         velocity.put(VelocityDirection.NORTH, north);
         velocity.put(VelocityDirection.EAST, east);

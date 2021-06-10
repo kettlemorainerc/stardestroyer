@@ -30,16 +30,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final double wheelRadius_;
     protected final Supplier<Double> getSeconds;
 
-    // Velocity setpoint.
-    protected double northSet_ = 0;
-    protected double eastSet_ = 0;
-    protected double clockwiseSet_ = 0;
-
-    // Velocity setpoint after adjustments for acceleration and velocity.
-    protected double north_ = 0;
-    protected double east_ = 0;
-    protected double clockwise_ = 0;
-
     protected double maximumSpeed_;
     protected double maximumRotation_;
     protected double minimumSpeed_;
@@ -61,8 +51,9 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     protected final Position positionSet_ = new Position(); // Continuously updated by integrating velocity setpoints.
     protected final Position positionMeasured_ = new Position(); // Continuously updated by integrating measured velocities.
 
-    protected EnumMap<VelocityDirection, Double> velocitySet_ = defaultedDirectionMap(0d);
-    protected EnumMap<VelocityDirection, Double> velocityMeasured_ = defaultedDirectionMap(0d);
+    protected EnumMap<VelocityDirection, Double> velocity = defaultedDirectionMap(0d); // target velocity for next period
+    protected EnumMap<VelocityDirection, Double> velocitySet_ = defaultedDirectionMap(0d); // target velocity overall
+    protected EnumMap<VelocityDirection, Double> velocityMeasured_ = defaultedDirectionMap(0d); //
 
     // Debug flag gets set to true every Nth call to beginUpdate().
     protected int debugFrequency_ = 100; // N
@@ -91,9 +82,12 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
         lastUpdateTime_ = now;
 
         updatePosition();
-        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
-        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
-        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
+        velocity.compute(NORTH, (k, north) -> limit(velocitySet_.get(NORTH), north, maximumSpeed_, accelerationLimits.get(NORTH)));
+        velocity.compute(EAST, (k, east) -> limit(velocitySet_.get(EAST), east, maximumSpeed_, accelerationLimits.get(NORTH)));
+        velocity.compute(ROTATION, (k, rotation) -> limit(velocitySet_.get(ROTATION), rotation, maximumRotation_, accelerationLimits.get(ROTATION)));
+//        north_ = limit(northSet_, north_, maximumSpeed_, northAccelerationLimit_);
+//        east_ = limit(eastSet_, east_, maximumSpeed_, eastAccelerationLimit_);
+//        clockwise_ = limit(clockwiseSet_, clockwise_, maximumRotation_, rotationAccelerationLimit_);
         updateDriveModules();
     }
 
@@ -109,6 +103,21 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
      * Called by {@link #periodic()}.
      */
     protected abstract void updateDriveModules();
+
+    @Override
+    public EnumMap<VelocityDirection, Double> getVelocitySet() {
+        return velocitySet_.clone();
+    }
+
+    @Override
+    public EnumMap<VelocityDirection, Double> getVelocityCalculated() {
+        return velocity.clone();
+    }
+
+    @Override
+    public EnumMap<VelocityDirection, Double> getVelocityMeasured() {
+        return velocityMeasured_.clone();
+    }
 
     @Override
     public EnumMap<VelocityDirection, Double> getMaximumVelocity() {
