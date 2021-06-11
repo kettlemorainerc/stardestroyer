@@ -8,8 +8,12 @@ package org.usfirst.frc.team2077.commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
-import org.usfirst.frc.team2077.math.Acceleration;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
+
+import java.util.EnumMap;
 
 /**
  * Full speed translation for a fixed time.
@@ -29,14 +33,14 @@ public class Nudge extends WaitCommand {
   @Override
   public void initialize() {
     super.initialize();
-    double[] max = robot_.chassis_.getMaximumVelocity();
-    robot_.chassis_.setVelocity(north_*max[0], east_*max[1], (new Acceleration(.5, .5, robot_.chassis_)).get());
+    EnumMap<VelocityDirection, Double> max = robot_.chassis_.getMaximumVelocity();
+    robot_.chassis_.setVelocity(north_*max.get(NORTH), east_ * max.get(EAST), (new AccelerationLimits(.5, .5, robot_.chassis_)));
   }
 
   @Override
   public void end(boolean interrupted) {
     super.end(interrupted);
-    robot_.chassis_.setVelocity(0, 0, (new Acceleration(.5, .5, robot_.chassis_)).get());
+    robot_.chassis_.setVelocity(0, 0, (new AccelerationLimits(.5, .5, robot_.chassis_)));
   }
 
   @Override

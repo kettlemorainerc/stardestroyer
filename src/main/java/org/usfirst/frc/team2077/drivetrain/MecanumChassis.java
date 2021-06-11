@@ -5,51 +5,72 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
-import org.usfirst.frc.team2077.Constants;
+import org.usfirst.frc.team2077.*;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
+import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.DrivePosition;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
 
-import static org.usfirst.frc.team2077.Robot.robot_;
+import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
+import java.util.function.*;
+
+import static java.util.stream.Collectors.*;
+import static org.usfirst.frc.team2077.Robot.*;
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
 
 public class MecanumChassis extends AbstractChassis {
+	private static final double WHEELBASE = 20.375; // inches
+	private static final double TRACK_WIDTH = 22.625; // inches
+	private static final double WHEEL_RADIUS = 4.0; // inches
+	private static final double EAST_ADJUSTMENT = .65;
 
 	private final MecanumMath mecanumMath_;
 
-	private static DriveModuleIF[] buildDriveModule() {
-		return new DriveModuleIF[]{
-			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_RIGHT),  // northeast (right front)
-			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_RIGHT),  // southeast (right rear)
-			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_LEFT),  // southwest (left rear)
-			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_LEFT)   // northwest (left front)
-		};
+	private static EnumMap<WheelPosition, DriveModuleIF> buildDriveModule() {
+		EnumMap<WheelPosition, DriveModuleIF> driveModule = new EnumMap<>(WheelPosition.class);
+
+		for(WheelPosition pos: WheelPosition.values()) {
+			driveModule.put(pos, new SparkNeoDriveModule(DrivePosition.forWheelPosition(pos)));
+		}
+
+		return driveModule;
+//		return new DriveModuleIF[]{
+//			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_RIGHT),  // northeast (right front)
+//			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_RIGHT),  // southeast (right rear)
+//			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.BACK_LEFT),  // southwest (left rear)
+//			new SparkNeoDriveModule(SparkNeoDriveModule.DrivePosition.FRONT_LEFT)   // northwest (left front)
+//		};
 	}
 
-	/**
-	 * @param driveModule [4]
-	 * @param wheelbase
-	 * @param trackWidth
-	 * @param wheelRadius
-	 */
-	public MecanumChassis(Constants constants_) {
-		super(
-			buildDriveModule(),
-			constants_.STARDESTROYER_WHEELBASE,
-			constants_.STARDESTROYER_TRACK_WIDTH,
-			constants_.STARDESTROYER_WHEEL_RADIUS
-		);
+	public MecanumChassis() {
+		this(buildDriveModule(), Clock::getSeconds);
+	}
+
+	MecanumChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, Supplier<Double> getSeconds) {
+		super(driveModule, WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 
 		mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180 / Math.PI);
 
 		// north/south speed conversion from 0-1 range to DriveModule maximum (inches/second)
-		maximumSpeed_ = Math.min(
-			Math.min(driveModule_[0].getMaximumSpeed(), driveModule_[1].getMaximumSpeed()),
-			Math.min(driveModule_[2].getMaximumSpeed(), driveModule_[3].getMaximumSpeed())
-		);
+		maximumSpeed_ = driveModule_.values()
+									.stream()
+									.map(DriveModuleIF::getMaximumSpeed)
+									.min(Comparator.naturalOrder())
+									.orElseThrow();
+//		Math.min(
+//			Math.min(driveModule_[0].getMaximumSpeed(), driveModule_[1].getMaximumSpeed()),
+//			Math.min(driveModule_[2].getMaximumSpeed(), driveModule_[3].getMaximumSpeed())
+//		);
 		// rotation speed conversion from 0-1 range to DriveModule maximum (degrees/second)
-		maximumRotation_ = mecanumMath_.forward(new double[]{
+		maximumRotation_ = mecanumMath_.forward(MecanumMath.mapOf(
+			WheelPosition.class,
 			-maximumSpeed_,
 			-maximumSpeed_,
 			maximumSpeed_,
 			maximumSpeed_
-		})[2];
+		)).get(ROTATION);
 
 		// lowest chassis speeds supportable by the drive modules
 		minimumSpeed_ = maximumSpeed_ * .1; // TODO: Test and configure.
@@ -67,82 +88,77 @@ public class MecanumChassis extends AbstractChassis {
 						   " IN/SEC MINIMUM ROTATION:" +
 						   Math.round(minimumRotation_ * 10.) / 10. +
 						   " DEG/SEC");
-		double[][] a = getAccelerationLimits();
+		AccelerationLimits a = getAccelerationLimits();
 		System.out.println(getClass().getName() + "ACCELERATION:"
-						   + Math.round(a[0][0] * 10.) / 10. + "/" + Math.round(a[0][1] * 10.) / 10. + "/"
-						   + Math.round(a[1][0] * 10.) / 10. + "/" + Math.round(a[1][1] * 10.) / 10. + "/"
-						   + Math.round(a[2][0] * 10.) / 10. + "/" + Math.round(a[2][1] * 10.) / 10.);
+						   + Math.round(a.get(NORTH, ACCELERATION) * 10.) / 10. + "/" + Math.round(a.get(NORTH, DECELERATION) * 10.) / 10. + "/"
+						   + Math.round(a.get(EAST, ACCELERATION) * 10.) / 10. + "/" + Math.round(a.get(EAST, DECELERATION) * 10.) / 10. + "/"
+						   + Math.round(a.get(ROTATION, ACCELERATION) * 10.) / 10. + "/" + Math.round(a.get(ROTATION, DECELERATION) * 10.) / 10.);
 	}
 
 	@Override
-	public void setVelocity(double north, double east, double clockwise, double[][] accelerationLimits) {
-		northSet_ = north;
-		eastSet_ = east;
-		clockwiseSet_ = clockwise;
-		northAccelerationLimit_ = accelerationLimits[0];
-		eastAccelerationLimit_ = accelerationLimits[1];
-		rotationAccelerationLimit_ = accelerationLimits[2];
+	public void setVelocity(double north, double east, double clockwise, AccelerationLimits accelerationLimits) {
+		setVelocity(north, east, accelerationLimits);
+		setRotation(clockwise, accelerationLimits);
 	}
 
 	@Override
-	public void setVelocity(double north, double east, double[][] accelerationLimits) {
-		northSet_ = north;
-		eastSet_ = east;
-		northAccelerationLimit_ = accelerationLimits[0];
-		eastAccelerationLimit_ = accelerationLimits[1];
+	public void setVelocity(double north, double east, AccelerationLimits accelerationLimits) {
+		//		northSet_ = north;
+		targetVelocity.put(NORTH, north);
+		//		northAccelerationLimit_ = accelerationLimits[0];
+		this.accelerationLimits.set(NORTH, accelerationLimits.get(NORTH));
+//		northAccelerationLimit_ = accelerationLimits.get(NORTH);
+
+		//		eastSet_ = east;
+		targetVelocity.put(EAST, east);
+//		eastAccelerationLimit_ = accelerationLimits[1];
+		this.accelerationLimits.set(EAST, accelerationLimits.get(EAST));
+//		eastAccelerationLimit_ = accelerationLimits.get(EAST);
 	}
 
 	@Override
-	public void setRotation(double clockwise, double[][] accelerationLimits) {
-		clockwiseSet_ = clockwise;
-		rotationAccelerationLimit_ = accelerationLimits[2];
-	}
-
-	@Override
-	public double[] getVelocitySet() {
-		return new double[]{northSet_, eastSet_, clockwiseSet_};
-	}
-
-	@Override
-	public double[] getVelocityCalculated() {
-		return new double[]{north_, east_, clockwise_};
-	}
-
-	@Override
-	public double[] getVelocityMeasured() {
-		return new double[]{velocityMeasured_[0], velocityMeasured_[1], velocityMeasured_[2]};
+	public void setRotation(double clockwise, AccelerationLimits accelerationLimits) {
+//		clockwiseSet_ = clockwise;
+		targetVelocity.put(ROTATION, clockwise);
+		this.accelerationLimits.set(ROTATION, accelerationLimits.get(ROTATION));
+//		rotationAccelerationLimit_ = accelerationLimits.get(ROTATION);
+//		rotationAccelerationLimit_ = accelerationLimits[2];
 	}
 
 	@Override
 	protected void updatePosition() {
-
+//		System.out.println("Updating Position of: " + this);
 		// chassis velocity from internal set point
 		velocitySet_ = getVelocityCalculated();
 		// chassis velocity from motor/wheel measurements
-		double[] w = {
-			driveModule_[0].getVelocity(),
-			driveModule_[1].getVelocity(),
-			driveModule_[2].getVelocity(),
-			driveModule_[3].getVelocity()
-		};
-		velocityMeasured_ = mecanumMath_.forward(w);
+
+		EnumMap<WheelPosition, Double> wheelVelocities = driveModule_.entrySet()
+																	 .stream()
+																	 .map(e -> new SimpleEntry<>(e.getKey(), e.getValue().getVelocity()))
+																	 .collect(toMap(
+																	 	Entry::getKey,
+																		Entry::getValue,
+																		Math::min,
+																		() -> new EnumMap<>(WheelPosition.class)
+																	 ));
+		velocityMeasured_ = mecanumMath_.forward(wheelVelocities);
 
 		// TODO: E/W velocities are consistently lower than those calculated from wheel speeds.
 		// TODO: Measure actual vs measured E/W distances and insert an adjustment factor here.
 		// TODO: Put the adjustment factor in constants.
-		velocitySet_[1] *= .65; // just a guess
-		velocityMeasured_[1] *= .65; // just a guess
+		velocitySet_.compute(EAST, (k, v) -> v * EAST_ADJUSTMENT); // just a guess
+		velocityMeasured_.compute(EAST, (k, v) -> v * EAST_ADJUSTMENT); // just a guess
 
 		// update position with motion since last update
 		positionSet_.moveRelative(
-			velocitySet_[0] * timeSinceLastUpdate_,
-			velocitySet_[1] * timeSinceLastUpdate_,
-			velocitySet_[2] * timeSinceLastUpdate_
+			velocitySet_.get(NORTH) * timeSinceLastUpdate_,
+			velocitySet_.get(EAST) * timeSinceLastUpdate_,
+			velocitySet_.get(ROTATION) * timeSinceLastUpdate_
 		);
 		positionMeasured_.moveRelative(
-			velocityMeasured_[0] * timeSinceLastUpdate_,
-			velocityMeasured_[1] * timeSinceLastUpdate_,
-			velocityMeasured_[2] * timeSinceLastUpdate_
+			velocityMeasured_.get(NORTH) * timeSinceLastUpdate_,
+			velocityMeasured_.get(EAST) * timeSinceLastUpdate_,
+			velocityMeasured_.get(ROTATION) * timeSinceLastUpdate_
 		);
 		if(robot_.angleSensor_ != null) { // TODO: Confirm AngleSensor is actually reading. Handle bench testing.
 			double[] pS = positionSet_.get();
@@ -155,44 +171,52 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updateDriveModules() {
-
-		double[] v = getVelocityCalculated();
-		//    if (debug_ ) System.out.print("CHASSIS: " + Math.round(v[0]*10.)/10. + " " + Math.round(v[1]*10.)/10. + " " + Math.round(v[2]*10.)/10.);
+//		System.out.println("Updating drive modules: " + this);
+		EnumMap<VelocityDirection, Double> botVelocity = getVelocityCalculated();
 
 		// compute motor speeds
-		double[] w = mecanumMath_.inverse(v);
+		EnumMap<WheelPosition, Double> wheelSpeed = mecanumMath_.inverse(botVelocity);
 
 		// scale all motors proportionally if any are out of range
-		double max = 1;
-		for(double ws : w) {
-			max = Math.max(max, Math.abs(ws) / maximumSpeed_);
-		}
+		double max = wheelSpeed.values()
+		                       .stream()
+					  .map(vel -> Math.abs(vel) / maximumSpeed_)
+					  .max(Comparator.naturalOrder())
+		              .map(val -> Math.max(1, val))
+					  .orElseThrow();
 
-		//    if (debug_ ) System.out.print(" WHEELS:");
-		for(int i = 0; i < w.length; i++) {
-			double ws = w[i] / max;
-			driveModule_[i].setVelocity(ws);
-			//        if (debug_ ) System.out.print(" " + Math.round(100.*ws)/100. + "(" + Math.round(100.*driveModule_[i].getVelocity())/100. + ")");
+		for (WheelPosition position : WheelPosition.values()) {
+			driveModule_.get(position).setVelocity(
+				wheelSpeed.get(position) / max
+			);
 		}
-		// if (debug_ ) System.out.println(" " + this);
 	}
 
 	@Override
 	public String toString() {
+//		return String.format(
+//			"MecanumChassis\n\t" +
+//			"Velocity: %s\n\t" +
+//			"Set Velocity: %s\n\t" +
+//			"MeasuredVelocity: %s\n\t" +
+//			"Drive Modules: %s\n\t" +
+//			"Set Position: %s\n\t" +
+//			"Measured Position: %s\n",
+//			velocity,
+//			velocitySet_,
+//			velocityMeasured_,
+//			driveModule_,
+//			positionSet_,
+//			positionMeasured_
+//		);
 		return "V:" +
-			   Math.round(north_ * 10.) / 10. +
+			   Math.round(velocity.get(NORTH) * 10.) / 10. +
 			   "/" +
-			   Math.round(east_ * 10.) / 10. +
+			   Math.round(velocity.get(EAST) * 10.) / 10. +
 			   "/" +
-			   Math.round(clockwise_ * 10.) / 10.
+			   Math.round(velocity.get(ROTATION) * 10.) / 10.
 			   +
 			   " W:" +
-			   driveModule_[0] +
-			   "/" +
-			   driveModule_[1] +
-			   "/" +
-			   driveModule_[2] +
-			   "/" +
-			   driveModule_[3];
+			   driveModule_;
 	}
 }

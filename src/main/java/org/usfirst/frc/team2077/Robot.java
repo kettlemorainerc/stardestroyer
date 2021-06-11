@@ -16,12 +16,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.usfirst.frc.team2077.commands.AutonomousCheck;
-import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
-import org.usfirst.frc.team2077.drivetrain.DriveModuleIF;
-import org.usfirst.frc.team2077.drivetrain.MecanumChassis;
-import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule;
+import org.usfirst.frc.team2077.drivetrain.*;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
 import org.usfirst.frc.team2077.sensors.*;
 import org.usfirst.frc.team2077.subsystems.*;
+
+import java.util.EnumMap;
+
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 
 public class Robot extends TimedRobot {
 
@@ -54,6 +56,7 @@ public class Robot extends TimedRobot {
 	public Subsystem position_;
 	public Subsystem heading_;
 	public Subsystem target_;
+	public Subsystem grabber_;
 	//    Aiming system for elevating ball launcher and pointing the robot. Displayed on DS video.
 	public Crosshairs crosshairs_;
 	//    Ball launcher with ajustable elevation and speed based on range to target.
@@ -64,7 +67,6 @@ public class Robot extends TimedRobot {
 	public Launcher testLauncher_; // low-level control for testing
 	public Telemetry telemetry_;
 	public TestGrabber tgrabber_;
-	public Subsystem testConfig_;//AJ New
 	// Default commands
 	//    Autonomous selected via drive station dashboard.
 	protected Command autonomous_;
@@ -72,7 +74,7 @@ public class Robot extends TimedRobot {
 	protected Command drive_;
 	//    Continuous update of target range and direction based on robot motion.
 	protected Command track_;
-	//    Operator input of target position relative to robot.
+	//    Operator input of target position relative to robot using the stick.
 	protected Command aim_;
 	//    Continuous update of launcher elevation for target range.
 	protected Command range_;
@@ -102,10 +104,11 @@ public class Robot extends TimedRobot {
 
 
 		setupDriveTrain();
-
+		
 		robot_.chassis_.setPosition(-180, 0, 0); // TODO: Initialize from Smart Dashboard
-		double[] p = robot_.chassis_.getPosition();
-		robot_.crosshairs_.set(Math.atan2(-p[1], -p[0]), Math.sqrt(p[0] * p[0] + p[1] * p[1]));
+		EnumMap<VelocityDirection, Double> p = robot_.chassis_.getPosition();
+		robot_.crosshairs_.set(Math.atan2(-p.get(EAST), -p.get(NORTH)),
+							   Math.sqrt(p.get(NORTH) * p.get(NORTH) + p.get(EAST) * p.get(EAST)));
 
 		System.out.println("CROSSHAIRS:" + crosshairs_);
 
@@ -113,7 +116,7 @@ public class Robot extends TimedRobot {
 	}
 
 	public void setupDriveTrain() {
-		chassis_ = new MecanumChassis(constants_);
+		chassis_ = new MecanumChassis();
 
 		//   These dummy subsystems support separate command ownership of robot motion and rotation.
 		position_ = new SubsystemBase() {
@@ -135,7 +138,7 @@ public class Robot extends TimedRobot {
 
 	public void setupController() {
 		// Container for remote control software objects.
-		driveStation_ = new DriveStation(position_, target_, crosshairs_);
+		driveStation_ = new DriveStation(position_, target_, crosshairs_, tgrabber_);
 	}
 
 	/**
@@ -155,10 +158,10 @@ public class Robot extends TimedRobot {
 		CommandScheduler.getInstance()
 						.run();
 
-		for (DriveModuleIF module : chassis_.driveModule_) {
-			SparkNeoDriveModule hi = (SparkNeoDriveModule) module;
-			SmartDashboard.putNumber(hi.getPosition().name() + " RPM", hi.getRPM());
-		}
+		chassis_.driveModule_.values().forEach(module -> {
+			SmartDashboard.putNumber(module.getWheelPosition() + " RPM", ((SparkNeoDriveModule) module).getRPM());
+		});
+
 		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());
 	}
 
@@ -228,11 +231,13 @@ public class Robot extends TimedRobot {
 	}
 
 	private static void printWheelInfo(SparkNeoDriveModule.DrivePosition position) {
-		System.out.printf("[%s set RPM: %s][%s reported RPM %s]",
-				position.name(),
-				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getSetPoint(),
-				position.name(),
-				((SparkNeoDriveModule) robot_.chassis_.driveModule_[position.ordinal()]).getRPM());
+		System.out.printf(
+			"[%s set RPM: %s][%s reported RPM %s]",
+			position,
+			((SparkNeoDriveModule) robot_.chassis_.driveModule_.get(position.WHEEL_POSITION)).getSetPoint(),
+			position,
+			((SparkNeoDriveModule) robot_.chassis_.driveModule_.get(position.WHEEL_POSITION)).getRPM()
+		);
 	}
 
 

@@ -12,24 +12,24 @@ import static org.usfirst.frc.team2077.Robot.*;
 public class Crosshairs extends SubsystemBase {
 
 
-    private static double MINIMUM_RANGE = 18; // inches // TODO: Configure in Constants;
-    private static double MAXIMUM_RANGE = 54*12; // inches // TODO: Configure in Constants;
+    private static final double MINIMUM_RANGE = 18; // inches
+    private static final double MAXIMUM_RANGE = 60.*12.-18.; // inches
 
-    private double azimuth_ = 0;
+    private double heading = 0;
     private double range_ = 50*12; // TODO: Don't rely on these initial values.
 
 
     public final void set(double azimuth, double range) {
-        azimuth_ = normalize(azimuth);
+        heading = normalize(azimuth);
         range_ = constrain(range);
     }
 
     public double[] get() {
-        return new double[] {azimuth_, range_};
+        return new double[] {heading, range_};
     }
 
-    public double getAzimuth() {
-        return azimuth_;
+    public double getHeading() {
+        return heading;
     }
 
     public double getRange() {
@@ -37,7 +37,7 @@ public class Crosshairs extends SubsystemBase {
     }
 
     private static double constrain(double range) {
-        return Math.max(robot_.constants_.MINIMUM_TARGET_RANGE, Math.min(robot_.constants_.MAXIMUM_TARGET_RANGE, range));
+        return Math.max(MINIMUM_RANGE, Math.min(MAXIMUM_RANGE, range));
     }
 
     private static double normalize(double azimuth) {
@@ -46,7 +46,7 @@ public class Crosshairs extends SubsystemBase {
 
     @Override
     public String toString() {
-        return "Azimuth:" + Math.round(azimuth_*10.)/10. + " degrees, Range:" + Math.round(range_*10.)/10. + " inches";
+        return "Azimuth:" + Math.round(heading * 10.) / 10. + " degrees, Range:" + Math.round(range_ * 10.) / 10. + " inches";
     }
 
 
@@ -67,10 +67,10 @@ public class Crosshairs extends SubsystemBase {
 
     private void targetToCamera() {
 
-        double azimuth = azimuth_;
+        double azimuth = heading;
         double range = range_;
-        double north = range_ * Math.cos(Math.toRadians(azimuth_));
-        double east = range_ * Math.sin(Math.toRadians(azimuth_));
+        double north = range_ * Math.cos(Math.toRadians(heading));
+        double east = range_ * Math.sin(Math.toRadians(heading));
 
         north -= robot_.constants_.FISHEYE_CAMERA_POSITION_NORTH;
         azimuth = Math.toDegrees(Math.atan2(east, north)); // from camera to target

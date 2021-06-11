@@ -4,20 +4,18 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 
-public class resetCrosshairs extends CommandBase {
+public class Launch extends CommandBase {
 
-    public resetCrosshairs() {
-        this(robot_.constants_.UPPER_TARGET_HEIGHT);
-    }
-
-    public resetCrosshairs(double targetHeight) {
+    public Launch() {
         addRequirements(robot_.launcher_);
     }
 
+
     @Override
     public void initialize() {
-        robot_.crosshairs_.set(0, 0);
+        robot_.launcher_.launch();
     }
+
 
     @Override
     public void end(boolean interrupted) {
@@ -28,4 +26,3 @@ public class resetCrosshairs extends CommandBase {
         return true;
     }
 }
-

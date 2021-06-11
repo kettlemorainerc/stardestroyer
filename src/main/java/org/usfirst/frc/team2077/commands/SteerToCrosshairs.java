@@ -5,9 +5,9 @@
 
 package org.usfirst.frc.team2077.commands;
 
-import static org.usfirst.frc.team2077.Robot.robot_;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
+
+import static org.usfirst.frc.team2077.Robot.*;
 
 public class SteerToCrosshairs extends CommandBase {
 
@@ -15,7 +15,7 @@ public class SteerToCrosshairs extends CommandBase {
   private final double maxRPMCoarse;
   private final double angleToBeginSlowingDown;
   private final double deadZoneToCentered;        //In degrees
-  
+
   public SteerToCrosshairs() {
     addRequirements(robot_.heading_);
     maxRPMFine = 800;
@@ -30,12 +30,11 @@ public class SteerToCrosshairs extends CommandBase {
 
   @Override
   public void execute() {
-    double azimuth = robot_.crosshairs_.getAzimuth(); // angle from robot to target
-    double velocity = robot_.chassis_.getVelocityCalculated()[2]; // current rotation speed
-    double speed = Math.abs(azimuth) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / Math.ceil(angleToBeginSlowingDown - Math.abs(azimuth));
+    double crosshairHeading = robot_.crosshairs_.getHeading(); // angle from robot to target
+    double speed = Math.abs(crosshairHeading) >= angleToBeginSlowingDown ? maxRPMCoarse : maxRPMFine / Math.ceil(angleToBeginSlowingDown - Math.abs(crosshairHeading));
 
-    if (Math.abs(azimuth) < deadZoneToCentered) robot_.chassis_.halt();
-    else robot_.chassis_.setRotation(speed * Math.signum(azimuth));
+    if (Math.abs(crosshairHeading) < deadZoneToCentered) robot_.chassis_.halt();
+    else robot_.chassis_.setRotation(speed * Math.signum(crosshairHeading));
   }
   @Override
   public void end(boolean interrupted) {

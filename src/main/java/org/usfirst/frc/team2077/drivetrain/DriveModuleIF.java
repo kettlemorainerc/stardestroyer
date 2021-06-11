@@ -5,8 +5,10 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
+
 /**
- * Wrapper for a single wheel/motor/contoller/encoder assembly. The wrapper
+ * Wrapper for a single wheel/motor/controller/encoder assembly. The wrapper
  * should construct the underlying hardware-specific objects and perform unit
  * and sign conversion as required.
  */
@@ -25,6 +27,8 @@ public interface DriveModuleIF {
      * Positive values are robot-forward ("north"), negative backward/south.
      */
     void setVelocity(double velocity);
+
+    WheelPosition getWheelPosition();
 
     /**
      * Current velocity for this wheel.

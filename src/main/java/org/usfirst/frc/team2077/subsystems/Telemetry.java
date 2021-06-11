@@ -27,7 +27,13 @@ public class Telemetry extends SubsystemBase {
     @Override
     public void periodic() {
 
-        getNTE("Position").forceSetDoubleArray(robot_.chassis_.getPosition());
+        getNTE("Position").forceSetDoubleArray(
+            robot_.chassis_.getPosition()
+                           .values()
+                           .stream()
+                           .mapToDouble(a -> a == null ? 0 : a)
+                           .toArray()
+        );
         
         getNTE("Target").setDoubleArray(robot_.crosshairs_.get());
         getNTE("Crosshairs").setDoubleArray(robot_.crosshairs_.getCamera());
