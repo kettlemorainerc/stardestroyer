@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
 import org.usfirst.frc.team2077.commands.ZeroScrew;
+import org.usfirst.frc.team2077.commands.TurnOffLauncher;
 
 
 public class DriveStation {
@@ -79,21 +80,24 @@ public class DriveStation {
     protected Command track_;
     //    Operator input of target position relative to robot.
     protected Command aim_;
+
+    protected Command feed_;
     
     public DriveStation(Subsystem position_,
                         Subsystem target_,
-                        Crosshairs crosshairs_) {
+                        Crosshairs crosshairs_,
+                        Subsystem grabber_) {
 
         drive_ = new PrimaryStickDrive3Axis();
         aim_ = new AimCrosshairs();
         track_ = new TrackTarget();
+        feed_ = new RunGrabber();
         // range_ = new RangeToCrosshairs(constants_.UPPER_TARGET_HEIGHT - constants_.FISHEYE_CAMERA_HEIGHT);
 
-
+        CommandScheduler.getInstance()
+                .setDefaultCommand(grabber_, feed_);
         CommandScheduler.getInstance()
                         .setDefaultCommand(position_, drive_);
-        // Uncomment the following to move rotation to secondary stick.
-        //CommandScheduler.getInstance().setDefaultCommand(heading_, new SecondaryStickDrive());
         CommandScheduler.getInstance()
                         .setDefaultCommand(target_, track_);
         CommandScheduler.getInstance()
@@ -101,9 +105,9 @@ public class DriveStation {
         // CommandScheduler.getInstance().setDefaultCommand(launcher_, range_);
 
 
-        primaryTrigger_.whileHeld(new RunGrabber(1));
+        primaryTrigger_.whileHeld(new RunGrabber());
         primary4_.whenPressed(new resetCrosshairs());
-        testing9_.whileHeld(new RunGrabber(1)); //for flysky controller
+//        testing9_.whileHeld(new RunGrabber()); //for flysky controller
 
         testing10_.whileHeld(new SteerToCrosshairs());
 //        secondary2_.whileHeld(new RangeToCrosshairs());
@@ -117,7 +121,7 @@ public class DriveStation {
         testing12_.whileHeld(new LauncherScrewTest(false));
         testing16_.whileHeld(new LauncherScrewTest(true));
 
-        testing1_.whenPressed(new ToggleLauncher());
+        testing1_.whenPressed(new TurnOffLauncher());
         //secondaryTrigger_.whileHeld(new ContinousAimToTarget3());
 
 

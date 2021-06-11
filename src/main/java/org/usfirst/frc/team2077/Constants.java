@@ -15,7 +15,7 @@ public final class Constants {
     public final double MAXIMUM_TARGET_RANGE = 60.*12.-18.; // maximum possible distance from target
 
     public final double AZIMUTH_CROSSHAIR_SENSITIVITY = 0.5; // joystick multiplier
-    public final double RANGE_CROSSHAIR_SENSITIVITY = 2.0; // joystick multiplier
+    public final double RANGE_CROSSHAIR_SENSITIVITY = 2.0 * .875 ; // joystick multiplier
 
     public final double FISHEYE_CAMERA_TILT = 0; // degrees upward tilt
     public final double FISHEYE_CAMERA_HEIGHT = 17.; // inches from floor to camera lens (check this)

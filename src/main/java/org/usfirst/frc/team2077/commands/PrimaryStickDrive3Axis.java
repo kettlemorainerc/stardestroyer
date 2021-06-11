@@ -31,7 +31,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double accelerationLimit = robot_.constants_.STARDESTROYER_ACCELERATION_G_LIMIT;
 		double decelerationLimit = robot_.constants_.STARDESTROYER_DECELERATION_G_LIMIT;
 
-		RunGrabber grabCommand = new RunGrabber(1);
 
 		if(robot_.analogSettings_ != null) {
 			double[] dialSetting = { // analog input dials, scaled to 0.0 - 1.0
@@ -68,15 +67,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
 
-		double z = robot_.driveStation_.Flight.getZ();
-//		if (z > .5) {
-//			grabCommand.schedule();
-//			wasLoading = true;
-//		}
-//		else if (wasLoading){
-//			grabCommand.end(false);
-//			wasLoading = false;
-//		}
 
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading

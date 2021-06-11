@@ -54,6 +54,7 @@ public class Robot extends TimedRobot {
 	public Subsystem position_;
 	public Subsystem heading_;
 	public Subsystem target_;
+	public Subsystem grabber_;
 	//    Aiming system for elevating ball launcher and pointing the robot. Displayed on DS video.
 	public Crosshairs crosshairs_;
 	//    Ball launcher with ajustable elevation and speed based on range to target.
@@ -135,7 +136,7 @@ public class Robot extends TimedRobot {
 
 	public void setupController() {
 		// Container for remote control software objects.
-		driveStation_ = new DriveStation(position_, target_, crosshairs_);
+		driveStation_ = new DriveStation(position_, target_, crosshairs_, tgrabber_);
 	}
 
 	/**
