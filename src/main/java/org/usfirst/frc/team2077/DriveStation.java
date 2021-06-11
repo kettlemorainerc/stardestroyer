@@ -142,6 +142,9 @@ public class DriveStation {
         // (new JoystickButton(primaryStick_, 8)).whenPressed(new Move(12, 12));
         // (new JoystickButton(primaryStick_, 9)).whenPressed(new Move(270));
         // (new JoystickButton(primaryStick_, 10)).whenPressed(new Move(-270));
+
+        // AJ VISION AIMING @@@
+        testing11_.whileHeld(new CenterBallOnVision());
     }
 
     /**

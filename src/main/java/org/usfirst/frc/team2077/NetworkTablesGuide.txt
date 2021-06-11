@@ -1,0 +1,11 @@
+THIS FILE HAS BEEN MADE BY AJ, IT'S LOCATION CAN BE MOVED, I DO NOT MIND, I JUST HAVE THIS HERE FOR ORGNISATION, I DIDN'T THINK THAT
+IT WAS NESSERY TO PUT IT IN A CONSTENTS FILE YET :)
+
+
+- FROM VISION
+
+|_ BALLS
+    - 'ball1' (DOUBLE ARRAY {x, y, r, a}) = the first ball of three, the closest to the robot. Angle provided is from center, a value of 0 means that there is no ball in the slot
+    - 'ball2' (DOUBLE ARRAY {x, y, r, a}) = the second ball of three, the second closest to the robot. Angle provided is from center, a value of 0 means that there is no ball in the slot
+    - 'ball3' (DOUBLE ARRAY {x, y, r, a}) = the third ball of three, the furthest (of the three) from the robot. Angle provided is from center, a value of 0 means that there is no ball in the slot
+
