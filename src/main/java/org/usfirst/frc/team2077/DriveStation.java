@@ -17,8 +17,8 @@ import org.usfirst.frc.team2077.commands.ZeroScrew;
 
 
 public class DriveStation {
-//    public final Joystick primaryStick_ = new Joystick(0);
-//    public final Joystick secondaryStick_ = new Joystick(1);
+    public final Joystick primaryStick_ = new Joystick(0);
+    public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
 
@@ -29,10 +29,10 @@ public class DriveStation {
                         .setDefaultCommand(position_, new PrimaryStickDrive3Axis());
         CommandScheduler.getInstance()
                         .setDefaultCommand(target_, new TrackTarget());
-//        CommandScheduler.getInstance()
-//                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
+        CommandScheduler.getInstance()
+                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
 
-//        bindDriverControl(primaryStick_);
+        bindDriverControl(primaryStick_);
         bindTechnicalControl(testingStick_);
     }
 

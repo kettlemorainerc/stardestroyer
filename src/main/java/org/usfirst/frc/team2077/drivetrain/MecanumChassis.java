@@ -127,7 +127,7 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updatePosition() {
-		System.out.println("Updating Position of: " + this);
+//		System.out.println("Updating Position of: " + this);
 		// chassis velocity from internal set point
 		velocitySet_ = getVelocityCalculated();
 		// chassis velocity from motor/wheel measurements
@@ -171,7 +171,7 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	protected void updateDriveModules() {
-		System.out.println("Updating drive modules: " + this);
+//		System.out.println("Updating drive modules: " + this);
 		EnumMap<VelocityDirection, Double> botVelocity = getVelocityCalculated();
 
 		// compute motor speeds
@@ -194,29 +194,29 @@ public class MecanumChassis extends AbstractChassis {
 
 	@Override
 	public String toString() {
-		return String.format(
-			"MecanumChassis\n\t" +
-			"Velocity: %s\n\t" +
-			"Set Velocity: %s\n\t" +
-			"MeasuredVelocity: %s\n\t" +
-			"Drive Modules: %s\n\t" +
-			"Set Position: %s\n\t" +
-			"Measured Position: %s\n",
-			velocity,
-			velocitySet_,
-			velocityMeasured_,
-			driveModule_,
-			positionSet_,
-			positionMeasured_
-		);
-//		return "V:" +
-//			   Math.round(velocity.get(NORTH) * 10.) / 10. +
-//			   "/" +
-//			   Math.round(velocity.get(EAST) * 10.) / 10. +
-//			   "/" +
-//			   Math.round(velocity.get(ROTATION) * 10.) / 10.
-//			   +
-//			   " W:" +
-//			   driveModule_;
+//		return String.format(
+//			"MecanumChassis\n\t" +
+//			"Velocity: %s\n\t" +
+//			"Set Velocity: %s\n\t" +
+//			"MeasuredVelocity: %s\n\t" +
+//			"Drive Modules: %s\n\t" +
+//			"Set Position: %s\n\t" +
+//			"Measured Position: %s\n",
+//			velocity,
+//			velocitySet_,
+//			velocityMeasured_,
+//			driveModule_,
+//			positionSet_,
+//			positionMeasured_
+//		);
+		return "V:" +
+			   Math.round(velocity.get(NORTH) * 10.) / 10. +
+			   "/" +
+			   Math.round(velocity.get(EAST) * 10.) / 10. +
+			   "/" +
+			   Math.round(velocity.get(ROTATION) * 10.) / 10.
+			   +
+			   " W:" +
+			   driveModule_;
 	}
 }
