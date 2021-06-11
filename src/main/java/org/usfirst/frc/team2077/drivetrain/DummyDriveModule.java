@@ -5,6 +5,8 @@
 
 package org.usfirst.frc.team2077.drivetrain;
 
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
+
 public class DummyDriveModule implements DriveModuleIF {
 
     // speed limit
@@ -38,6 +40,11 @@ public class DummyDriveModule implements DriveModuleIF {
         distance_ += speed_ * ((now-distanceTime_)/1000.);
         distanceTime_ = now;
         speed_ = speed;
+    }
+
+    @Override
+    public WheelPosition getWheelPosition() {
+        return null;
     }
 
     @Override

@@ -12,6 +12,9 @@ import org.usfirst.frc.team2077.DriveStation;
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class PrimaryStickDrive3Axis extends CommandBase {
+	public final double ACCELERATION_G_LIMIT = .4;
+	public final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
+
 	public PrimaryStickDrive3Axis() {
 		addRequirements(robot_.position_);
 	}
@@ -24,12 +27,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 		double speedLimit = 1.0;
 		// Rotation limit as a percentage (0.0-1.0) of maximum wheel speed
 		double rotationLimit = 1.0; // 0.3;
-		// Acceleration/deceleration limit, in Gs
-		// Should be at or below the static coefficient of friction (CoF) between the wheels and the floor
-		// Too high allows wheelspin, too low is hazardous due to slow deceleration
-		//double accelerationLimit = 1.0;
-		double accelerationLimit = robot_.constants_.STARDESTROYER_ACCELERATION_G_LIMIT;
-		double decelerationLimit = robot_.constants_.STARDESTROYER_DECELERATION_G_LIMIT;
 
 
 		if(robot_.analogSettings_ != null) {
@@ -46,17 +43,10 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			double rotationLimitMin = 0.2;
 			double rotationLimitMax = 1.0;
 			rotationLimit = rotationLimitMin + (rotationLimitMax - rotationLimitMin) * dialSetting[1];
-
-			double accelerationLimitMin = .05;
-			double accelerationLimitMax = 0.5;
-			accelerationLimit = accelerationLimitMin +
-								(accelerationLimitMax - accelerationLimitMin) * (1 - dialSetting[2]); // reverse dial
-			//decelerationLimit = Math.max(accelerationLimit, .25); // don't let this go too low for safety
 		}
-//		double throttle = 1 - robot_.driveStation_.secondaryStick_.getRawAxis(2);
 		double throttle = 1;
 
-		robot_.chassis_.setGLimits(robot_.constants_.STARDESTROYER_ACCELERATION_G_LIMIT, robot_.constants_.STARDESTROYER_DECELERATION_G_LIMIT);
+		robot_.chassis_.setGLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT);
 
 		// TODO: Who handles rotation updates if another command owns robot_position_?
 		// TODO: Check joystick/drive capabilities and merge w/2-axis.
@@ -66,8 +56,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 //		 double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
 //		east = Math.abs(east) > Math.abs(north) ? east : 0;
-
-
 
 		if(CommandScheduler.getInstance().requiring(robot_.heading_) != null) { // we don't control heading
 			//System.out.println(" STICK(3): " + north + " \t" + east);
@@ -79,6 +67,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			if (north == 0 && east == 0 && clockwise == 0) {
 				robot_.chassis_.halt();
 			} else {
+				System.out.printf("[Non-0 Stick inputs: N%s E%s R%s]%n", north, east, clockwise);
 				robot_.chassis_.setVelocity01(
 						north * speedLimit * throttle,
 						east * speedLimit * throttle,

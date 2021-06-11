@@ -6,6 +6,10 @@
 package org.usfirst.frc.team2077.drivetrain;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
+import org.usfirst.frc.team2077.math.AccelerationLimits;
+
+import java.util.EnumMap;
 
 /*
 Notes on units:
@@ -31,7 +35,7 @@ public interface DriveChassisIF extends Subsystem {
     void rotateRelative(double clockwise);
 
     void setPosition(double north, double east, double heading);
-    double[] getPosition();
+    EnumMap<VelocityDirection, Double> getPosition();
 
 
     /**
@@ -40,7 +44,7 @@ public interface DriveChassisIF extends Subsystem {
      * to these values (positive or negative).
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getMaximumVelocity();
+    EnumMap<VelocityDirection, Double> getMaximumVelocity();
 
     /**
      * Minimum velocities necessary to ensure motion, as determined by
@@ -49,7 +53,7 @@ public interface DriveChassisIF extends Subsystem {
      * to these values (positive or negative).
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getMinimumVelocity();
+    EnumMap<VelocityDirection, Double> getMinimumVelocity();
 
     /**
      * Set maximum allowable linear (N/S or E/W) acceleration and deceleration.
@@ -74,7 +78,7 @@ public interface DriveChassisIF extends Subsystem {
      * Acceleration and deceleration limits in units inches/second/second and degrees/second/second.
      * @return {linearAcceleration, linearDeceleration, rotationalAcceleration, rotationalDeceleration}
      */
-    double[][] getAccelerationLimits();
+    AccelerationLimits getAccelerationLimits();
 
     /**
      * @param north In inches per second.
@@ -82,7 +86,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param clockwise In degrees per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setVelocity(double north, double east, double clockwise, double[][] accelerationLimits);
+    void setVelocity(double north, double east, double clockwise, AccelerationLimits accelerationLimits);
     /**
      * @param north In inches per second.
      * @param east In inches per second.
@@ -94,7 +98,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param east In inches per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setVelocity(double north, double east, double[][] accelerationLimits);
+    void setVelocity(double north, double east, AccelerationLimits accelerationLimits);
     /**
      * @param north In inches per second.
      * @param east In inches per second.
@@ -104,7 +108,7 @@ public interface DriveChassisIF extends Subsystem {
      * @param clockwise In degrees per second.
      * @param accelerationLimits As returned by {@link #getAccelerationLimits()}.
      */
-    void setRotation(double clockwise, double[][] accelerationLimits);
+    void setRotation(double clockwise, AccelerationLimits accelerationLimits);
     /**
      * @param clockwise In degrees per second.
      */
@@ -135,19 +139,18 @@ public interface DriveChassisIF extends Subsystem {
      * Velocity set point.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocitySet();
+    EnumMap<VelocityDirection, Double> getVelocitySet();
 
     /**
      * Internal velocity set point, after adjustment for acceleration and velocity limits.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocityCalculated();
+    EnumMap<VelocityDirection, Double> getVelocityCalculated();
 
     /**
      * Measured velocity based on motor or wheel encoders if present.
      * May be affected by acceleration limits or calculated from relative settings.
      * @return {north, east, rotation} Units are inches and degrees per second.
      */
-    double[] getVelocityMeasured();
-
+    EnumMap<VelocityDirection, Double> getVelocityMeasured();
 }

@@ -5,25 +5,33 @@
 
 package org.usfirst.frc.team2077.math;
 
-public class Position {
+import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
 
-    protected double north_ = 0;
-    protected double east_ = 0;
-    protected double heading_ = 0;
+import java.util.EnumMap;
+
+import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
+
+public class Position extends EnumMap<VelocityDirection, Double> {
 
     public Position() {
+        this(new double[]{0, 0, 0});
+    }
+
+    public Position(Position from) {
+        this(new double[]{from.get(NORTH), from.get(EAST), from.get(ROTATION)});
     }
 
     public Position(double[] position) {
-        north_ = position[0];
-        east_ = position[1];
-        heading_ = position[2];
+        super(VelocityDirection.class);
+        put(NORTH, position[NORTH.ordinal()]);
+        put(EAST, position[EAST.ordinal()]);
+        put(ROTATION, position[ROTATION.ordinal()]);
     }
 
     public void moveAbsolute(double north, double east, double rotation) {
-        north_ += north;
-        east_ += east;
-        heading_ += rotation;
+        compute(NORTH, (k, val) -> val + north);
+        compute(EAST, (k, v) -> v + east);
+        compute(ROTATION, (k, v) -> v + rotation);
     }
 
     public void moveRelative(double north, double east, double rotation) {
@@ -38,21 +46,26 @@ public class Position {
             directionCurve = Math.atan2(side, ahead);
             distance = Math.sqrt(side*side + ahead*ahead);
         }
-        double direction = Math.toRadians(heading_) + directionStraight + directionCurve;
+        double direction = Math.toRadians(get(ROTATION)) + directionStraight + directionCurve;
         moveAbsolute(distance * Math.cos(direction), distance * Math.sin(direction), rotation);
     }
 
-    public double[] distanceAbsolute(Position origin) {
-        double[] o = origin.get();
-        return new double[] {north_-o[0], east_-o[1], heading_-o[2]};
+    public EnumMap<VelocityDirection, Double> distanceAbsolute(Position origin) {
+        EnumMap<VelocityDirection, Double> distanceTo = this.clone();
+
+        distanceTo.compute(NORTH, (k, v) -> v - origin.getOrDefault(NORTH, 0d));
+        distanceTo.compute(EAST, (k, v) -> v - origin.getOrDefault(EAST, 0d));
+        distanceTo.compute(ROTATION, (k, v) -> v - origin.getOrDefault(ROTATION, 0d));
+        
+        return distanceTo;
     }
 
 
-    public double[] distanceRelative(Position origin) {
-        double[] absolute = distanceAbsolute(origin);
-        double rotation = absolute[2];
-        double distance = Math.sqrt(absolute[0]*absolute[0] + absolute[1]*absolute[1]); // straight line
-        double direction = Math.atan2(absolute[1], absolute[0]) - Math.toRadians(origin.heading_);
+    public EnumMap<VelocityDirection, Double> distanceRelative(Position origin) {
+        EnumMap<VelocityDirection, Double> absolute = distanceAbsolute(origin);
+        double rotation = absolute.get(ROTATION);
+        double distance = Math.sqrt(absolute.get(NORTH)*absolute.get(NORTH) + absolute.get(EAST)*absolute.get(EAST)); // straight line
+        double direction = Math.atan2(absolute.get(EAST), absolute.get(NORTH)) - Math.toRadians(origin.get(ROTATION));
         double directionCurve = 0;
         if ( distance != 0 && rotation != 0) {
             double radians = Math.toRadians(rotation);
@@ -63,22 +76,37 @@ public class Position {
             distance = radius * radians;
         }
         double directionStraight = direction - directionCurve;
-        return new double[] {distance*Math.cos(directionStraight), distance*Math.sin(directionStraight), rotation};
+
+        EnumMap<VelocityDirection, Double> distanceTo = new EnumMap<>(VelocityDirection.class);
+
+        distanceTo.put(NORTH, distance * Math.cos(directionStraight));
+        distanceTo.put(EAST, distance * Math.cos(directionStraight));
+        distanceTo.put(ROTATION, rotation);
+
+        return distanceTo;
     }
 
     public void set(double north, double east, double heading) {
-        north_ = north;
-        east_ = east;
-        heading_ = heading;
+        put(NORTH, north);
+        put(EAST, east);
+        setHeading(heading);
+    }
+
+    public void setHeading(double heading) {
+        put(ROTATION, heading);
     }
 
     public double[] get() {
-        return new double[] {north_, east_, heading_};
+        return new double[] {get(NORTH), get(EAST), get(ROTATION)};
+    }
+
+    public Position copy() {
+        return new Position(this);
     }
 
     @Override
     public String toString() {
-        return "N:" + Math.round(north_*10.)/10. + "in E:" + Math.round(east_*10.)/10. + "in A:" + Math.round(heading_*10.)/10. +"deg";
+        return "N:" + Math.round(get(NORTH)*10.)/10. + "in E:" + Math.round(get(EAST)*10.)/10. + "in A:" + Math.round(get(ROTATION) * 10.) / 10. + "deg";
     }
 
     private static String toString(double[] doubleArray) {
@@ -88,75 +116,5 @@ public class Position {
             sb.append(" ");
         }
         return sb.toString();
-    }
-
-    /**
-     * Test code. May be run locally in VSCode.
-     */
-    public static void main(String[] argv) {
-        Position p = new Position();
-        Position pp;
-        
-        p = new Position();
-        System.out.println();
-        System.out.println(p);
-
-        p = new Position();
-        pp = new Position(p.get());
-        p.moveRelative(12, 12, 0);
-        System.out.println();
-        System.out.println("moveRelative(12, 12, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-
-        p = new Position();
-        pp = new Position(p.get());
-        p.moveRelative(0, 0, 90);
-        System.out.println();
-        System.out.println("moveRelative(0, 0, 90)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-
-        p = new Position();
-        pp = new Position(p.get());
-        p.moveRelative(12, 0, 90);
-        System.out.println();
-        System.out.println("moveRelative(12, 0, 90)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-
-        p = new Position();
-        pp = new Position(p.get());
-        p.moveRelative(24, 24, 180);
-        System.out.println();
-        System.out.println("moveRelative(24, 24, 180)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-        p.moveRelative(0, 10, 0);
-        System.out.println("moveRelative(0, 10, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-        p.moveRelative(0, 10, 0);
-        System.out.println("moveRelative(0, 10, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-        p.moveRelative(0, 10, 0);
-        System.out.println("moveRelative(0, 10, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-        p.moveRelative(0, 10, 0);
-        System.out.println("moveRelative(0, 10, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-
-        p = new Position();
-        pp = new Position(p.get());
-        p.moveRelative(12, 0, 0);
-        System.out.println();
-        System.out.println("moveRelative(12, 0, 0)");
-        System.out.println(p);
-        System.out.println(toString(p.distanceAbsolute(pp)) + " " + toString(p.distanceRelative(pp)));
-       
-
     }
 }
