@@ -33,14 +33,14 @@ public class Move extends CommandBase {
 		return new EnumMap<>(VelocityDirection.class);
 	}
 
-	private final EnumMap<VelocityDirection, Double> distanceTotal_;
-	private final Style method_;
+	private final EnumMap<VelocityDirection, Double> targetDistance;
 	private EnumMap<VelocityDirection, Double> vCurrent = directionMap();
 	private EnumMap<VelocityDirection, Double> fast_ = directionMap();
 	private EnumMap<VelocityDirection, Double> slow_ = directionMap();
 	private EnumMap<VelocityDirection, Double> distanceRemaining_ = directionMap();
 	private EnumMap<VelocityDirection, Boolean> finished_ = directionMap();
 	private AccelerationLimits acceleration_;
+	private final Style method_;
 	private Position origin_;
 
 	public Move(double north, double east, double rotation) {
@@ -59,20 +59,20 @@ public class Move extends CommandBase {
 
 		addRequirements(requirements);
 		// distanceTotal_ = new double[] {north, east * .68, rotation * 7/8}; //fudged values for the multipliers
-		distanceTotal_ = new EnumMap<>(VelocityDirection.class);
-		distanceTotal_.put(NORTH, north);
-		distanceTotal_.put(EAST, east);
-		distanceTotal_.put(ROTATION, rotation);
+		targetDistance = new EnumMap<>(VelocityDirection.class);
+		targetDistance.put(NORTH, north);
+		targetDistance.put(EAST, east * .68);
+		targetDistance.put(ROTATION, rotation * 7/8);
 		method_ = method;
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" +
-                           distanceTotal_.get(NORTH) +
-                           " " +
-                           distanceTotal_.get(EAST) +
-                           " " +
-                           distanceTotal_.get(ROTATION) +
-                           " (" +
-                           method_ +
-                           ")");
+						   targetDistance.get(NORTH) +
+						   " " +
+						   targetDistance.get(EAST) +
+						   " " +
+						   targetDistance.get(ROTATION) +
+						   " (" +
+						   method_ +
+						   ")");
 	}
 
 
@@ -83,9 +83,9 @@ public class Move extends CommandBase {
 
 		// scale factors for north/east/rotation by fraction of maximum velocity
 		double[] scale = {
-			Math.abs(distanceTotal_.get(NORTH)) / max.get(NORTH),
-			Math.abs(distanceTotal_.get(EAST)) / max.get(EAST),
-            Math.abs(distanceTotal_.get(ROTATION)) / max.get(ROTATION)
+			Math.abs(targetDistance.get(NORTH)) / max.get(NORTH),
+			Math.abs(targetDistance.get(EAST)) / max.get(EAST),
+			Math.abs(targetDistance.get(ROTATION)) / max.get(ROTATION)
 		};
 		double maxScale = Math.max(scale[NORTH.ordinal()], Math.max(scale[EAST.ordinal()], scale[ROTATION.ordinal()]));
 		scale = new double[]{
@@ -94,9 +94,9 @@ public class Move extends CommandBase {
             scale[ROTATION.ordinal()] / maxScale
 		}; // NORTH - EAST
 		double[] sign = {
-			signum(distanceTotal_.get(NORTH)),
-			signum(distanceTotal_.get(EAST)),
-			signum(distanceTotal_.get(ROTATION))
+			signum(targetDistance.get(NORTH)),
+			signum(targetDistance.get(EAST)),
+			signum(targetDistance.get(ROTATION))
 		};
 
 		// scale speeds and acceleration/deceleration
@@ -112,25 +112,24 @@ public class Move extends CommandBase {
 											   robot_.chassis_,
 											   scale);
 
-		origin_ = new Position(robot_.chassis_.getPosition());
-		distanceRemaining_ = new EnumMap<VelocityDirection, Double>(VelocityDirection.class);
-		distanceRemaining_.put(NORTH, distanceTotal_.get(NORTH));
-		distanceRemaining_.put(EAST, distanceTotal_.get(EAST));
-		distanceRemaining_.put(ROTATION, distanceTotal_.get(ROTATION));
+		origin_ = robot_.chassis_.getPosition().copy();
+		distanceRemaining_.put(NORTH, targetDistance.get(NORTH));
+		distanceRemaining_.put(EAST, targetDistance.get(EAST));
+		distanceRemaining_.put(ROTATION, targetDistance.get(ROTATION));
 
 		finished_.put(NORTH, abs(distanceRemaining_.get(NORTH)) == 0d);
 		finished_.put(EAST, abs(distanceRemaining_.get(EAST)) == 0d);
 		finished_.put(ROTATION, abs(distanceRemaining_.get(ROTATION)) == 0d);
 
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE DISTANCE:" +
-                           distanceTotal_.get(NORTH) +
-                           " " +
-                           distanceTotal_.get(EAST) +
-                           " " +
-                           distanceTotal_.get(ROTATION) +
-                           " (" +
-                           method_ +
-                           ")");
+						   targetDistance.get(NORTH) +
+						   " " +
+						   targetDistance.get(EAST) +
+						   " " +
+						   targetDistance.get(ROTATION) +
+						   " (" +
+						   method_ +
+						   ")");
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE SCALE:" +
 						   scale[NORTH.ordinal()] +
 						   " " +
@@ -170,7 +169,7 @@ public class Move extends CommandBase {
 		EnumMap<VelocityDirection, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(origin_);
 		boolean[] slow = {false, false, false};
 		for(VelocityDirection direction : VelocityDirection.values()){
-			distanceRemaining_.compute(direction, (k,v) -> v - distanceTraveled.get(direction));
+			distanceRemaining_.put(direction, targetDistance.get(direction) - distanceTraveled.get(direction));
 			double distanceToStop = vCurrent.get(direction) * vCurrent.get(direction) /
 									acceleration_.get(direction, DECELERATION) /
 									2.;// exact absolute value per physics
@@ -181,7 +180,7 @@ public class Move extends CommandBase {
 			slow[direction.ordinal()] = finished_.get(direction) ||
 					  Math.abs(distanceRemaining_.get(direction)) <= distanceToStop; // slow down within padded stopping distance
 		}
-		boolean s = Math.abs(distanceTotal_.get(ROTATION)) > 0 ? slow[ROTATION.ordinal()] : (slow[NORTH.ordinal()] && slow[EAST.ordinal()]);
+		boolean s = Math.abs(targetDistance.get(ROTATION)) > 0 ? slow[ROTATION.ordinal()] : (slow[NORTH.ordinal()] && slow[EAST.ordinal()]);
 		for(VelocityDirection direction : VelocityDirection.values()) {
 			vNew[direction.ordinal()] = finished_.get(direction) ? 0d : (s ? slow_ : fast_).get(direction);
 		}
@@ -212,14 +211,15 @@ public class Move extends CommandBase {
 			double total = distanceRemaining_.get(direction);
 			finished_.compute(direction, (k, v) -> v || (signum(remaining) != signum(total)));
 		}
-		boolean reachedGoal = abs(distanceTotal_.get(ROTATION)) > 0 ?
+		/*boolean reachedGoal =*/
+		return abs(targetDistance.get(ROTATION)) > 0 ?
 			finished_.get(ROTATION) :
 			finished_.get(NORTH) && finished_.get(EAST);
-		boolean stoppedMoving = false;
-		for(double velocity : vCurrent.values()) {
-			stoppedMoving = stoppedMoving || Math.abs(velocity) <= 0.1;
-		}
+//		boolean stoppedMoving = false;
+//		for(double velocity : vCurrent.values()) {
+//			stoppedMoving = stoppedMoving || Math.abs(velocity) <= 0.1;
+//		}
 
-		return reachedGoal && stoppedMoving;
+//		return reachedGoal && stoppedMoving;
 	}
 }

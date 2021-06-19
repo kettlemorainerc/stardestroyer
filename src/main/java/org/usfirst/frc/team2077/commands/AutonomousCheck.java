@@ -19,9 +19,7 @@ public class AutonomousCheck extends SequentialCommandGroup{
     private boolean barrelRacing = false;
     private boolean slalom = false;
     private boolean bounce = false;
-
-
-
+    private final Move move = new Move(36, 0, 0);
 
     public void initialize(){
     }
@@ -29,11 +27,12 @@ public class AutonomousCheck extends SequentialCommandGroup{
 
     @Override
     public void execute() {
-
         runAuto = SmartDashboard.getBoolean("Run Autonomous", false);
 
-        if (runAuto) {
-            new Move(36, 0, 0);
+        if (runAuto && !move.isScheduled()) {
+            move.schedule();
+            done = true;
+//            (new Move(2, 0, 0)).schedule();
         }
 
 //        galacticSearch = SmartDashboard.getBoolean("Galactic Search", false);
