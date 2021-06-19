@@ -33,7 +33,7 @@ public class AutonomousCheck extends SequentialCommandGroup{
         runAuto = SmartDashboard.getBoolean("Run Autonomous", false);
 
         if (runAuto) {
-            new Move(60, 0, 0);
+            new Move(36, 0, 0);
         }
 
 //        galacticSearch = SmartDashboard.getBoolean("Galactic Search", false);
