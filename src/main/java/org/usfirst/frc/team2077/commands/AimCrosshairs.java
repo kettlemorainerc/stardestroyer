@@ -23,9 +23,9 @@ public class AimCrosshairs extends CommandBase {
 
   private enum SimulatedKey {
     W(true, 1),
-    A(false, 1),
+    A(false, -1),
     S(true, -1),
-    D(false, -1)
+    D(false, 1)
     ;
 
     private final double adjustment;

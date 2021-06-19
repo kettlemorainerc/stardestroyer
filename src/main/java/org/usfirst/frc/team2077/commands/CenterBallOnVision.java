@@ -66,14 +66,11 @@ public class CenterBallOnVision extends CommandBase {
   @Override
   public void execute() {
     NetworkTableEntry nte;
-    SmartDashboard.putNumber("hi buddyw", done? 100:-100);
-    SmartDashboard.putNumber("CenterBallOnVision ", 50);
 
     if ( (nte = getNTE("ball1")) != null) {
       double[] ball1 = nte.getDoubleArray(new double[0]);
-
-      if(ball1[3] != 0)
-        robot_.chassis_.setRotation(ball1[3]);
+      if(ball1[3] != 0.0)
+        robot_.chassis_.setRotation(ball1[3]*1.25);
     }
   }
 

@@ -29,42 +29,46 @@ public class AutonomousCheck extends SequentialCommandGroup{
 
     @Override
     public void execute() {
-        
 
         runAuto = SmartDashboard.getBoolean("Run Autonomous", false);
-        galacticSearch = SmartDashboard.getBoolean("Galactic Search", false);
-        a = SmartDashboard.getBoolean("A", false);
-        red = SmartDashboard.getBoolean("Red", false);
-
-        if (!barrelRacing && SmartDashboard.getBoolean("Barrel Racing", false)) {
-            SmartDashboard.putBoolean("Slalom", false);
-            SmartDashboard.putBoolean("Bounce", false);
-        } else if (!slalom && SmartDashboard.getBoolean("Slalom", false)) {
-            SmartDashboard.putBoolean("Barrel Racing", false);
-            SmartDashboard.putBoolean("Bounce", false);
-        } else if (!bounce && SmartDashboard.getBoolean("Bounce", false)) {
-            SmartDashboard.putBoolean("Barrel Racing", false);
-            SmartDashboard.putBoolean("Slalom", false);
-        }
-        barrelRacing = SmartDashboard.getBoolean("Barrel Racing", false);
-        slalom = SmartDashboard.getBoolean("Slalom", false);
-        bounce = SmartDashboard.getBoolean("Bounce", false);
 
         if (runAuto) {
-            if (galacticSearch) {
-                // System.out.println("GALACTIC SEARCH TIME _______________");
-                (new GalacticSearch(a, red)).schedule();
-            } else {
-                if (barrelRacing) {
-                    (new AutoNavRoutes(AutoNavRoute.BARREL_RACE)).schedule();
-                } else if (slalom) {
-                    (new AutoNavRoutes(AutoNavRoute.SLALOM)).schedule();
-                } else if (bounce) {
-                    (new AutoNavRoutes(AutoNavRoute.BOUNCE)).schedule();   
-                }
-            }
-            end(false);
+            new Move(60, 0, 0);
         }
+
+//        galacticSearch = SmartDashboard.getBoolean("Galactic Search", false);
+//        a = SmartDashboard.getBoolean("A", false);
+//        red = SmartDashboard.getBoolean("Red", false);
+//
+//        if (!barrelRacing && SmartDashboard.getBoolean("Barrel Racing", false)) {
+//            SmartDashboard.putBoolean("Slalom", false);
+//            SmartDashboard.putBoolean("Bounce", false);
+//        } else if (!slalom && SmartDashboard.getBoolean("Slalom", false)) {
+//            SmartDashboard.putBoolean("Barrel Racing", false);
+//            SmartDashboard.putBoolean("Bounce", false);
+//        } else if (!bounce && SmartDashboard.getBoolean("Bounce", false)) {
+//            SmartDashboard.putBoolean("Barrel Racing", false);
+//            SmartDashboard.putBoolean("Slalom", false);
+//        }
+//        barrelRacing = SmartDashboard.getBoolean("Barrel Racing", false);
+//        slalom = SmartDashboard.getBoolean("Slalom", false);
+//        bounce = SmartDashboard.getBoolean("Bounce", false);
+//
+//        if (runAuto) {
+//            if (galacticSearch) {
+//                // System.out.println("GALACTIC SEARCH TIME _______________");
+//                (new GalacticSearch(a, red)).schedule();
+//            } else {
+//                if (barrelRacing) {
+//                    (new AutoNavRoutes(AutoNavRoute.BARREL_RACE)).schedule();
+//                } else if (slalom) {
+//                    (new AutoNavRoutes(AutoNavRoute.SLALOM)).schedule();
+//                } else if (bounce) {
+//                    (new AutoNavRoutes(AutoNavRoute.BOUNCE)).schedule();
+//                }
+//            }
+//            end(false);
+//        }
     }
 
     private boolean done = false;

@@ -225,9 +225,9 @@ public class Robot extends TimedRobot {
 		// teleop starts running. If you want the autonomous to
 		// continue until interrupted by another command, remove
 		// this line or comment it out.
-		// if (autonomous_ != null) {
-		// autonomous_.cancel();
-		// }
+		 if (autonomous_ != null) {
+		 	autonomous_.cancel();
+		 }
 	}
 
 	private static void printWheelInfo(SparkNeoDriveModule.DrivePosition position) {

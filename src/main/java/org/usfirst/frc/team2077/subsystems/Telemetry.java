@@ -45,7 +45,9 @@ public class Telemetry extends SubsystemBase {
 
         if (robot_.launcher_ instanceof Launcher) {
             getNTE("RangeAV").setDoubleArray(((Launcher)robot_.launcher_).getRangeAV());
+            System.out.println(((Launcher)robot_.launcher_).getRangeAV()[0]);
             getNTE("setPointShoot").setDouble(robot_.testLauncher_.launcherRPM_);
+
             getNTE("ReadyShoot").setBoolean(robot_.testLauncher_.isReady());
         }
     }

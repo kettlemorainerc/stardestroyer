@@ -7,14 +7,10 @@ package org.usfirst.frc.team2077;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
-
-import org.usfirst.frc.team2077.commands.ZeroScrew;
-import org.usfirst.frc.team2077.commands.TurnOffLauncher;
 
 
 public class DriveStation {
@@ -28,7 +24,7 @@ public class DriveStation {
                         Crosshairs crosshairs_,
                 Subsystem grabber_) {
         CommandScheduler.getInstance()
-                .setDefaultCommand(grabber_, new RunGrabber());
+                .setDefaultCommand(grabber_, new RunGrabber(Flight, new JoystickButton(testingStick_, 9)));
         CommandScheduler.getInstance()
                         .setDefaultCommand(position_, new PrimaryStickDrive3Axis());
         CommandScheduler.getInstance()
@@ -36,13 +32,13 @@ public class DriveStation {
         CommandScheduler.getInstance()
                         .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
 
-        bindDriverControl(primaryStick_);
+//        bindDriverControl(primaryStick_);
         bindTechnicalControl(testingStick_);
     }
 
     private static void bindDriverControl(Joystick primary) {
         JoystickButton primaryTrigger = new JoystickButton(primary, 1);
-        primaryTrigger.whileHeld(new RunGrabber());
+//        primaryTrigger.whileHeld(new RunGrabber());
 
         new JoystickButton(primary, 4).whenPressed(new ResetCrosshairs());
     }

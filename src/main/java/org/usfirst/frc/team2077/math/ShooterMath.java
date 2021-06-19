@@ -4,7 +4,7 @@ public class ShooterMath {
 
     private double height, shooterAngle, distance, shooterRPM, neededAngle;
     private final double barrelLength = 11.375, shooterHeightFromActuator = 3.75; //inches
-    private final double actuatorLength = 13.75, angleToPerpendicular = 3;
+    private final double actuatorLength = 13.75, angleToPerpendicular = 3, angleOffset = -.7;
     private double lastActuatorTicks;
 //    private final int maxAngle = 58, minAngle = 38;
 
@@ -37,8 +37,8 @@ public class ShooterMath {
         double actuatedDistance = actuatorTickDistance / 6.38e6;
         double numerator = (-Math.pow(actuatorLength + actuatedDistance,2)) + Math.pow(barrelLength,2) + Math.pow(shooterHeightFromActuator,2);
         double denominator = 2 * barrelLength * shooterHeightFromActuator;
-        System.out.println("Dividend " + (numerator/denominator));
-        this.shooterAngle = Math.toDegrees(Math.acos((numerator/denominator))) - 90 + angleToPerpendicular;
+        this.shooterAngle = Math.toDegrees(Math.acos((numerator/denominator))) - 90 + angleToPerpendicular + angleOffset;
+        System.out.println("ShooterAngle " + this.shooterAngle);
 
         return this.shooterAngle;
     }

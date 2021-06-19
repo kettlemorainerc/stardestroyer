@@ -81,6 +81,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     public void periodic() {
         // stop if position reading is outside normal range due to disconnected wires, etc
         double currentScrewPosition = getScrewPosition();
+        SmartDashboard.putNumber("Screw Position: ", currentScrewPosition);
         shooterMath.setDistance(robot_.crosshairs_.getRange(), currentScrewPosition);
 //        launcherRPM_ = (robot_.driveStation_.secondaryStick_.getZ() - 1.) / 2. * -3250 + 2350;
         SmartDashboard.putNumber("hi buddy", robot_.crosshairs_.getRange());
