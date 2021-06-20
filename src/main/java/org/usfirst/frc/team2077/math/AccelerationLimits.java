@@ -38,8 +38,8 @@ public class AccelerationLimits {
         this(accelerationG, decelerationG, chassis, new double[] {1, 1, 0});
     }
 
-    public AccelerationLimits(double accelerationG, double decelerationG, DriveChassisIF chassisIF, double[] scale) {
-        this(true, accelerationG, decelerationG, chassisIF, scale);
+    public AccelerationLimits(double accelerationG, double decelerationG, DriveChassisIF chassis, double[] scale) {
+        this(true, accelerationG, decelerationG, chassis, scale);
     }
 
     public AccelerationLimits(boolean calculateRotation, double accelerationG, double decelerationG, DriveChassisIF chassis) {
@@ -105,11 +105,11 @@ public class AccelerationLimits {
         return LIMITS.getMatrix()[d.ordinal()];
     }
 
-    public double[][] getAdjusted(DriveChassisIF chassisIF) {
+    public double[][] getAdjusted(DriveChassisIF chassis) {
         return new double[][] {
-            get(NORTH, chassisIF),
-            get(EAST, chassisIF),
-            get(ROTATION, chassisIF)
+            get(NORTH, chassis),
+            get(EAST, chassis),
+            get(ROTATION, chassis)
         };
     }
 

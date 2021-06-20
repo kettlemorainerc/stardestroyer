@@ -5,12 +5,14 @@
 
 package org.usfirst.frc.team2077;
 
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
+
+import java.util.*;
 
 
 public class DriveStation {
@@ -18,11 +20,15 @@ public class DriveStation {
     public final Joystick secondaryStick_ = new Joystick(1);
     public final Joystick testingStick_ = new Joystick(5);
     public final Joystick Flight = new Joystick(2);
+    
+    private final List<Joystick> joysticks = new LinkedList<>();
+    private final List<JoystickButton> buttons = new LinkedList<>();
+    private final List<Subsystem> subsystems = new LinkedList<>();
 
     public DriveStation(Subsystem position_,
                         Subsystem target_,
                         Crosshairs crosshairs_,
-                Subsystem grabber_) {
+                        Subsystem grabber_) {
         CommandScheduler.getInstance()
                 .setDefaultCommand(grabber_, new RunGrabber(Flight, new JoystickButton(testingStick_, 9)));
         CommandScheduler.getInstance()
@@ -43,7 +49,7 @@ public class DriveStation {
         new JoystickButton(primary, 4).whenPressed(new ResetCrosshairs());
     }
 
-    private static void bindTechnicalControl(Joystick testing) {
+    private void bindTechnicalControl(Joystick testing) {
         new JoystickButton(testing, 1).whenPressed(new TurnOffLauncher());
         new JoystickButton(testing, 3).whileHeld(new Launch());
         new JoystickButton(testing, 4).whileHeld(new LoadLauncher());
@@ -61,5 +67,12 @@ public class DriveStation {
      */
     public static double adjustInputSensitivity(double input, double deadBand, double exponent) {
         return Math.pow(Math.max(0, Math.abs(input) - deadBand) / (1 - deadBand), exponent) * Math.signum(input);
+    }
+
+    public void cancel() {
+//        CommandScheduler.getInstance().unregisterSubsystem(subsystems.toArray(new Subsystem[0]));
+//        joysticks.forEach(stick -> {
+//            stick.`
+//        });
     }
 }

@@ -93,6 +93,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
+		SmartDashboard.putBoolean("Run Autonomous", false);
 		networkTableInstance_ = NetworkTableInstance.getDefault();
 		angleSensor_ = new AngleSensor();
 
@@ -204,6 +205,9 @@ public class Robot extends TimedRobot {
 		// if (autonomous_ != null) {
 		//   autonomous_.schedule();
 		// }
+		if(driveStation_ != null) {
+			driveStation_.cancel();
+		}
 		autonomous_ = new AutonomousCheck();
 		autonomous_.schedule();
 	}

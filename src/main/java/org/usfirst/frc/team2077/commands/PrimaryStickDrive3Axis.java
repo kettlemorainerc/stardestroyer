@@ -12,8 +12,8 @@ import org.usfirst.frc.team2077.DriveStation;
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class PrimaryStickDrive3Axis extends CommandBase {
-	public final double ACCELERATION_G_LIMIT = .4;
-	public final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
+	public static final double ACCELERATION_G_LIMIT = .4;
+	public static final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
 
 	public PrimaryStickDrive3Axis() {
 		addRequirements(robot_.position_);
@@ -23,7 +23,6 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 	public void execute() {
 
 		// Speed limit as a percentage (0.0-1.0) of maximum wheel speed
-		boolean wasLoading = false;
 		double speedLimit = 1.0;
 		// Rotation limit as a percentage (0.0-1.0) of maximum wheel speed
 		double rotationLimit = 1.0; // 0.3;
