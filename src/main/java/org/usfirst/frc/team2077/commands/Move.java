@@ -5,71 +5,57 @@
 
 package org.usfirst.frc.team2077.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
-import org.usfirst.frc.team2077.math.AccelerationLimits;
-import org.usfirst.frc.team2077.math.Position;
+import org.usfirst.frc.team2077.math.*;
+import org.usfirst.frc.team2077.math.AccelerationLimits.Type;
 
 import java.util.EnumMap;
 
-import static java.lang.Math.*;
-import static org.usfirst.frc.team2077.Robot.robot_;
-import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
-import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
+import static org.usfirst.frc.team2077.Robot.*;
 
 
 public class Move extends CommandBase {
-	 public final double ACCELERATION_G_LIMIT = .1;
-	 public final double DECELERATION_G_LIMIT = .3;
+	public static final double ACCELERATION_G_LIMIT = .1;
+	public static final double DECELERATION_G_LIMIT = .3;
+	private final double[] distanceTotal_; // {north, east, rotation} (signed)
+	private final int method_; // 1 2 or 3 (#args to setVelocity/setRotation)
 
-	public enum Style {
-		MOVE_AND_ROTATE,
-		MOVE,
-		ROTATE
-	}
-	
-	public static <T> EnumMap<VelocityDirection, T> directionMap() {
-		return new EnumMap<>(VelocityDirection.class);
-	}
+	private double[] fast_; // {north, east, rotation} (signed)
+	private double[] slow_; // {north, east, rotation} (signed)
+	private AccelerationLimits acceleration_; // like getAccelerationLimits, but scaled
 
-	private final EnumMap<VelocityDirection, Double> targetDistance;
-	private EnumMap<VelocityDirection, Double> vCurrent = directionMap();
-	private EnumMap<VelocityDirection, Double> fast_ = directionMap();
-	private EnumMap<VelocityDirection, Double> slow_ = directionMap();
-	private EnumMap<VelocityDirection, Double> distanceRemaining_ = directionMap();
-	private EnumMap<VelocityDirection, Boolean> finished_ = directionMap();
-	private AccelerationLimits acceleration_;
-	private final Style method_;
+	private double[] distanceRemaining_; // {north, east, rotation} (signed)
+
+	private boolean[] finished_; // {north, east, rotation}
+
+
 	private Position origin_;
 
 	public Move(double north, double east, double rotation) {
-		this(north, east, rotation, Style.MOVE_AND_ROTATE, robot_.position_, robot_.heading_);
+		this(north, east, rotation, 3, robot_.position_, robot_.heading_);
+		// this(north, east, ation(rotation), 3, robot_.position_, robot_.heading_);
 	}
 
 	public Move(double north, double east) {
-		this(north, east, 0, Style.MOVE, robot_.position_);
+		this(north, east, 0, 2, robot_.position_);
 	}
 
 	public Move(double rotation) {
-		this(0, 0, rotation, Style.ROTATE, robot_.heading_);
+		this(0, 0, rotation, 1, robot_.heading_);
 	}
 
-	private Move(double north, double east, double rotation, Style method, Subsystem... requirements) {
+	private Move(double north, double east, double rotation, int method, Subsystem... requirements) {
 
 		addRequirements(requirements);
-		// distanceTotal_ = new double[] {north, east * .68, rotation * 7/8}; //fudged values for the multipliers
-		targetDistance = new EnumMap<>(VelocityDirection.class);
-		targetDistance.put(NORTH, north);
-		targetDistance.put(EAST, east * .68);
-		targetDistance.put(ROTATION, rotation * 7/8);
+		distanceTotal_ = new double[]{north, east * .68, rotation * 7 / 8}; //fudged values for the multipliers
 		method_ = method;
 		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" +
-						   targetDistance.get(NORTH) +
+						   distanceTotal_[0] +
 						   " " +
-						   targetDistance.get(EAST) +
+						   distanceTotal_[1] +
 						   " " +
-						   targetDistance.get(ROTATION) +
+						   distanceTotal_[2] +
 						   " (" +
 						   method_ +
 						   ")");
@@ -78,111 +64,95 @@ public class Move extends CommandBase {
 
 	@Override
 	public void initialize() {
+
 		EnumMap<VelocityDirection, Double> max = robot_.chassis_.getMaximumVelocity();
 		EnumMap<VelocityDirection, Double> min = robot_.chassis_.getMinimumVelocity();
 
 		// scale factors for north/east/rotation by fraction of maximum velocity
 		double[] scale = {
-			Math.abs(targetDistance.get(NORTH)) / max.get(NORTH),
-			Math.abs(targetDistance.get(EAST)) / max.get(EAST),
-			Math.abs(targetDistance.get(ROTATION)) / max.get(ROTATION)
+			Math.abs(distanceTotal_[0]) / max.get(VelocityDirection.NORTH),
+			Math.abs(distanceTotal_[1]) / max.get(VelocityDirection.EAST),
+			Math.abs(distanceTotal_[2]) / max.get(VelocityDirection.ROTATION)
 		};
-		double maxScale = Math.max(scale[NORTH.ordinal()], Math.max(scale[EAST.ordinal()], scale[ROTATION.ordinal()]));
-		scale = new double[]{
-			scale[NORTH.ordinal()] / maxScale,
-			scale[EAST.ordinal()] / maxScale,
-            scale[ROTATION.ordinal()] / maxScale
-		}; // NORTH - EAST
+		double maxScale = Math.max(scale[0], Math.max(scale[1], scale[2]));
+		scale = new double[]{scale[0] / maxScale, scale[1] / maxScale, scale[2] / maxScale}; // 0 - 1
 		double[] sign = {
-			signum(targetDistance.get(NORTH)),
-			signum(targetDistance.get(EAST)),
-			signum(targetDistance.get(ROTATION))
+			Math.signum(distanceTotal_[0]),
+			Math.signum(distanceTotal_[1]),
+			Math.signum(distanceTotal_[02])
 		};
 
 		// scale speeds and acceleration/deceleration
-		fast_.put(NORTH, Math.max(min.get(NORTH), max.get(NORTH) * scale[NORTH.ordinal()]) * sign[NORTH.ordinal()]);
-		fast_.put(EAST, Math.max(min.get(EAST), max.get(EAST) * scale[EAST.ordinal()]) * sign[EAST.ordinal()]);
-		fast_.put(ROTATION, Math.max(min.get(ROTATION), max.get(ROTATION) * scale[ROTATION.ordinal()]) * sign[ROTATION.ordinal()]);
-		
-		slow_.put(NORTH, min.get(NORTH) * sign[NORTH.ordinal()]);
-		slow_.put(EAST, min.get(EAST) * sign[EAST.ordinal()]);
-		slow_.put(ROTATION, min.get(ROTATION) * sign[ROTATION.ordinal()]);
-		// don't scale below minimum
-		acceleration_ = new AccelerationLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT,
-											   robot_.chassis_,
-											   scale);
+		fast_ = new double[]{
+			Math.max(min.get(VelocityDirection.NORTH), max.get(VelocityDirection.NORTH) * scale[0]) * sign[0],
+			Math.max(min.get(VelocityDirection.EAST), max.get(VelocityDirection.EAST) * scale[1]) * sign[1],
+			Math.max(min.get(VelocityDirection.ROTATION), max.get(VelocityDirection.ROTATION) * scale[2]) * sign[2]
+		}; // don't let maximum scale below minimum
+		slow_ = new double[]{
+			min.get(VelocityDirection.NORTH) * sign[0],
+			min.get(VelocityDirection.EAST) * sign[1],
+			min.get(VelocityDirection.ROTATION) * sign[2]
+		}; // don't scale below minimum
+		acceleration_ = new AccelerationLimits(ACCELERATION_G_LIMIT, DECELERATION_G_LIMIT, robot_.chassis_, scale);
 
-		origin_ = robot_.chassis_.getPosition().copy();
-		distanceRemaining_.put(NORTH, targetDistance.get(NORTH));
-		distanceRemaining_.put(EAST, targetDistance.get(EAST));
-		distanceRemaining_.put(ROTATION, targetDistance.get(ROTATION));
+		origin_ = new Position(robot_.chassis_.getPosition());
+		distanceRemaining_ = new double[]{distanceTotal_[0], distanceTotal_[1], distanceTotal_[2]};
+		finished_ = new boolean[]{
+			Math.abs(distanceRemaining_[0]) == 0.,
+			Math.abs(distanceRemaining_[1]) == 0.,
+			Math.abs(distanceRemaining_[2]) == 0.
+		};
 
-		finished_.put(NORTH, abs(distanceRemaining_.get(NORTH)) == 0d);
-		finished_.put(EAST, abs(distanceRemaining_.get(EAST)) == 0d);
-		finished_.put(ROTATION, abs(distanceRemaining_.get(ROTATION)) == 0d);
-
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE DISTANCE:" +
-						   targetDistance.get(NORTH) +
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" +
+						   distanceTotal_[0] +
 						   " " +
-						   targetDistance.get(EAST) +
+						   distanceTotal_[1] +
 						   " " +
-						   targetDistance.get(ROTATION) +
+						   distanceTotal_[2] +
 						   " (" +
 						   method_ +
 						   ")");
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE SCALE:" +
-						   scale[NORTH.ordinal()] +
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SCALE:" + scale[0] + " " + scale[1] + " " + scale[2]);
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 FAST:" + fast_[0] + " " + fast_[1] + " " + fast_[2]);
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SLOW:" + slow_[0] + " " + slow_[1] + " " + slow_[2]);
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL N:" +
+						   acceleration_.get(VelocityDirection.NORTH, Type.ACCELERATION) +
 						   " " +
-						   scale[EAST.ordinal()] +
+						   acceleration_.get(VelocityDirection.NORTH, Type.DECELERATION));
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL E:" +
+						   acceleration_.get(VelocityDirection.EAST, Type.ACCELERATION) +
 						   " " +
-						   scale[ROTATION.ordinal()]);
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE FAST:" +
-						   fast_.get(NORTH) +
+						   acceleration_.get(VelocityDirection.EAST, Type.DECELERATION));
+		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL R:" +
+						   acceleration_.get(VelocityDirection.ROTATION, Type.ACCELERATION) +
 						   " " +
-						   fast_.get(EAST) +
-						   " " +
-						   fast_.get(ROTATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE SLOW:" +
-						   slow_.get(NORTH) +
-						   " " +
-						   slow_.get(EAST) +
-						   " " +
-						   slow_.get(ROTATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL N:" +
-						   acceleration_.get(NORTH, ACCELERATION) +
-						   " " +
-						   acceleration_.get(NORTH, DECELERATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL E:" +
-						   acceleration_.get(EAST, ACCELERATION) +
-						   " " +
-						   acceleration_.get(EAST, DECELERATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVECLOCKWISE ACCEL R:" +
-                           acceleration_.get(ROTATION, ACCELERATION) +
-                           " " +
-                           acceleration_.get(ROTATION, DECELERATION));
+						   acceleration_.get(VelocityDirection.ROTATION, Type.DECELERATION));
 	}
 
 	@Override
 	public void execute() {
-		vCurrent = robot_.chassis_.getVelocityCalculated();
+
+		EnumMap<VelocityDirection, Double> vCurrent = robot_.chassis_.getVelocityCalculated();
 		double[] vNew = {0, 0, 0};
-		EnumMap<VelocityDirection, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(origin_);
+		EnumMap<VelocityDirection, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(
+			origin_);
 		boolean[] slow = {false, false, false};
-		for(VelocityDirection direction : VelocityDirection.values()){
-			distanceRemaining_.put(direction, targetDistance.get(direction) - distanceTraveled.get(direction));
+		for(int i = 0; i < 3; i++) {
+			VelocityDirection direction = VelocityDirection.values()[i];
+			distanceRemaining_[i] = distanceTotal_[i] - distanceTraveled.get(direction);
 			double distanceToStop = vCurrent.get(direction) * vCurrent.get(direction) /
-									acceleration_.get(direction, DECELERATION) /
+									acceleration_.get(direction, Type.DECELERATION) /
 									2.;// exact absolute value per physics
 			distanceToStop += Math.max(
 				distanceToStop * .05,
 				Math.abs(vCurrent.get(direction)) * .04
 			); // pad just a bit to avoid overshoot
-			slow[direction.ordinal()] = finished_.get(direction) ||
-					  Math.abs(distanceRemaining_.get(direction)) <= distanceToStop; // slow down within padded stopping distance
+			slow[i] = finished_[i] ||
+					  Math.abs(distanceRemaining_[i]) <= distanceToStop; // slow down within padded stopping distance
 		}
-		boolean s = Math.abs(targetDistance.get(ROTATION)) > 0 ? slow[ROTATION.ordinal()] : (slow[NORTH.ordinal()] && slow[EAST.ordinal()]);
-		for(VelocityDirection direction : VelocityDirection.values()) {
-			vNew[direction.ordinal()] = finished_.get(direction) ? 0d : (s ? slow_ : fast_).get(direction);
+		boolean s = Math.abs(distanceTotal_[2]) > 0 ? slow[2] : (slow[0] && slow[1]);
+		for(int i = 0; i < 3; i++) {
+			vNew[i] = finished_[i] ? 0. : s ? slow_[i] : fast_[i];
 		}
 /*
     System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2:"
@@ -192,34 +162,23 @@ public class Move extends CommandBase {
     + Math.round(distanceTraveled[2]*10)/10. + "/" + Math.round(distanceTotal_[2]*10)/10. + "@" + Math.round(vNew[2]*10)/10. + robot_.angleSensor_.getAngle());
 */
 		switch(method_) {
-			case MOVE_AND_ROTATE:
-				robot_.chassis_.setVelocity(vNew[NORTH.ordinal()], vNew[EAST.ordinal()], vNew[ROTATION.ordinal()], acceleration_);
+			case 3:
+				robot_.chassis_.setVelocity(vNew[0], vNew[1], vNew[2], acceleration_);
 				break;
-			case MOVE:
-				robot_.chassis_.setVelocity(vNew[NORTH.ordinal()], vNew[EAST.ordinal()], acceleration_);
+			case 2:
+				robot_.chassis_.setVelocity(vNew[0], vNew[1], acceleration_);
 				break;
-			case ROTATE:
-				robot_.chassis_.setRotation(vNew[ROTATION.ordinal()], acceleration_);
+			case 1:
+				robot_.chassis_.setRotation(vNew[2], acceleration_);
 				break;
 		}
 	}
 
 	@Override
 	public boolean isFinished() {
-		for(VelocityDirection direction : VelocityDirection.values()) {
-			double remaining = distanceRemaining_.get(direction);
-			double total = distanceRemaining_.get(direction);
-			finished_.compute(direction, (k, v) -> v || (signum(remaining) != signum(total)));
+		for(int i = 0; i < 3; i++) {
+			finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
 		}
-		/*boolean reachedGoal =*/
-		return abs(targetDistance.get(ROTATION)) > 0 ?
-			finished_.get(ROTATION) :
-			finished_.get(NORTH) && finished_.get(EAST);
-//		boolean stoppedMoving = false;
-//		for(double velocity : vCurrent.values()) {
-//			stoppedMoving = stoppedMoving || Math.abs(velocity) <= 0.1;
-//		}
-
-//		return reachedGoal && stoppedMoving;
+		return Math.abs(distanceTotal_[2]) > 0 ? finished_[2] : (finished_[0] && finished_[1]);
 	}
 }
