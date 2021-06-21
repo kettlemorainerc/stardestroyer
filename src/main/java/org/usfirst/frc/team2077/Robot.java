@@ -199,7 +199,6 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-
 		// autonomous_ = new AutonomousOperations();
 
 		// if (autonomous_ != null) {
