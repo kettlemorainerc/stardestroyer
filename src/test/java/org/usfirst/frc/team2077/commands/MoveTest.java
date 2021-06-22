@@ -44,8 +44,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(8.0, 0.0, 0.0)
                                .setVelocities(8.0, 0.0, 0.0)
                                .measuredVelocities(8.0, 0.0, 0.0)
-                               .setPosition(1.6000000000000005, 0.0, 0.0)
-                               .measuredPosition(1.6000000000000005, 0.0, 0.0)
+                               .setPosition(1.6, 0.0, 0.0)
+                               .measuredPosition(1.6, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -71,8 +71,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(8.0, 0.0, 0.0)
                                .setVelocities(8.0, 0.0, 0.0)
                                .measuredVelocities(8.0, 0.0, 0.0)
-                               .setPosition(6.3999999999999995, 0.0, 0.0)
-                               .measuredPosition(6.3999999999999995, 0.0, 0.0)
+                               .setPosition(6.4, 0.0, 0.0)
+                               .measuredPosition(6.4, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -80,26 +80,26 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(8.0, 0.0, 0.0)
                                .setVelocities(0.8, 0.0, 0.0)
                                .measuredVelocities(8.0, 0.0, 0.0)
-                               .setPosition(7.999999999999999, 0.0, 0.0)
-                               .measuredPosition(7.999999999999999, 0.0, 0.0)
+                               .setPosition(8, 0.0, 0.0)
+                               .measuredPosition(8, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
-            new ChassisValues().wheelVelocities(0.7999999999999998, 0.7999999999999998, 0.7999999999999998, 0.7999999999999998)
-                               .calculatedVelocities(0.7999999999999998, 0.0, 0.0)
+            new ChassisValues().wheelVelocities(.8, .8, .8, .8)
+                               .calculatedVelocities(.8, 0.0, 0.0)
                                .setVelocities(8.0, 0.0, 0.0)
                                .measuredVelocities(8.0, 0.0, 0.0)
-                               .setPosition(9.599999999999998, 0.0, 0.0)
-                               .measuredPosition(9.599999999999998, 0.0, 0.0)
+                               .setPosition(9.6, 0.0, 0.0)
+                               .measuredPosition(9.6, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
             new ChassisValues().wheelVelocities(8.0, 8.0, 8.0, 8.0)
                                .calculatedVelocities(8.0, 0.0, 0.0)
                                .setVelocities(0.0, 0.0, 0.0)
-                               .measuredVelocities(0.7999999999999998, 0.0, 0.0)
-                               .setPosition(9.759999999999998, 0.0, 0.0)
-                               .measuredPosition(9.759999999999998, 0.0, 0.0)
+                               .measuredVelocities(.8, 0.0, 0.0)
+                               .setPosition(9.76, 0.0, 0.0)
+                               .measuredPosition(9.76, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -107,8 +107,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(0.0, 0.0, 0.0)
                                .setVelocities(0.0, 0.0, 0.0)
                                .measuredVelocities(8.0, 0.0, 0.0)
-                               .setPosition(11.359999999999998, 0.0, 0.0)
-                               .measuredPosition(11.359999999999998, 0.0, 0.0)
+                               .setPosition(11.36, 0.0, 0.0)
+                               .measuredPosition(11.36, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -116,8 +116,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(0.0, 0.0, 0.0)
                                .setVelocities(0.0, 0.0, 0.0)
                                .measuredVelocities(0.0, 0.0, 0.0)
-                               .setPosition(11.359999999999998, 0.0, 0.0)
-                               .measuredPosition(11.359999999999998, 0.0, 0.0)
+                               .setPosition(11.36, 0.0, 0.0)
+                               .measuredPosition(11.36, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -125,8 +125,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(0.0, 0.0, 0.0)
                                .setVelocities(0.0, 0.0, 0.0)
                                .measuredVelocities(0.0, 0.0, 0.0)
-                               .setPosition(11.359999999999998, 0.0, 0.0)
-                               .measuredPosition(11.359999999999998, 0.0, 0.0)
+                               .setPosition(11.36, 0.0, 0.0)
+                               .measuredPosition(11.36, 0.0, 0.0)
         );
 
         assertPeriodicUpdate(
@@ -134,8 +134,8 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
                                .calculatedVelocities(0.0, 0.0, 0.0)
                                .setVelocities(0.0, 0.0, 0.0)
                                .measuredVelocities(0.0, 0.0, 0.0)
-                               .setPosition(11.359999999999998, 0.0, 0.0)
-                               .measuredPosition(11.359999999999998, 0.0, 0.0)
+                               .setPosition(11.36, 0.0, 0.0)
+                               .measuredPosition(11.36, 0.0, 0.0)
         );
 
     }
