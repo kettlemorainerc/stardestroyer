@@ -1,6 +1,6 @@
 package org.usfirst.frc.team2077;
 
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.*;
 import org.junit.*;
 import org.usfirst.frc.team2077.drivetrain.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
@@ -13,9 +13,13 @@ import java.util.EnumMap;
 import static org.junit.Assert.*;
 
 public abstract class ChassisTest<Chassis extends AbstractChassis> {
-	private static TestDriveModule NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST;
+	private static TestDriveModule
+		NORTH_EAST = new TestDriveModule(11, WheelPosition.NORTH_EAST),
+		SOUTH_EAST = new TestDriveModule(8, WheelPosition.SOUTH_EAST),
+		SOUTH_WEST = new TestDriveModule(10, WheelPosition.SOUTH_WEST),
+		NORTH_WEST = new TestDriveModule(9, WheelPosition.NORTH_EAST);
 
-	protected Chassis chassis;
+	protected static AbstractChassis chassis;
 	static { // Robot needs to initialized to prevent a NullPointer dereference inside Mecanum/AbstractChassis
 		new Robot();
 		Robot.robot_.heading_ = new Subsystem() {};
@@ -23,24 +27,25 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 		Robot.robot_.crosshairs_ = new Crosshairs();
 	}
 
-	protected abstract Chassis create(EnumMap<WheelPosition, DriveModuleIF> driveModule);
-
-	@Before
-	public final void beforeEach() {
-		TestClock.reset();
-
-		NORTH_EAST = new TestDriveModule(11, WheelPosition.NORTH_EAST);
-		SOUTH_EAST = new TestDriveModule(8, WheelPosition.SOUTH_EAST);
-		SOUTH_WEST = new TestDriveModule(10, WheelPosition.SOUTH_WEST);
-		NORTH_WEST = new TestDriveModule(9, WheelPosition.NORTH_EAST);
-
+	protected ChassisTest() {
 		EnumMap<WheelPosition, DriveModuleIF> driveModule = new EnumMap<>(WheelPosition.class);
 		driveModule.put(WheelPosition.NORTH_EAST, NORTH_EAST);
 		driveModule.put(WheelPosition.SOUTH_EAST, SOUTH_EAST);
 		driveModule.put(WheelPosition.SOUTH_WEST, SOUTH_WEST);
 		driveModule.put(WheelPosition.NORTH_WEST, NORTH_WEST);
 
-		chassis = create(driveModule);
+		AbstractChassis chassis = create(driveModule);
+		AbstractChassis unregister = ChassisTest.chassis;
+		ChassisTest.chassis = chassis;
+		if(unregister != null) CommandScheduler.getInstance()
+		                                       .unregisterSubsystem(unregister);
+	}
+
+	protected abstract Chassis create(EnumMap<WheelPosition, DriveModuleIF> driveModule);
+
+	@Before
+	public final void beforeEach() {
+		TestClock.reset();
 		Robot.robot_.chassis_ = chassis;
 
 		chassis.setGLimits(1 / AccelerationLimits.G, 1 / AccelerationLimits.G);
