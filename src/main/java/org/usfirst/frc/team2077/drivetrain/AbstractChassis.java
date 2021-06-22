@@ -237,4 +237,6 @@ public abstract class AbstractChassis extends SubsystemBase implements DriveChas
     public AccelerationLimits getAccelerationLimits() {
         return accelerationLimits.getAdjustedAdjustments();
     }
+
+    public abstract Position getMeasuredPosition();
 }

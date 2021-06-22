@@ -160,7 +160,9 @@ public class Robot extends TimedRobot {
 						.run();
 
 		chassis_.driveModule_.values().forEach(module -> {
-			SmartDashboard.putNumber(module.getWheelPosition() + " RPM", ((SparkNeoDriveModule) module).getRPM());
+			if(module instanceof SparkNeoDriveModule) {
+				SmartDashboard.putNumber(module.getWheelPosition() + " RPM", ((SparkNeoDriveModule) module).getRPM());
+			}
 		});
 
 		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());

@@ -8,7 +8,7 @@ package org.usfirst.frc.team2077.drivetrain;
 import org.usfirst.frc.team2077.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
 import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.DrivePosition;
-import org.usfirst.frc.team2077.math.AccelerationLimits;
+import org.usfirst.frc.team2077.math.*;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.*;
 import static org.usfirst.frc.team2077.Robot.*;
 import static org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection.*;
 import static org.usfirst.frc.team2077.math.AccelerationLimits.Type.*;
+
 
 public class MecanumChassis extends AbstractChassis {
 	private static final double WHEELBASE = 20.375; // inches
@@ -48,7 +49,12 @@ public class MecanumChassis extends AbstractChassis {
 		this(buildDriveModule(), Clock::getSeconds);
 	}
 
-	MecanumChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, Supplier<Double> getSeconds) {
+	/**
+	 * This should really only be used for testing externally
+	 * @param driveModule
+	 * @param getSeconds
+	 */
+	public MecanumChassis(EnumMap<WheelPosition, DriveModuleIF> driveModule, Supplier<Double> getSeconds) {
 		super(driveModule, WHEELBASE, TRACK_WIDTH, WHEEL_RADIUS, getSeconds);
 
 		mecanumMath_ = new MecanumMath(wheelbase_, trackWidth_, wheelRadius_, wheelRadius_, 1, 180 / Math.PI);
@@ -190,6 +196,11 @@ public class MecanumChassis extends AbstractChassis {
 				wheelSpeed.get(position) / max
 			);
 		}
+	}
+
+	@Override
+	public Position getMeasuredPosition() {
+		return positionMeasured_.copy();
 	}
 
 	@Override

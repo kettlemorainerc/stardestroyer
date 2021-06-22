@@ -5,6 +5,7 @@ public class TestClock {
 
 	public static double getAndIncrementSeconds() {
 		seconds += .2;
+		new Exception().printStackTrace();
 		return seconds;
 	}
 

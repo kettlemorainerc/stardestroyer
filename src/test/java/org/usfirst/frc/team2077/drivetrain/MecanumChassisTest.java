@@ -10,58 +10,15 @@ import java.util.*;
 import static org.junit.Assert.*;
 import static org.usfirst.frc.team2077.math.AccelerationLimits.*;
 
-public class ChassisTest {
-    private static TestDriveModule NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST;
-
-    private static MecanumChassis chassis;
-    static { // Robot needs to initialized to prevent a NullPointer dereference inside Mecanum/AbstractChassis
-        new Robot();
+public class MecanumChassisTest extends ChassisTest<MecanumChassis> {
+    @Override
+    protected MecanumChassis create(EnumMap<WheelPosition, DriveModuleIF> driveModule) {
+        return new MecanumChassis(driveModule, TestClock::getAndIncrementSeconds);
     }
 
-    @Before
-    public void beforeEach() {
-        TestClock.reset();
-
-        NORTH_EAST = new TestDriveModule(11, WheelPosition.NORTH_EAST);
-        SOUTH_EAST = new TestDriveModule(8, WheelPosition.SOUTH_EAST);
-        SOUTH_WEST = new TestDriveModule(10, WheelPosition.SOUTH_WEST);
-        NORTH_WEST = new TestDriveModule(9, WheelPosition.NORTH_EAST);
-
-        EnumMap<WheelPosition, DriveModuleIF> driveModule = new EnumMap<>(WheelPosition.class);
-        driveModule.put(WheelPosition.NORTH_EAST, NORTH_EAST);
-        driveModule.put(WheelPosition.SOUTH_EAST, SOUTH_EAST);
-        driveModule.put(WheelPosition.SOUTH_WEST, SOUTH_WEST);
-        driveModule.put(WheelPosition.NORTH_WEST, NORTH_WEST);
-
-        chassis = new MecanumChassis(driveModule, TestClock::getAndIncrementSeconds);
-
-        chassis.setGLimits(1 / G, 1 / G); // set acc/deceleration limits to ~ 1 in/s
-    }
-
-    private <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap, double delta) {
-        double[] expected = new double[expectedMap.size()], actual = new double[expectedMap.size()];
-
-        for(T key : expectedMap.keySet()) {
-            expected[key.ordinal()] = expectedMap.get(key);
-            actual[key.ordinal()] = actualMap.get(key);
-        }
-
-        Assert.assertArrayEquals(message, expected, actual, delta);
-    }
-
-    private void assertPeriodicUpdate(ChassisValues expected) {
-        chassis.periodic();
-
-        ChassisValues actual = new ChassisValues(chassis);
-        double delta = 0.000000000000001; // HIGH degree of accuracy
-        assertEnumMapEquals("Wheel Velocities", expected.wheelVelocities, actual.wheelVelocities, delta);
-
-        assertEnumMapEquals("Calculated Velocity", expected.calculateVelocity, actual.calculateVelocity, delta);
-        assertEnumMapEquals("Set Velocity", expected.setVelocity, actual.setVelocity, delta);
-        assertEnumMapEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity, delta);
-
-        assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), delta);
-        assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), delta);
+    @Override
+    public void beforeEachTest() {
+        RobotTest.forTeleop();
     }
 
     @Test
@@ -124,7 +81,7 @@ public class ChassisTest {
     public void moves_forward_in_straight_line() {
         chassis.setVelocity(8, 0);
         assertPeriodicUpdate(
-            new ChassisValues().wheelVelocities(0.2, 0.2, 0.2, 0.2)
+        new ChassisValues().wheelVelocities(0.2, 0.2, 0.2, 0.2)
                                .calculatedVelocities(0.2, 0, 0)
                                .setVelocities(8, 0, 0)
                                .measuredVelocities(0, 0, 0)
@@ -211,81 +168,5 @@ public class ChassisTest {
                                .setPosition(2.2, 0, 0)
                                .measuredPosition(2.2, 0, 0)
        );
-    }
-
-    private static class ChassisValues {
-        // Unset things are considered equal
-        EnumMap<VelocityDirection, Double> calculateVelocity, setVelocity, measuredVelocity;
-        EnumMap<WheelPosition, Double> wheelVelocities;
-        Position setPosition, measuredPosition;
-
-        ChassisValues() {}
-
-        ChassisValues(MecanumChassis chassis) {
-            calculateVelocity = chassis.getVelocityCalculated();
-            setVelocity = chassis.getVelocitySet();
-            measuredVelocity = chassis.getVelocityMeasured();
-            wheelVelocities(
-                NORTH_EAST.getVelocity(),
-                SOUTH_EAST.getVelocity(),
-                SOUTH_WEST.getVelocity(),
-                NORTH_WEST.getVelocity()
-            );
-            setPosition = chassis.positionSet_;
-            measuredPosition = chassis.positionMeasured_;
-        }
-
-        public ChassisValues wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
-            wheelVelocities = MecanumMathTest.wheelVelocities(northEast, southEast, southWest, northWest);
-//            wheelVelocities = new double[] {northEast, southEast, southWest, northWest};
-            return this;
-        }
-
-        public ChassisValues calculatedVelocities(double north, double east, double rotation) {
-//            calculateVelocity = new double[] {north, east, rotation};
-            calculateVelocity = MecanumMathTest.botVelocity(north, east, rotation);
-            return this;
-        }
-
-        public ChassisValues setVelocities(double north, double east, double rotation) {
-//            setVelocity = new double[] {north, east, rotation};
-            setVelocity = MecanumMathTest.botVelocity(north, east, rotation);
-            return this;
-        }
-
-        public ChassisValues measuredVelocities(double north, double east, double rotation) {
-//            measuredVelocity = new double[] {north, east, rotation};
-            measuredVelocity = MecanumMathTest.botVelocity(north, east, rotation);
-            return this;
-        }
-
-        public ChassisValues setPosition(double north, double east, double heading) {
-            setPosition = new Position(new double[] {north, east, heading});
-            return this;
-        }
-
-        public ChassisValues measuredPosition(double north, double east, double heading) {
-            measuredPosition = new Position(new double[] {north, east, heading});
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(
-              "\nVelocities:\n\t" +
-              "wheel vels: %s\n\t" +
-              "calc vel: %s\n\t" +
-              "set vel: %s\n\t" +
-              "measured vel: %s\n\t" +
-              "set pos: %s\n\t" +
-              "measured pos: %s\n",
-              /*Arrays.toString*/(wheelVelocities),
-              /*Arrays.toString*/(calculateVelocity),
-              /*Arrays.toString*/(setVelocity),
-              /*Arrays.toString*/(measuredVelocity),
-              setPosition,
-              measuredPosition
-            );
-        }
     }
 }
