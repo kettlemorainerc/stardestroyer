@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import org.junit.*;
 import org.usfirst.frc.team2077.drivetrain.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
+import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.*;
 import org.usfirst.frc.team2077.math.*;
 import org.usfirst.frc.team2077.sensors.AngleSensor;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
@@ -13,21 +14,21 @@ import java.util.EnumMap;
 import static org.junit.Assert.*;
 
 public abstract class ChassisTest<Chassis extends AbstractChassis> {
-	private static TestDriveModule
+	private static final TestDriveModule
 		NORTH_EAST = new TestDriveModule(11, WheelPosition.NORTH_EAST),
 		SOUTH_EAST = new TestDriveModule(8, WheelPosition.SOUTH_EAST),
 		SOUTH_WEST = new TestDriveModule(10, WheelPosition.SOUTH_WEST),
 		NORTH_WEST = new TestDriveModule(9, WheelPosition.NORTH_EAST);
 
 	protected static AbstractChassis chassis;
-	static { // Robot needs to initialized to prevent a NullPointer dereference inside Mecanum/AbstractChassis
-		new Robot();
-		Robot.robot_.heading_ = new Subsystem() {};
-		Robot.robot_.position_ = new Subsystem() {};
-		Robot.robot_.crosshairs_ = new Crosshairs();
-	}
 
 	protected ChassisTest() {
+		if(Robot.robot_ == null) {
+			new Robot();
+			Robot.robot_.heading_ = new Subsystem() {};
+			Robot.robot_.position_ = new Subsystem() {};
+			Robot.robot_.crosshairs_ = new Crosshairs();
+		}
 		EnumMap<WheelPosition, DriveModuleIF> driveModule = new EnumMap<>(WheelPosition.class);
 		driveModule.put(WheelPosition.NORTH_EAST, NORTH_EAST);
 		driveModule.put(WheelPosition.SOUTH_EAST, SOUTH_EAST);
@@ -37,6 +38,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 		AbstractChassis chassis = create(driveModule);
 		AbstractChassis unregister = ChassisTest.chassis;
 		ChassisTest.chassis = chassis;
+		Robot.robot_.chassis_ = chassis;
 		if(unregister != null) CommandScheduler.getInstance()
 		                                       .unregisterSubsystem(unregister);
 	}
@@ -55,7 +57,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 
 	public void beforeEachTest() {}
 
-	protected  <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap, double delta) {
+	protected static <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap, double delta) {
 		double[] expected = new double[expectedMap.size()], actual = new double[expectedMap.size()];
 
 		for(T key : expectedMap.keySet()) {
@@ -66,7 +68,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 		Assert.assertArrayEquals(message, expected, actual, delta);
 	}
 
-	protected void assertPeriodicUpdate(ChassisValues expected) {
+	public static void assertPeriodicUpdate(ChassisValues expected) {
 		RobotTest.advanceAPeriod();
 
 		ChassisValues actual = new ChassisValues(chassis);
@@ -81,7 +83,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 		assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), delta);
 	}
 
-	protected static class ChassisValues {
+	public static class ChassisValues {
 		// Unset things are considered equal
 		EnumMap<VelocityDirection, Double> calculateVelocity, setVelocity, measuredVelocity;
 		EnumMap<WheelPosition, Double> wheelVelocities;
@@ -139,21 +141,64 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 
 		@Override
 		public String toString() {
-			return String.format(
-				"\nVelocities:\n\t" +
-				"wheel vels: %s\n\t" +
-				"calc vel: %s\n\t" +
-				"set vel: %s\n\t" +
-				"measured vel: %s\n\t" +
-				"set pos: %s\n\t" +
-				"measured pos: %s\n",
-				/*Arrays.toString*/(wheelVelocities),
-				/*Arrays.toString*/(calculateVelocity),
-				/*Arrays.toString*/(setVelocity),
-				/*Arrays.toString*/(measuredVelocity),
-				setPosition,
-				measuredPosition
-			);
+			StringBuilder wheels = new StringBuilder("[Wheels | "),
+				calculatedVelocity = new StringBuilder("[Calc Vel | "),
+				setVel = new StringBuilder("[Set Vel | "),
+				measuredVel = new StringBuilder("[Measured Vel | "),
+				setPos = new StringBuilder("[Set Pos | "),
+				measuredPos = new StringBuilder("[Measured Pos | ");
+
+			for(WheelPosition pos : WheelPosition.values()) {
+				String[] positionParts = pos.name().split("_");
+				wheels.append(positionParts[0].charAt(0))
+				      .append(positionParts[1].charAt(0))
+				      .append("{")
+				      .append(wheelVelocities.get(pos))
+				      .append("} ");
+			}
+
+			for(VelocityDirection dir : VelocityDirection.values()) {
+				char dirChar = dir.name().charAt(0);
+
+				calculatedVelocity.append(dirChar)
+				                  .append(": ")
+				                  .append('{')
+				                  .append(calculateVelocity.get(dir))
+				                  .append("} ");
+
+				setVel.append(dirChar)
+				                  .append(": ")
+				                  .append('{')
+				                  .append(setVelocity.get(dir))
+				                  .append("} ");
+
+				measuredVel.append(dirChar)
+				                  .append(": ")
+				                  .append('{')
+				                  .append(measuredVelocity.get(dir))
+				                  .append("} ");
+
+				setPos.append(dirChar)
+				                  .append(": ")
+				                  .append('{')
+				                  .append(setPosition.get(dir))
+				                  .append("} ");
+
+				measuredPos.append(dirChar)
+				                  .append(": ")
+				                  .append('{')
+				                  .append(measuredPosition.get(dir))
+				                  .append("} ");
+			}
+
+			return "Chassis Velocities: " +
+			       wheels.toString().replaceFirst(" $", "]") +
+			       calculatedVelocity.toString().replaceFirst(" $", "]") +
+			       setVel.toString().replaceFirst(" $", "]") +
+			       "\n                    " +
+			       measuredVel.toString().replaceFirst(" $", "]") +
+			       setPos.toString().replaceFirst(" $", "]") +
+			       measuredPos.toString().replaceFirst(" $", "]");
 		}
 	}
 }

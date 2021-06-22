@@ -10,7 +10,7 @@ import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
 import org.usfirst.frc.team2077.math.*;
 import org.usfirst.frc.team2077.math.AccelerationLimits.Type;
 
-import java.util.EnumMap;
+import java.util.*;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
@@ -18,6 +18,7 @@ import static org.usfirst.frc.team2077.Robot.*;
 public class Move extends CommandBase {
 	public static final double ACCELERATION_G_LIMIT = .1;
 	public static final double DECELERATION_G_LIMIT = .3;
+	private static final double STOP_WITHIN = .5;
 	private final double[] distanceTotal_; // {north, east, rotation} (signed)
 	private final int method_; // 1 2 or 3 (#args to setVelocity/setRotation)
 
@@ -175,9 +176,16 @@ public class Move extends CommandBase {
 	}
 
 	@Override
+	public void end(boolean interrupted) {
+		robot_.chassis_.halt();
+	}
+
+	@Override
 	public boolean isFinished() {
 		for(int i = 0; i < 3; i++) {
-			finished_[i] = finished_[i] || (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
+			finished_[i] = finished_[i] ||
+//			               distanceRemaining_[i] < STOP_WITHIN * Math.signum(distanceTotal_[i]) ||
+			               (Math.signum(distanceRemaining_[i]) != Math.signum(distanceTotal_[i]));
 		}
 		return Math.abs(distanceTotal_[2]) > 0 ? finished_[2] : (finished_[0] && finished_[1]);
 	}
