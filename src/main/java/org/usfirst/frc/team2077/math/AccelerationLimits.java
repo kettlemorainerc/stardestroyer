@@ -137,4 +137,8 @@ public class AccelerationLimits {
     public double[][] get() {
         return LIMITS.getMatrix();
     }
+
+    public String toString() {
+        return String.format("AccelerationLimits\n%s", LIMITS);
+    }
 }

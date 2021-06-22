@@ -9,7 +9,7 @@ import org.usfirst.frc.team2077.math.*;
 import org.usfirst.frc.team2077.sensors.AngleSensor;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
 
-import java.util.EnumMap;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -48,39 +48,46 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 	@Before
 	public final void beforeEach() {
 		TestClock.reset();
-		Robot.robot_.chassis_ = chassis;
+//		Robot.robot_.chassis_ = chassis;
 
-		chassis.setGLimits(1 / AccelerationLimits.G, 1 / AccelerationLimits.G);
+		Robot.robot_.chassis_.setGLimits(1 / AccelerationLimits.G, 1 / AccelerationLimits.G);
 
 		beforeEachTest();
 	}
 
 	public void beforeEachTest() {}
 
-	protected static <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap, double delta) {
-		double[] expected = new double[expectedMap.size()], actual = new double[expectedMap.size()];
-
+	private static final double EXPECTED_DELTA = 0.000000000000001;
+	protected static <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap) {
 		for(T key : expectedMap.keySet()) {
-			expected[key.ordinal()] = expectedMap.get(key);
-			actual[key.ordinal()] = actualMap.get(key);
+			assertEquals(key + " " + message, expectedMap.get(key), actualMap.get(key), EXPECTED_DELTA);
 		}
+	}
 
-		Assert.assertArrayEquals(message, expected, actual, delta);
+	protected static void assertPositionsEqual(String message, double[] expected, double[] actual) {
+		for(VelocityDirection dir : VelocityDirection.values()) {
+			int i = dir.ordinal();
+			assertEquals(dir + " " + message, expected[i], actual[i], EXPECTED_DELTA);
+		}
+	}
+
+	private static void assertChassisValues(ChassisValues expected, ChassisValues actual) {
+		assertEnumMapEquals("Wheel Velocity", expected.wheelVelocities, actual.wheelVelocities);
+
+		assertEnumMapEquals("Calculated Velocity", expected.calculateVelocity, actual.calculateVelocity);
+		assertEnumMapEquals("Set Velocity", expected.setVelocity, actual.setVelocity);
+		assertEnumMapEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity);
+
+		assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), EXPECTED_DELTA);
+		assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), EXPECTED_DELTA);
 	}
 
 	public static void assertPeriodicUpdate(ChassisValues expected) {
 		RobotTest.advanceAPeriod();
 
 		ChassisValues actual = new ChassisValues(chassis);
-		double delta = 0.000000000000001; // HIGH degree of accuracy
-		assertEnumMapEquals("Wheel Velocities", expected.wheelVelocities, actual.wheelVelocities, delta);
-
-		assertEnumMapEquals("Calculated Velocity", expected.calculateVelocity, actual.calculateVelocity, delta);
-		assertEnumMapEquals("Set Velocity", expected.setVelocity, actual.setVelocity, delta);
-		assertEnumMapEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity, delta);
-
-		assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), delta);
-		assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), delta);
+		assertChassisValues(expected, actual);
+		System.out.println(Robot.robot_.chassis_.getAccelerationLimits());
 	}
 
 	public static class ChassisValues {
@@ -139,66 +146,92 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 			return this;
 		}
 
+		private String joining(EnumMap<?, ?> map) {
+			return String.join(
+				", ",
+				map.values()
+				   .stream()
+				   .map(Objects::toString)
+				   .toArray(String[]::new)
+			);
+		}
+
+		private String assertionLine(String method, EnumMap<?, ?> map) {
+			return "                       ." + method + "(" + joining(map) + ")\n";
+		}
+
+		private String asAssertion() {
+			return "assertPeriodicUpdate(\n" +
+			       "    new ChassisValues().wheelVelocities(" + joining(wheelVelocities) + ")\n" +
+			       assertionLine("calculatedVelocities", calculateVelocity) +
+			       assertionLine("setVelocities", setVelocity) +
+			       assertionLine("measuredVelocities", measuredVelocity) +
+			       assertionLine("setPosition", setPosition) +
+			       assertionLine("measuredPosition", measuredPosition) +
+			       ");\n";
+		}
+
 		@Override
 		public String toString() {
-			StringBuilder wheels = new StringBuilder("[Wheels | "),
-				calculatedVelocity = new StringBuilder("[Calc Vel | "),
-				setVel = new StringBuilder("[Set Vel | "),
-				measuredVel = new StringBuilder("[Measured Vel | "),
-				setPos = new StringBuilder("[Set Pos | "),
-				measuredPos = new StringBuilder("[Measured Pos | ");
-
-			for(WheelPosition pos : WheelPosition.values()) {
-				String[] positionParts = pos.name().split("_");
-				wheels.append(positionParts[0].charAt(0))
-				      .append(positionParts[1].charAt(0))
-				      .append("{")
-				      .append(wheelVelocities.get(pos))
-				      .append("} ");
-			}
-
-			for(VelocityDirection dir : VelocityDirection.values()) {
-				char dirChar = dir.name().charAt(0);
-
-				calculatedVelocity.append(dirChar)
-				                  .append(": ")
-				                  .append('{')
-				                  .append(calculateVelocity.get(dir))
-				                  .append("} ");
-
-				setVel.append(dirChar)
-				                  .append(": ")
-				                  .append('{')
-				                  .append(setVelocity.get(dir))
-				                  .append("} ");
-
-				measuredVel.append(dirChar)
-				                  .append(": ")
-				                  .append('{')
-				                  .append(measuredVelocity.get(dir))
-				                  .append("} ");
-
-				setPos.append(dirChar)
-				                  .append(": ")
-				                  .append('{')
-				                  .append(setPosition.get(dir))
-				                  .append("} ");
-
-				measuredPos.append(dirChar)
-				                  .append(": ")
-				                  .append('{')
-				                  .append(measuredPosition.get(dir))
-				                  .append("} ");
-			}
-
-			return "Chassis Velocities: " +
-			       wheels.toString().replaceFirst(" $", "]") +
-			       calculatedVelocity.toString().replaceFirst(" $", "]") +
-			       setVel.toString().replaceFirst(" $", "]") +
-			       "\n                    " +
-			       measuredVel.toString().replaceFirst(" $", "]") +
-			       setPos.toString().replaceFirst(" $", "]") +
-			       measuredPos.toString().replaceFirst(" $", "]");
+			return asAssertion();
+//			StringBuilder wheels = new StringBuilder("[Wheels | "),
+//				calculatedVelocity = new StringBuilder("[Calc Vel | "),
+//				setVel = new StringBuilder("[Set Vel | "),
+//				measuredVel = new StringBuilder("[Measured Vel | "),
+//				setPos = new StringBuilder("[Set Pos | "),
+//				measuredPos = new StringBuilder("[Measured Pos | ");
+//
+//			for(WheelPosition pos : WheelPosition.values()) {
+//				String[] positionParts = pos.name().split("_");
+//				wheels.append(positionParts[0].charAt(0))
+//				      .append(positionParts[1].charAt(0))
+//				      .append("{")
+//				      .append(wheelVelocities.get(pos))
+//				      .append("} ");
+//			}
+//
+//			for(VelocityDirection dir : VelocityDirection.values()) {
+//				char dirChar = dir.name().charAt(0);
+//
+//				calculatedVelocity.append(dirChar)
+//				                  .append(": ")
+//				                  .append('{')
+//				                  .append(calculateVelocity.get(dir))
+//				                  .append("} ");
+//
+//				setVel.append(dirChar)
+//				                  .append(": ")
+//				                  .append('{')
+//				                  .append(setVelocity.get(dir))
+//				                  .append("} ");
+//
+//				measuredVel.append(dirChar)
+//				                  .append(": ")
+//				                  .append('{')
+//				                  .append(measuredVelocity.get(dir))
+//				                  .append("} ");
+//
+//				setPos.append(dirChar)
+//				                  .append(": ")
+//				                  .append('{')
+//				                  .append(setPosition.get(dir))
+//				                  .append("} ");
+//
+//				measuredPos.append(dirChar)
+//				                  .append(": ")
+//				                  .append('{')
+//				                  .append(measuredPosition.get(dir))
+//				                  .append("} ");
+//			}
+//
+//			return "Chassis Velocities: " +
+//			       wheels.toString().replaceFirst(" $", "]") +
+//			       calculatedVelocity.toString().replaceFirst(" $", "]") +
+//			       setVel.toString().replaceFirst(" $", "]") +
+//			       "\n                    " +
+//			       measuredVel.toString().replaceFirst(" $", "]") +
+//			       setPos.toString().replaceFirst(" $", "]") +
+//			       measuredPos.toString().replaceFirst(" $", "]");
 		}
 	}
 }
