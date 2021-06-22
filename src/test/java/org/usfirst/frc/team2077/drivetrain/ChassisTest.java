@@ -49,10 +49,10 @@ public class ChassisTest {
         Assert.assertArrayEquals(message, expected, actual, delta);
     }
 
-    private void assertPeriodicUpdate(BotValues expected) {
+    private void assertPeriodicUpdate(ChassisValues expected) {
         chassis.periodic();
 
-        BotValues actual = new BotValues(chassis);
+        ChassisValues actual = new ChassisValues(chassis);
         double delta = 0.000000000000001; // HIGH degree of accuracy
         assertEnumMapEquals("Wheel Velocities", expected.wheelVelocities, actual.wheelVelocities, delta);
 
@@ -79,44 +79,44 @@ public class ChassisTest {
     public void maintains_zero_with_no_input() {
         System.out.println(chassis);
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0, 0, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setVelocities(0, 0, 0)
-                           .calculatedVelocities(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
-                           .setPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0, 0, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setVelocities(0, 0, 0)
+                               .calculatedVelocities(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
+                               .setPosition(0, 0, 0)
         );
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0, 0, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setVelocities(0, 0, 0)
-                           .calculatedVelocities(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
-                           .setPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0, 0, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setVelocities(0, 0, 0)
+                               .calculatedVelocities(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
+                               .setPosition(0, 0, 0)
         );
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0, 0, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setVelocities(0, 0, 0)
-                           .calculatedVelocities(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
-                           .setPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0, 0, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setVelocities(0, 0, 0)
+                               .calculatedVelocities(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
+                               .setPosition(0, 0, 0)
         );
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0, 0, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setVelocities(0, 0, 0)
-                           .calculatedVelocities(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
-                           .setPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0, 0, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setVelocities(0, 0, 0)
+                               .calculatedVelocities(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
+                               .setPosition(0, 0, 0)
         );
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0, 0, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setVelocities(0, 0, 0)
-                           .calculatedVelocities(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
-                           .setPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0, 0, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setVelocities(0, 0, 0)
+                               .calculatedVelocities(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
+                               .setPosition(0, 0, 0)
         );
     }
 
@@ -124,104 +124,104 @@ public class ChassisTest {
     public void moves_forward_in_straight_line() {
         chassis.setVelocity(8, 0);
         assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0.2, 0.2, 0.2, 0.2)
-                           .calculatedVelocities(0.2, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(0, 0, 0)
-                           .setPosition(0, 0, 0)
-                           .measuredPosition(0, 0, 0)
+            new ChassisValues().wheelVelocities(0.2, 0.2, 0.2, 0.2)
+                               .calculatedVelocities(0.2, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(0, 0, 0)
+                               .setPosition(0, 0, 0)
+                               .measuredPosition(0, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0.4, 0.4, 0.4, 0.4)
-                           .calculatedVelocities(0.4, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(0.2, 0, 0)
-                           .setPosition(0.04, 0, 0)
-                           .measuredPosition(0.04, 0, 0)
+            new ChassisValues().wheelVelocities(0.4, 0.4, 0.4, 0.4)
+                               .calculatedVelocities(0.4, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(0.2, 0, 0)
+                               .setPosition(0.04, 0, 0)
+                               .measuredPosition(0.04, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(.6, .6, .6, .6)
-                           .calculatedVelocities(.6, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(.4, 0, 0)
-                           .setPosition(0.12, 0, 0)
-                           .measuredPosition(0.12, 0, 0)
+            new ChassisValues().wheelVelocities(.6, .6, .6, .6)
+                               .calculatedVelocities(.6, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(.4, 0, 0)
+                               .setPosition(0.12, 0, 0)
+                               .measuredPosition(0.12, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(0.8, 0.8, 0.8, 0.8)
-                           .calculatedVelocities(.8, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(0.6, 0, 0)
-                           .setPosition(.24, 0, 0)
-                           .measuredPosition(.24, 0, 0)
+            new ChassisValues().wheelVelocities(0.8, 0.8, 0.8, 0.8)
+                               .calculatedVelocities(.8, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(0.6, 0, 0)
+                               .setPosition(.24, 0, 0)
+                               .measuredPosition(.24, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(1, 1, 1, 1)
-                           .calculatedVelocities(1, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(.8, 0, 0)
-                           .setPosition(.4, 0, 0)
-                           .measuredPosition(.4, 0, 0)
+            new ChassisValues().wheelVelocities(1, 1, 1, 1)
+                               .calculatedVelocities(1, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(.8, 0, 0)
+                               .setPosition(.4, 0, 0)
+                               .measuredPosition(.4, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(1.2, 1.2, 1.2, 1.2)
-                           .calculatedVelocities(1.2, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(1, 0, 0)
-                           .setPosition(.6, 0, 0)
-                           .measuredPosition(.6, 0, 0)
+            new ChassisValues().wheelVelocities(1.2, 1.2, 1.2, 1.2)
+                               .calculatedVelocities(1.2, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(1, 0, 0)
+                               .setPosition(.6, 0, 0)
+                               .measuredPosition(.6, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(1.4, 1.4, 1.4, 1.4)
-                           .calculatedVelocities(1.4, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(1.2, 0, 0)
-                           .setPosition(.84, 0, 0)
-                           .measuredPosition(.84, 0, 0)
+            new ChassisValues().wheelVelocities(1.4, 1.4, 1.4, 1.4)
+                               .calculatedVelocities(1.4, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(1.2, 0, 0)
+                               .setPosition(.84, 0, 0)
+                               .measuredPosition(.84, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(1.6, 1.6, 1.6, 1.6)
-                           .calculatedVelocities(1.6, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(1.4, 0, 0)
-                           .setPosition(1.12, 0, 0)
-                           .measuredPosition(1.12, 0, 0)
+            new ChassisValues().wheelVelocities(1.6, 1.6, 1.6, 1.6)
+                               .calculatedVelocities(1.6, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(1.4, 0, 0)
+                               .setPosition(1.12, 0, 0)
+                               .measuredPosition(1.12, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(1.8, 1.8, 1.8, 1.8)
-                           .calculatedVelocities(1.8, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(1.6, 0, 0)
-                           .setPosition(01.44, 0, 0)
-                           .measuredPosition(1.44, 0, 0)
+            new ChassisValues().wheelVelocities(1.8, 1.8, 1.8, 1.8)
+                               .calculatedVelocities(1.8, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(1.6, 0, 0)
+                               .setPosition(01.44, 0, 0)
+                               .measuredPosition(1.44, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(2, 2, 2, 2)
-                           .calculatedVelocities(2, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(1.8, 0, 0)
-                           .setPosition(1.8, 0, 0)
-                           .measuredPosition(1.8, 0, 0)
+            new ChassisValues().wheelVelocities(2, 2, 2, 2)
+                               .calculatedVelocities(2, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(1.8, 0, 0)
+                               .setPosition(1.8, 0, 0)
+                               .measuredPosition(1.8, 0, 0)
        );
        assertPeriodicUpdate(
-            new BotValues().wheelVelocities(2.2, 2.2, 2.2, 2.2)
-                           .calculatedVelocities(2.2, 0, 0)
-                           .setVelocities(8, 0, 0)
-                           .measuredVelocities(2, 0, 0)
-                           .setPosition(2.2, 0, 0)
-                           .measuredPosition(2.2, 0, 0)
+            new ChassisValues().wheelVelocities(2.2, 2.2, 2.2, 2.2)
+                               .calculatedVelocities(2.2, 0, 0)
+                               .setVelocities(8, 0, 0)
+                               .measuredVelocities(2, 0, 0)
+                               .setPosition(2.2, 0, 0)
+                               .measuredPosition(2.2, 0, 0)
        );
     }
 
-    private static class BotValues {
+    private static class ChassisValues {
         // Unset things are considered equal
         EnumMap<VelocityDirection, Double> calculateVelocity, setVelocity, measuredVelocity;
         EnumMap<WheelPosition, Double> wheelVelocities;
         Position setPosition, measuredPosition;
 
-        BotValues() {}
+        ChassisValues() {}
 
-        BotValues(MecanumChassis chassis) {
+        ChassisValues(MecanumChassis chassis) {
             calculateVelocity = chassis.getVelocityCalculated();
             setVelocity = chassis.getVelocitySet();
             measuredVelocity = chassis.getVelocityMeasured();
@@ -235,36 +235,36 @@ public class ChassisTest {
             measuredPosition = chassis.positionMeasured_;
         }
 
-        public BotValues wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
+        public ChassisValues wheelVelocities(double northEast, double southEast, double southWest, double northWest) {
             wheelVelocities = MecanumMathTest.wheelVelocities(northEast, southEast, southWest, northWest);
 //            wheelVelocities = new double[] {northEast, southEast, southWest, northWest};
             return this;
         }
 
-        public BotValues calculatedVelocities(double north, double east, double rotation) {
+        public ChassisValues calculatedVelocities(double north, double east, double rotation) {
 //            calculateVelocity = new double[] {north, east, rotation};
             calculateVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
-        public BotValues setVelocities(double north, double east, double rotation) {
+        public ChassisValues setVelocities(double north, double east, double rotation) {
 //            setVelocity = new double[] {north, east, rotation};
             setVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
-        public BotValues measuredVelocities(double north, double east, double rotation) {
+        public ChassisValues measuredVelocities(double north, double east, double rotation) {
 //            measuredVelocity = new double[] {north, east, rotation};
             measuredVelocity = MecanumMathTest.botVelocity(north, east, rotation);
             return this;
         }
 
-        public BotValues setPosition(double north, double east, double heading) {
+        public ChassisValues setPosition(double north, double east, double heading) {
             setPosition = new Position(new double[] {north, east, heading});
             return this;
         }
 
-        public BotValues measuredPosition(double north, double east, double heading) {
+        public ChassisValues measuredPosition(double north, double east, double heading) {
             measuredPosition = new Position(new double[] {north, east, heading});
             return this;
         }
