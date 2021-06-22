@@ -57,7 +57,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 
 	public void beforeEachTest() {}
 
-	private static final double EXPECTED_DELTA = 0.000000000000001;
+	private static final double EXPECTED_DELTA = 0.000000002;
 	protected static <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap) {
 		for(T key : expectedMap.keySet()) {
 			assertEquals(key + " " + message, expectedMap.get(key), actualMap.get(key), EXPECTED_DELTA);
