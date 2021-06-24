@@ -80,7 +80,7 @@ public class Position extends EnumMap<VelocityDirection, Double> {
         EnumMap<VelocityDirection, Double> distanceTo = new EnumMap<>(VelocityDirection.class);
 
         distanceTo.put(NORTH, distance * Math.cos(directionStraight));
-        distanceTo.put(EAST, distance * Math.cos(directionStraight));
+        distanceTo.put(EAST, distance * Math.sin(directionStraight));
         distanceTo.put(ROTATION, rotation);
 
         return distanceTo;
