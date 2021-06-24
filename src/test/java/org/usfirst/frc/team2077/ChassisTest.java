@@ -4,9 +4,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import org.junit.*;
 import org.usfirst.frc.team2077.drivetrain.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.*;
-import org.usfirst.frc.team2077.drivetrain.SparkNeoDriveModule.*;
 import org.usfirst.frc.team2077.math.*;
-import org.usfirst.frc.team2077.sensors.AngleSensor;
 import org.usfirst.frc.team2077.subsystems.Crosshairs;
 
 import java.util.*;
@@ -51,23 +49,23 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 //		Robot.robot_.chassis_ = chassis;
 
 		Robot.robot_.chassis_.setGLimits(1 / AccelerationLimits.G, 1 / AccelerationLimits.G);
-
+		allowedDifference = 0.000000002;
 		beforeEachTest();
 	}
 
 	public void beforeEachTest() {}
 
-	private static final double EXPECTED_DELTA = 0.000000002;
+	private static double allowedDifference;
 	protected static <T extends Enum<T>> void assertEnumMapEquals(String message, EnumMap<T, Double> expectedMap, EnumMap<T, Double> actualMap) {
 		for(T key : expectedMap.keySet()) {
-			assertEquals(key + " " + message, expectedMap.get(key), actualMap.get(key), EXPECTED_DELTA);
+			assertEquals(key + " " + message, expectedMap.get(key), actualMap.get(key), allowedDifference);
 		}
 	}
 
 	protected static void assertPositionsEqual(String message, double[] expected, double[] actual) {
 		for(VelocityDirection dir : VelocityDirection.values()) {
 			int i = dir.ordinal();
-			assertEquals(dir + " " + message, expected[i], actual[i], EXPECTED_DELTA);
+			assertEquals(dir + " " + message, expected[i], actual[i], allowedDifference);
 		}
 	}
 
@@ -78,8 +76,8 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 		assertEnumMapEquals("Set Velocity", expected.setVelocity, actual.setVelocity);
 		assertEnumMapEquals("Measured Velocity", expected.measuredVelocity, actual.measuredVelocity);
 
-		assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), EXPECTED_DELTA);
-		assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), EXPECTED_DELTA);
+		assertArrayEquals("Set Position", expected.setPosition.get(), actual.setPosition.get(), allowedDifference);
+		assertArrayEquals("Measured Position", expected.measuredPosition.get(), actual.measuredPosition.get(), allowedDifference);
 	}
 
 	public static void assertPeriodicUpdate(ChassisValues expected) {
@@ -87,7 +85,7 @@ public abstract class ChassisTest<Chassis extends AbstractChassis> {
 
 		ChassisValues actual = new ChassisValues(chassis);
 		assertChassisValues(expected, actual);
-		System.out.println(Robot.robot_.chassis_.getAccelerationLimits());
+//		System.out.println(Robot.robot_.chassis_.getAccelerationLimits());
 	}
 
 	public static class ChassisValues {

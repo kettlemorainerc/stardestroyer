@@ -104,30 +104,32 @@ public class Move extends CommandBase {
 			Math.abs(distanceRemaining_[2]) == 0.
 		};
 
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" +
-						   distanceTotal_[0] +
-						   " " +
-						   distanceTotal_[1] +
-						   " " +
-						   distanceTotal_[2] +
-						   " (" +
-						   method_ +
-						   ")");
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SCALE:" + scale[0] + " " + scale[1] + " " + scale[2]);
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 FAST:" + fast_[0] + " " + fast_[1] + " " + fast_[2]);
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SLOW:" + slow_[0] + " " + slow_[1] + " " + slow_[2]);
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL N:" +
-						   acceleration_.get(VelocityDirection.NORTH, Type.ACCELERATION) +
-						   " " +
-						   acceleration_.get(VelocityDirection.NORTH, Type.DECELERATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL E:" +
-						   acceleration_.get(VelocityDirection.EAST, Type.ACCELERATION) +
-						   " " +
-						   acceleration_.get(VelocityDirection.EAST, Type.DECELERATION));
-		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL R:" +
-						   acceleration_.get(VelocityDirection.ROTATION, Type.ACCELERATION) +
-						   " " +
-						   acceleration_.get(VelocityDirection.ROTATION, Type.DECELERATION));
+		System.out.println("Initial finished: " + Arrays.toString(finished_));
+
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 DISTANCE:" +
+//						   distanceTotal_[0] +
+//						   " " +
+//						   distanceTotal_[1] +
+//						   " " +
+//						   distanceTotal_[2] +
+//						   " (" +
+//						   method_ +
+//						   ")");
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SCALE:" + scale[0] + " " + scale[1] + " " + scale[2]);
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 FAST:" + fast_[0] + " " + fast_[1] + " " + fast_[2]);
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 SLOW:" + slow_[0] + " " + slow_[1] + " " + slow_[2]);
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL N:" +
+//						   acceleration_.get(VelocityDirection.NORTH, Type.ACCELERATION) +
+//						   " " +
+//						   acceleration_.get(VelocityDirection.NORTH, Type.DECELERATION));
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL E:" +
+//						   acceleration_.get(VelocityDirection.EAST, Type.ACCELERATION) +
+//						   " " +
+//						   acceleration_.get(VelocityDirection.EAST, Type.DECELERATION));
+//		System.out.println("$$$$$$$$$$$$$$$$$$ MOVE2 ACCEL R:" +
+//						   acceleration_.get(VelocityDirection.ROTATION, Type.ACCELERATION) +
+//						   " " +
+//						   acceleration_.get(VelocityDirection.ROTATION, Type.DECELERATION));
 	}
 
 	@Override
@@ -135,8 +137,8 @@ public class Move extends CommandBase {
 
 		EnumMap<VelocityDirection, Double> vCurrent = robot_.chassis_.getVelocityCalculated();
 		double[] vNew = {0, 0, 0};
-		EnumMap<VelocityDirection, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(
-			origin_);
+		EnumMap<VelocityDirection, Double> distanceTraveled = (new Position(robot_.chassis_.getPosition())).distanceRelative(origin_);
+
 		boolean[] slow = {false, false, false};
 		for(int i = 0; i < 3; i++) {
 			VelocityDirection direction = VelocityDirection.values()[i];
