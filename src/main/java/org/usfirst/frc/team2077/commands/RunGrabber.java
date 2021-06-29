@@ -5,49 +5,48 @@
 
 package org.usfirst.frc.team2077.commands;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import org.usfirst.frc.team2077.subsystems.TestGrabber;
+import org.usfirst.frc.team2077.subsystems.controller.ControllerBinding;
+import org.usfirst.frc.team2077.subsystems.controller.ControllerBinding.Axis;
+
+import java.util.function.*;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
 
 public class RunGrabber extends CommandBase {
 
-  private double speed_;
-  private final double activationPoint_ = .75;
-  private final Joystick flight;
-  private final JoystickButton activate;
+  private static final double TOGGLE_AT = .75;
+  private final Function<Axis, Double> driver, technical;
+  private final TestGrabber grabber;
 
-  public RunGrabber(Joystick flight, JoystickButton activate) {
-    addRequirements(robot_.tgrabber_);
-
-    this.flight = flight;
-    this.activate = activate;
+  public RunGrabber(ControllerBinding driver, ControllerBinding technical, TestGrabber grabber) {
+    addRequirements(grabber);
+    this.driver = driver::getAxis;
+    this.technical = technical::getAxis;
+    this.grabber = grabber;
   }
 
   @Override
   public void initialize() {
-//    robot_.tgrabber_.toggleGrabber(speed_);
+//    grabber.toggleGrabber(speed_);
     //System.out.println("Grabbing!");
   }
 
   @Override
   public void execute() {
-    double z = this.flight.getZ();
-    boolean button = this.activate.get();
-
-    if (button || z > activationPoint_) {
-      robot_.tgrabber_.toggleGrabber(speed_);
+    if (driver.apply(Axis.GRABBER) >= TOGGLE_AT || technical.apply(Axis.GRABBER) >= TOGGLE_AT) {
+      grabber.toggleGrabber(0);
     } else {
-      robot_.tgrabber_.stopGrabber();
+      grabber.stopGrabber();
     }
-
   }
 
   @Override
   public void end(boolean interrupted) {
-    robot_.tgrabber_.stopGrabber();
+    grabber.stopGrabber();
   }
 
   @Override

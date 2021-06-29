@@ -33,17 +33,17 @@ public class Move extends CommandBase {
 
 	private Position origin_;
 
-	public Move(double north, double east, double rotation) {
-		this(north, east, rotation, 3, robot_.position_, robot_.heading_);
+	public Move(double north, double east, double rotation, Subsystem position, Subsystem heading) {
+		this(north, east, rotation, 3, position, heading);
 		// this(north, east, ation(rotation), 3, robot_.position_, robot_.heading_);
 	}
 
-	public Move(double north, double east) {
-		this(north, east, 0, 2, robot_.position_);
+	public Move(double north, double east, Subsystem position) {
+		this(north, east, 0, 2, position);
 	}
 
-	public Move(double rotation) {
-		this(0, 0, rotation, 1, robot_.heading_);
+	public Move(double rotation, Subsystem heading) {
+		this(0, 0, rotation, 1, heading);
 	}
 
 	private Move(double north, double east, double rotation, int method, Subsystem... requirements) {

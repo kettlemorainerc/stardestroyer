@@ -10,54 +10,56 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.*;
 import org.usfirst.frc.team2077.commands.*;
-import org.usfirst.frc.team2077.subsystems.Crosshairs;
+import org.usfirst.frc.team2077.drivetrain.AbstractChassis;
+import org.usfirst.frc.team2077.subsystems.*;
+import org.usfirst.frc.team2077.subsystems.controller.*;
+import org.usfirst.frc.team2077.subsystems.controller.KeypadController.SupportedAxis;
+import org.usfirst.frc.team2077.subsystems.controller.XboxController;
 
 import java.util.*;
 
 
 public class DriveStation {
-    public final Joystick primaryStick_ = new Joystick(0);
-    public final Joystick secondaryStick_ = new Joystick(1);
-    public final Joystick testingStick_ = new Joystick(5);
-    public final Joystick Flight = new Joystick(2);
-    
-    private final List<Joystick> joysticks = new LinkedList<>();
-    private final List<JoystickButton> buttons = new LinkedList<>();
-    private final List<Subsystem> subsystems = new LinkedList<>();
+    public final ControllerBinding driver = new FlySkyController(2);
+//    public final ControllerBinding driver = new FlightStickController(0);
+//    public final ControllerBinding driver = new XboxController(3); // ACTUAL Xbox controller
 
-    public DriveStation(Subsystem position_,
+    public final ControllerBinding technical = new KeypadController(5, SupportedAxis.NORTH, SupportedAxis.EAST);
+//    public final ControllerBinding technical = new FlightStickController(1);
+//    public final ControllerBinding technical = new XboxController(4); // Guitar Hero Controller
+
+
+    public final List<Subsystem> tracked;
+//    public final Joystick primaryStick_ = new Joystick(0);
+//    public final Joystick secondaryStick_ = new Joystick(1);
+//    public final Joystick testingStick_ = new Joystick(5);
+//    public final Joystick Flight = new Joystick(2);
+
+    public DriveStation(AbstractChassis chassis,
+                        Subsystem position_,
                         Subsystem target_,
                         Crosshairs crosshairs_,
-                        Subsystem grabber_) {
+                        TestGrabber grabber_) {
         CommandScheduler.getInstance()
-                .setDefaultCommand(grabber_, new RunGrabber(Flight, new JoystickButton(testingStick_, 9)));
+                        .setDefaultCommand(grabber_, new RunGrabber(driver, technical, grabber_));
         CommandScheduler.getInstance()
-                        .setDefaultCommand(position_, new PrimaryStickDrive3Axis());
+                        .setDefaultCommand(position_, new PrimaryStickDrive3Axis(position_, driver));
         CommandScheduler.getInstance()
-                        .setDefaultCommand(target_, new TrackTarget());
+                        .setDefaultCommand(target_, new TrackTarget(chassis, crosshairs_, target_));
         CommandScheduler.getInstance()
-                        .setDefaultCommand(crosshairs_, new AimCrosshairs(secondaryStick_, testingStick_));
+                        .setDefaultCommand(crosshairs_, new AimCrosshairs(technical));
 
-//        bindDriverControl(primaryStick_);
-        bindTechnicalControl(testingStick_);
+        tracked = List.of(grabber_, position_, target_, crosshairs_);
+
+        driver.bindDriver();
+        technical.bindTechnical();
     }
 
-    private static void bindDriverControl(Joystick primary) {
-        JoystickButton primaryTrigger = new JoystickButton(primary, 1);
-//        primaryTrigger.whileHeld(new RunGrabber());
+    public void cancel() {
+        driver.cancelDriver();
+        technical.cancelTechnical();
 
-        new JoystickButton(primary, 4).whenPressed(new ResetCrosshairs());
-    }
-
-    private void bindTechnicalControl(Joystick testing) {
-        new JoystickButton(testing, 1).whenPressed(new TurnOffLauncher());
-        new JoystickButton(testing, 3).whileHeld(new Launch());
-        new JoystickButton(testing, 4).whileHeld(new LoadLauncher());
-        new JoystickButton(testing, 8).whenPressed(new LoadLauncherBack());
-        new JoystickButton(testing, 10).whileHeld(new SteerToCrosshairs());
-        new JoystickButton(testing, 11).whileHeld(new CenterBallOnVision());
-        new JoystickButton(testing, 12).whileHeld(new LauncherScrewTest(false));
-        new JoystickButton(testing, 16).whileHeld(new LauncherScrewTest(true));
+        tracked.forEach(CommandScheduler.getInstance()::unregisterSubsystem);
     }
 
     /**
@@ -67,12 +69,5 @@ public class DriveStation {
      */
     public static double adjustInputSensitivity(double input, double deadBand, double exponent) {
         return Math.pow(Math.max(0, Math.abs(input) - deadBand) / (1 - deadBand), exponent) * Math.signum(input);
-    }
-
-    public void cancel() {
-//        CommandScheduler.getInstance().unregisterSubsystem(subsystems.toArray(new Subsystem[0]));
-//        joysticks.forEach(stick -> {
-//            stick.`
-//        });
     }
 }

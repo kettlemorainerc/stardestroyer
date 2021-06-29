@@ -5,18 +5,20 @@
 
 package org.usfirst.frc.team2077.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.usfirst.frc.team2077.DriveStation;
+import edu.wpi.first.wpilibj2.command.*;
+import org.usfirst.frc.team2077.subsystems.controller.ControllerBinding;
+import org.usfirst.frc.team2077.subsystems.controller.ControllerBinding.Axis;
 
 import static org.usfirst.frc.team2077.Robot.robot_;
 
 public class PrimaryStickDrive3Axis extends CommandBase {
 	public static final double ACCELERATION_G_LIMIT = .4;
 	public static final double DECELERATION_G_LIMIT = ACCELERATION_G_LIMIT; //1e10 //.35 is the value used for the 03-05-21 version
+	private final ControllerBinding driver;
 
-	public PrimaryStickDrive3Axis() {
-		addRequirements(robot_.position_);
+	public PrimaryStickDrive3Axis(Subsystem position, ControllerBinding driver) {
+		addRequirements(position);
+		this.driver = driver;
 	}
 
 	@Override
@@ -49,8 +51,8 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 
 		// TODO: Who handles rotation updates if another command owns robot_position_?
 		// TODO: Check joystick/drive capabilities and merge w/2-axis.
-		double north = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getY(), .3, 1);
-		double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .3, 1);
+		double north = driver.getAxis(Axis.NORTH); // DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getY(), .3, 1);
+		double east = driver.getAxis(Axis.EAST); // DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getX(), .3, 1);
 //		 double north = DriveStation.adjustInputSensitivity(-robot_.driveStation_.primaryStick_.getY(), .2, 2.5);
 //		 double east = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getX(), .2, 2.5);
 //		north = Math.abs(north) >= Math.abs(east) ? north : 0;
@@ -61,7 +63,7 @@ public class PrimaryStickDrive3Axis extends CommandBase {
 			robot_.chassis_.setVelocity01(north * speedLimit * throttle, east * speedLimit * throttle);
 		} else { // we control heading
 //			 double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.primaryStick_.getRawAxis(2), .2, 2.5);
-			double clockwise = DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
+			double clockwise = driver.getAxis(Axis.ROTATION); // DriveStation.adjustInputSensitivity(robot_.driveStation_.Flight.getRawAxis(4), .05, 1);
 
 			if (north == 0 && east == 0 && clockwise == 0) {
 				robot_.chassis_.halt();

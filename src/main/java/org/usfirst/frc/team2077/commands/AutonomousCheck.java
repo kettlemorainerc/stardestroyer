@@ -2,7 +2,7 @@
 package org.usfirst.frc.team2077.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import org.usfirst.frc.team2077.commands.AutoNavRoutes.AutoNavRoute;
 
 
@@ -15,13 +15,15 @@ public class AutonomousCheck extends SequentialCommandGroup{
         GALACTIC_SEARCH_FLAG = "Galactic Search",
         AUTO_FLAG = "Run Autonomous";
 
-    private boolean runAuto;
-    private boolean galacticSearch;
-    private boolean a;
-    private boolean red;
     private boolean barrelRacing = false;
     private boolean slalom = false;
     private boolean bounce = false;
+    private final Subsystem position, heading;
+
+    public AutonomousCheck(Subsystem position, Subsystem heading) {
+        this.position = position;
+        this.heading = heading;
+    }
 
     public void initialize() {
         SmartDashboard.putBoolean(AUTO_FLAG, false);
@@ -36,15 +38,15 @@ public class AutonomousCheck extends SequentialCommandGroup{
 
     @Override
     public void execute() {
-        runAuto = SmartDashboard.getBoolean(AUTO_FLAG, false);
+        boolean runAuto = SmartDashboard.getBoolean(AUTO_FLAG, false);
 //
 //        if (runAuto) {
 //            new Move(2, 0).schedule(false);
 //            done = true;
 //        }
-        galacticSearch = SmartDashboard.getBoolean(GALACTIC_SEARCH_FLAG, false);
-        a = SmartDashboard.getBoolean(A_FLAG, false);
-        red = SmartDashboard.getBoolean(RED_FLAG, false);
+        boolean galacticSearch = SmartDashboard.getBoolean(GALACTIC_SEARCH_FLAG, false);
+        boolean a = SmartDashboard.getBoolean(A_FLAG, false);
+        boolean red = SmartDashboard.getBoolean(RED_FLAG, false);
 
         if (!barrelRacing && SmartDashboard.getBoolean(BARREL_RACE_FLAG, false)) {
             SmartDashboard.putBoolean(SLALOM_FLAG, false);
@@ -63,14 +65,14 @@ public class AutonomousCheck extends SequentialCommandGroup{
         if (runAuto) {
             if (galacticSearch) {
                 // System.out.println("GALACTIC SEARCH TIME _______________");
-                (new GalacticSearch(a, red)).schedule();
+                (new GalacticSearch(a, red, position, heading)).schedule();
             } else {
                 if (barrelRacing) {
-                    (new AutoNavRoutes(AutoNavRoute.BARREL_RACE)).schedule();
+                    (new AutoNavRoutes(AutoNavRoute.BARREL_RACE, position, heading)).schedule();
                 } else if (slalom) {
-                    (new AutoNavRoutes(AutoNavRoute.SLALOM)).schedule();
+                    (new AutoNavRoutes(AutoNavRoute.SLALOM, position, heading)).schedule();
                 } else if (bounce) {
-                    (new AutoNavRoutes(AutoNavRoute.BOUNCE)).schedule();
+                    (new AutoNavRoutes(AutoNavRoute.BOUNCE, position, heading)).schedule();
                 }
             }
             done = true;
@@ -81,9 +83,5 @@ public class AutonomousCheck extends SequentialCommandGroup{
     
     public boolean isFinished() {
         return done;
-    }
-
-    public static void main(String[] args) {
-        (new AutonomousCheck()).initialize();
     }
 }

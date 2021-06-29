@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2077.commands;
 
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.junit.*;
 import org.usfirst.frc.team2077.*;
 import org.usfirst.frc.team2077.drivetrain.*;
@@ -20,7 +21,7 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
 
     @Test
     public void move_forward_8_correctly_updates_chassis() {
-        RobotTest.includeCommands(new Move(8, 0, 0));
+        RobotTest.includeCommands(new Move(8, 0, 0, new Subsystem() {}, new Subsystem() {}));
         assertPeriodicUpdate(
             new ChassisValues().wheelVelocities(0.0, 0.0, 0.0, 0.0)
                                .calculatedVelocities(0.0, 0.0, 0.0)
@@ -141,7 +142,7 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
 
     @Test
     public void moves_8_east_updates_chassis_correctly() {
-        RobotTest.includeCommands(new Move(0, 8, 0));
+        RobotTest.includeCommands(new Move(0, 8, 0, new Subsystem() {}, new Subsystem() {}));
 
         assertPeriodicUpdate(
             new ChassisValues().wheelVelocities(0.0, 0.0, 0.0, 0.0)
@@ -263,7 +264,7 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
 
     @Test
     public void rotate_8_degrees_correctly_updates_chassis() {
-        RobotTest.includeCommands(new Move(8));
+        RobotTest.includeCommands(new Move(8, new Subsystem() {}));
 
         assertPeriodicUpdate(
             new ChassisValues().wheelVelocities(0.0, 0.0, 0.0, 0.0)
@@ -340,7 +341,7 @@ public class MoveTest extends ChassisTest<MecanumChassis> {
 
     @Test
     public void move_8_north_east_updates_chassis_correctly() {
-        RobotTest.includeCommands(new Move(8, 8));
+        RobotTest.includeCommands(new Move(8, 8, new Subsystem() {}));
 
         assertPeriodicUpdate(
             new ChassisValues().wheelVelocities(0.0, 0.0, 0.0, 0.0)

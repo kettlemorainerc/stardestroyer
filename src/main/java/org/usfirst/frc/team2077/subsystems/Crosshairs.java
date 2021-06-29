@@ -6,6 +6,7 @@
 package org.usfirst.frc.team2077.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.usfirst.frc.team2077.commands.AimCrosshairs;
 
 import static org.usfirst.frc.team2077.Robot.*;
 
@@ -17,7 +18,6 @@ public class Crosshairs extends SubsystemBase {
 
     private double heading = 0;
     private double range_ = 50*12; // TODO: Don't rely on these initial values.
-
 
     public final void set(double azimuth, double range) {
         heading = normalize(azimuth);

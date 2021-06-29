@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.usfirst.frc.team2077.commands.AutonomousCheck;
+import org.usfirst.frc.team2077.commands.*;
 import org.usfirst.frc.team2077.drivetrain.*;
 import org.usfirst.frc.team2077.drivetrain.MecanumMath.VelocityDirection;
 import org.usfirst.frc.team2077.sensors.*;
@@ -120,12 +120,9 @@ public class Robot extends TimedRobot {
 		chassis_ = new MecanumChassis();
 
 		//   These dummy subsystems support separate command ownership of robot motion and rotation.
-		position_ = new SubsystemBase() {
-		};
-		heading_ = new SubsystemBase() {
-		};
-		target_ = new SubsystemBase() {
-		};
+		position_ = new SubsystemBase() {};
+//		target_ = new SubsystemBase() {};
+		heading_ = new SubsystemBase() {};
 		telemetry_ = new Telemetry();
 
 		launcher_ = new Launcher();
@@ -133,13 +130,13 @@ public class Robot extends TimedRobot {
 
 		//(new ResetTarPos()).initialize();
 		tgrabber_ = new TestGrabber();
-
 		crosshairs_ = new Crosshairs();
 	}
 
 	public void setupController() {
 		// Container for remote control software objects.
-		driveStation_ = new DriveStation(position_, target_, crosshairs_, tgrabber_);
+		SubsystemBase target = new SubsystemBase() {};
+		driveStation_ = new DriveStation(chassis_, position_, target, crosshairs_, tgrabber_);
 	}
 
 	/**
@@ -209,7 +206,7 @@ public class Robot extends TimedRobot {
 		if(driveStation_ != null) {
 			driveStation_.cancel();
 		}
-		autonomous_ = new AutonomousCheck();
+		autonomous_ = new AutonomousCheck(position_, heading_);
 		autonomous_.schedule();
 	}
 
