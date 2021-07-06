@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
 public class AngleSensor {
 
@@ -21,7 +22,7 @@ public class AngleSensor {
 
 	public AngleSensor() {
 		
-		navX_ = new AHRS(SPI.Port.kMXP, (byte)200);
+		navX_ = new AHRS(SPI.Port.kMXP, (byte)200) {public void initSendable(SendableBuilder builder) {}};
 		System.out.println("NavX:" + navX_);
 		System.out.println("Connected:" + navX_.isConnected());
 		System.out.println("Calibrating:" + navX_.isCalibrating());

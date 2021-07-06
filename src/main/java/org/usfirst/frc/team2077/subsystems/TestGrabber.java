@@ -34,7 +34,7 @@ public class TestGrabber extends SubsystemBase {
         boolean newBottom = Bloaded && !wasBLoaded;
         boolean newTop = Tloaded && !wasTLoaded;
         // System.out.println("[TestGrabber]: " + balls);
-        SmartDashboard.putNumber("voltage", robot_.infraredSensor_.getAverageVoltage());
+//        SmartDashboard.putNumber("voltage", robot_.infraredSensor_.getAverageVoltage());
         // SmartDashboard.putBoolean("switched", );
         //System.out.println(robot_.infraredSensor_.getAverageVoltage());
         if (newTop && InBetween) {

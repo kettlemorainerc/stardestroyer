@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
 public class AnalogSettings {
 
@@ -16,7 +17,10 @@ public class AnalogSettings {
 
 	public AnalogSettings(int... analogInputNumber) {
 		for (int i : analogInputNumber) {
-			analogInput_.put(i, new AnalogInput(i));
+			Object o = new Object() {
+
+			};
+			analogInput_.put(i, new AnalogInput(i) {public void initSendable(SendableBuilder builder) {}});
 		}
 	}
 

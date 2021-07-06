@@ -5,8 +5,7 @@
 
 package org.usfirst.frc.team2077.subsystems;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,19 +23,48 @@ public class Telemetry extends SubsystemBase {
         return nte_.get(key);
     }
 
+    private void checkValue(String key, double[] update, double allowedDifference) {
+        double[] differences = new double[update.length];
+        Arrays.fill(differences, allowedDifference);
+        checkValue(key, update, differences);
+    }
+
+    private void checkValue(String key, double[] update, double[] allowedDifference) {
+        NetworkTableEntry entry = getNTE(key);
+        double[] existing = entry.getDoubleArray(new double[0]);
+        boolean equal = existing.length == update.length;
+        int i = 0;
+        while(equal && i < existing.length)
+            equal = existing[i] - allowedDifference[i] <= update[i] &&
+                    update [i] <= existing[i] + allowedDifference[i++];
+
+        if(!Arrays.equals(update, existing)) entry.setDoubleArray(update);
+    }
+
     @Override
     public void periodic() {
-
-        getNTE("Position").forceSetDoubleArray(
+        checkValue(
+            "Position",
             robot_.chassis_.getPosition()
                            .values()
                            .stream()
                            .mapToDouble(a -> a == null ? 0 : a)
-                           .toArray()
+                           .toArray(),
+            new double[]{.1, .1, .05}
+        );
+        checkValue(
+          "Target",
+          robot_.crosshairs_.get(),
+          .05
+        );
+        checkValue(
+            "Crosshairs",
+            robot_.crosshairs_.getCamera(),
+            0
         );
         
-        getNTE("Target").setDoubleArray(robot_.crosshairs_.get());
-        getNTE("Crosshairs").setDoubleArray(robot_.crosshairs_.getCamera());
+//        getNTE("Target").setDoubleArray(robot_.crosshairs_.get());
+//        getNTE("Crosshairs").setDoubleArray(robot_.crosshairs_.getCamera());
 
         //TODO: Finish below
 //        if (robot_.potentialSensor_ != null) {

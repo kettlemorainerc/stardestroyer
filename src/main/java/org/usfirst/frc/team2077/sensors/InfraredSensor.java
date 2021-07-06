@@ -4,6 +4,8 @@ package org.usfirst.frc.team2077.sensors;
 import edu.wpi.first.wpilibj.AnalogInput;
 
 import static org.usfirst.frc.team2077.Robot.*;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class InfraredSensor extends SubsystemBase{
@@ -26,7 +28,7 @@ AnalogInput infraredSenseObject;
 
 ///----Instances----///
 public InfraredSensor(int id, double maxLoaded, double minLoaded) {
-        infraredSenseObject = new AnalogInput(id);
+        infraredSenseObject = new AnalogInput(id) {public void initSendable(SendableBuilder builder) {}};
         maxLoaded_ = maxLoaded;
         minLoaded_ = minLoaded;
     }
