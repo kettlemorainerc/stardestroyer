@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void robotInit() {
-		SmartDashboard.putBoolean("Run Autonomous", false);
+//		SmartDashboard.putBoolean("Run Autonomous", false);
 		networkTableInstance_ = NetworkTableInstance.getDefault();
 		angleSensor_ = new AngleSensor();
 
@@ -165,7 +165,7 @@ public class Robot extends TimedRobot {
 			}
 		});
 
-		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());
+//		SmartDashboard.putNumber("range to target", robot_.crosshairs_.getRange());
 	}
 
 	// The robot and the drive station exchange data packets around 50x/second so long

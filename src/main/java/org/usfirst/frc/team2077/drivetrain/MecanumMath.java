@@ -164,7 +164,8 @@ public final class MecanumMath {
 
 	public enum VelocityDirection {
 		NORTH,
-		EAST, ROTATION,
+		EAST,
+		ROTATION,
 	}
 
 	public static class Point {

@@ -84,7 +84,7 @@ public class Launcher extends SubsystemBase implements LauncherIF {
         SmartDashboard.putNumber("Screw Position: ", currentScrewPosition);
         shooterMath.setDistance(robot_.crosshairs_.getRange(), currentScrewPosition);
 //        launcherRPM_ = (robot_.driveStation_.secondaryStick_.getZ() - 1.) / 2. * -3250 + 2350;
-        SmartDashboard.putNumber("hi buddy", robot_.crosshairs_.getRange());
+//        SmartDashboard.putNumber("hi buddy", robot_.crosshairs_.getRange());
 
 
         double error = screwPosition_ - currentScrewPosition;
@@ -131,8 +131,8 @@ public class Launcher extends SubsystemBase implements LauncherIF {
     @Override
     public boolean setRangeUpper(double range) {
         launcherRPM_ = shooterMath.getRangeAV()[1];
-        SmartDashboard.putNumber("CalculatedScrew: ", this.shooterMath.getNeededAngle(false));
-        SmartDashboard.putNumber("CalculatedTicks: ", this.shooterMath.getNeededAngle((true)));
+//        SmartDashboard.putNumber("CalculatedScrew: ", this.shooterMath.getNeededAngle(false));
+//        SmartDashboard.putNumber("CalculatedTicks: ", this.shooterMath.getNeededAngle((true)));
         this.setScrewPosition(this.shooterMath.getNeededAngle(true), true);
 
 //        double[] av = getAngleVelocity(range);
